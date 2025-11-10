@@ -119,6 +119,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &504556234
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 504556235}
+  m_Layer: 0
+  m_Name: Dungeon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &504556235
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 504556234}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &783053227
 GameObject:
   m_ObjectHideFlags: 0
@@ -130,6 +161,7 @@ GameObject:
   - component: {fileID: 783053230}
   - component: {fileID: 783053229}
   - component: {fileID: 783053228}
+  - component: {fileID: 783053231}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -211,6 +243,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &783053231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 783053227}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d569b7b581d0a344fa46320e5b0c7e5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 5
+  lookSpeed: 2
 --- !u!1 &1182804257
 GameObject:
   m_ObjectHideFlags: 0
@@ -339,7 +385,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9387515ebcd666409dbe3daf8afa441, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dungeonParent: {fileID: 0}
+  dungeonParent: {fileID: 504556235}
   displayAlgorithmTime: 1
   debugMode: 0
   cellDimensions: {x: 4, y: 4, z: 4}
@@ -354,9 +400,9 @@ MonoBehaviour:
   stairsPrefab: {fileID: 4511191661846442700, guid: a47d5c71bc0d5a148956db1cc6ffcdc6, type: 3}
   stairSpacePrefab: {fileID: 3015041062976946509, guid: 5ef3605bfb74d8b4d9eb32dd3096619c, type: 3}
   wallPrefab: {fileID: 4875715511962008531, guid: afa55f8b9e7c75b4b962896efa9b23b2, type: 3}
-  doorwayPrefab: {fileID: 4875715511962008531, guid: b4aea497906fe94458b40f78c645e2ac, type: 3}
+  doorwayPrefab: {fileID: 149328350824309938, guid: 6a727f37b1098974186143ee7996a136, type: 3}
   pillarPrefab: {fileID: 2997563023746506253, guid: 4f66c62e42367224b9994f465328d795, type: 3}
-  archPrefab: {fileID: 4875715511962008531, guid: b1f7303a549c091428a148028c028741, type: 3}
+  archPrefab: {fileID: 149328350824309938, guid: 6a727f37b1098974186143ee7996a136, type: 3}
   percentEnableLights: 0.1
   extraHallwaysFactor: 0.5
   onDungeonClear:
@@ -478,3 +524,4 @@ SceneRoots:
   - {fileID: 783053230}
   - {fileID: 1182804259}
   - {fileID: 1608971362}
+  - {fileID: 504556235}
