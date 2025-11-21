@@ -84,6 +84,8 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] GameObject room;
     [Tooltip("Transform under which all rooms are parented")]
     [SerializeField] Transform roomParent;
+    [Tooltip("Layer to assign to walkable floor surfaces (rooms, hallways, stairs)")]
+    [SerializeField] string floorLayerName = "Floor";
 
     [Tooltip("Number of rooms to randomly place within the dungeon space.")]
     [SerializeField] int numRandomRooms = 10;
@@ -136,6 +138,23 @@ public class DungeonGenerator : MonoBehaviour
     public UnityEvent onDungeonGenerate;
 
     public List<Room> GetRooms() { return rooms; }
+
+    public Room GetRandomRoom()
+    {
+        if (rooms.Count == 0) return null;
+        return rooms[UnityEngine.Random.Range(0, rooms.Count)];
+    }
+
+    public Vector3 GetRandomPositionInRoom(Room room)
+    {
+        if (room == null || room.cells.Count == 0) return Vector3.zero;
+        Cell randomCell = room.cells[UnityEngine.Random.Range(0, room.cells.Count)];
+        // Return position at the bottom of the cell (floor level) instead of center
+        Vector3 floorPosition = randomCell.center;
+        floorPosition.y -= cellDimensions.y * 0.5f; // Move to bottom of cell
+        floorPosition.y += 0.1f; // Slightly above floor to avoid clipping
+        return floorPosition;
+    }
 
     private void Start()
     {
@@ -420,6 +439,13 @@ public class DungeonGenerator : MonoBehaviour
                             Transform trans = Instantiate(room, currentCenter, Quaternion.identity, roomParent).transform;
 
                             trans.localScale = cellDimensions;
+                            
+                            // Set floor layer
+                            int floorLayer = LayerMask.NameToLayer(floorLayerName);
+                            if (floorLayer != -1)
+                            {
+                                SetLayerRecursively(trans.gameObject, floorLayer);
+                            }
                         }
                     }
                 }
@@ -593,10 +619,14 @@ public class DungeonGenerator : MonoBehaviour
                 //Cell closest to the goal room
                 Vector3Int startIndices = pair.Key.ClosestValidStartCell(grid.GetGridIndices(room.center), grid);
 
-                if (grid.IsValidCell(startIndices)) //Sanity check
+                if (!grid.IsValidCell(startIndices)) //Check if valid starting cell was found
                 {
-                    //Run A* algorithm
-                    Stack<AStarNode> path = AStar.Run(startIndices, grid.GetGridIndices(room.center), room, grid);
+                    Debug.LogWarning($"Valid starting cell could not be found for path between rooms. Skipping this path.");
+                    continue;
+                }
+                
+                //Run A* algorithm
+                Stack<AStarNode> path = AStar.Run(startIndices, grid.GetGridIndices(room.center), room, grid);
 
                     //Set up currentPathParent
                     Transform currentPathParent = new GameObject().transform;
@@ -632,6 +662,13 @@ public class DungeonGenerator : MonoBehaviour
 
                             Transform trans = Instantiate(stairsPrefab, pos, stairRotation, currentPathParent).transform; //Spawn stairwell
                             trans.localScale = cellDimensions;  //Scale the unit to fit the grid cell
+                            
+                            // Set floor layer
+                            int floorLayer = LayerMask.NameToLayer(floorLayerName);
+                            if (floorLayer != -1)
+                            {
+                                SetLayerRecursively(trans.gameObject, floorLayer);
+                            }
 
                             //Stairspace cell
                             pos += new Vector3(0, cellDimensions.y, 0); //Update position to be the cell above the current node
@@ -653,6 +690,13 @@ public class DungeonGenerator : MonoBehaviour
                             grid.GetCell(stairIndex).cellType = CellTypes.STAIRS;  //Mark as stairs
                             Transform trans = Instantiate(stairsPrefab, pos - new Vector3(0, cellDimensions.y, 0), stairRotation, currentPathParent).transform; //Spawn stair, Update position to be the cell below the current node
                             trans.localScale = cellDimensions; //Scale the unit to fit the grid cell
+                            
+                            // Set floor layer
+                            int floorLayer = LayerMask.NameToLayer(floorLayerName);
+                            if (floorLayer != -1)
+                            {
+                                SetLayerRecursively(trans.gameObject, floorLayer);
+                            }
 
                             //Stairspace cell, cells up diagonally must be an empty space and the cell below them holds the actual stairs
                             grid.GetCell(node.indices).cellType = CellTypes.STAIRSPACE; //Mark next space as stairs
@@ -671,22 +715,24 @@ public class DungeonGenerator : MonoBehaviour
 
                             //Scale the unit to fit the grid cell
                             trans.localScale = cellDimensions;
+                            
+                            // Set floor layer
+                            int floorLayer = LayerMask.NameToLayer(floorLayerName);
+                            if (floorLayer != -1)
+                            {
+                                SetLayerRecursively(trans.gameObject, floorLayer);
+                            }
                         }
 
                         //Update last y with this node's y value
                         lastIndices = node.indices;
                     }
-                }
-                else
-                {
-                    Debug.LogError("Valid starting cell could not be found");
-                }
 
-                //Log the time this step took
-                if (displayAlgorithmTime)
-                {
-                    Debug.Log("Path Time: " + (Time.realtimeSinceStartup - realtime));
-                }
+                    //Log the time this step took
+                    if (displayAlgorithmTime)
+                    {
+                        Debug.Log("Path Time: " + (Time.realtimeSinceStartup - realtime));
+                    }
             }
         }
     }
@@ -1297,6 +1343,26 @@ public class DungeonGenerator : MonoBehaviour
         }
 
         return Quaternion.Euler(new Vector3(0, rot, 0));
+    }
+
+    /// <summary>
+    /// Set layer for a GameObject and all its children
+    /// </summary>
+    private void SetLayerRecursively(GameObject obj, int layer)
+    {
+        if (obj == null) return;
+        
+        // Only set layer on objects named "Floor" or if it's a room/hallway/stair prefab root
+        if (obj.name.Contains("Floor") || obj.name.Contains("Room") || 
+            obj.name.Contains("Hall") || obj.name.Contains("Stair"))
+        {
+            obj.layer = layer;
+        }
+        
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, layer);
+        }
     }
 
     /// <summary>
