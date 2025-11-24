@@ -17,11 +17,11 @@ public class DungeonRunner : MonoBehaviour
     {
         generator = GetComponent<DungeonGenerator>();
         surface = GetComponent<NavMeshSurface>();
-        
+
         if (surface != null)
         {
             surface.collectObjects = CollectObjects.All;
-            
+
             int floorLayer = LayerMask.NameToLayer("Floor");
             if (floorLayer != -1)
             {
@@ -56,9 +56,9 @@ public class DungeonRunner : MonoBehaviour
         }
 
         generator.Generate();
-        
+
         yield return null;
-        
+
         if (surface != null)
         {
             surface.BuildNavMesh();
@@ -67,7 +67,7 @@ public class DungeonRunner : MonoBehaviour
         {
             Debug.LogWarning("NavMeshSurface component not found. NavMesh will not be built.");
         }
-        
+
         SpawnAgentAndTarget();
     }
 
@@ -82,7 +82,7 @@ public class DungeonRunner : MonoBehaviour
 
         Room agentRoom = generator.GetRandomRoom();
         Room targetRoom = generator.GetRandomRoom();
-        
+
         while (targetRoom == agentRoom && rooms.Count > 1)
         {
             targetRoom = generator.GetRandomRoom();
@@ -92,7 +92,7 @@ public class DungeonRunner : MonoBehaviour
         {
             agent.position = generator.GetRandomPositionInRoom(agentRoom);
         }
-        
+
         if (target != null)
         {
             target.position = generator.GetRandomPositionInRoom(targetRoom);

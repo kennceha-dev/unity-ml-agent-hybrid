@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1718709506332176726}
   - component: {fileID: 1268821844931258051}
   - component: {fileID: 1285455170257606471}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -117,7 +117,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1714632468412606853}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: StairCell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
