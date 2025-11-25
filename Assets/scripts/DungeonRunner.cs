@@ -3,12 +3,11 @@ using Unity.AI.Navigation;
 using UnityEngine;
 
 [RequireComponent(typeof(DungeonGenerator))]
+[RequireComponent(typeof(NavMeshSurface))]
 public class DungeonRunner : MonoBehaviour
 {
-    [SerializeField]
-    private Transform agent;
-    [SerializeField]
-    private Transform target;
+    [SerializeField] private Transform agent;
+    [SerializeField] private Transform target;
 
     private DungeonGenerator generator;
     private NavMeshSurface surface;

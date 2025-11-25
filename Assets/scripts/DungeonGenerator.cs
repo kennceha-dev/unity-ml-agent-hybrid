@@ -149,10 +149,9 @@ public class DungeonGenerator : MonoBehaviour
     {
         if (room == null || room.cells.Count == 0) return Vector3.zero;
         Cell randomCell = room.cells[UnityEngine.Random.Range(0, room.cells.Count)];
-        // Return position at the bottom of the cell (floor level) instead of center
         Vector3 floorPosition = randomCell.center;
-        floorPosition.y -= cellDimensions.y * 0.5f; // Move to bottom of cell
-        floorPosition.y += 0.1f; // Slightly above floor to avoid clipping
+        floorPosition.y -= cellDimensions.y * 0.5f; 
+        floorPosition.y += 1.0f; 
         return floorPosition;
     }
 
