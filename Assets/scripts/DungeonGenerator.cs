@@ -39,6 +39,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Events;
 
 /// <summary>
@@ -63,7 +64,7 @@ public class DungeonGenerator : MonoBehaviour
     Grid grid;
     [SerializeField] Transform dungeonParent;
 
-[Header("Debug Controls")]
+    [Header("Debug Controls")]
     [Tooltip("Display debug logs for algorithm time.")]
     [SerializeField] bool displayAlgorithmTime = true;
     [Tooltip("Sets what is drawn for debug in OnDrawGizmos().")]
@@ -74,12 +75,12 @@ public class DungeonGenerator : MonoBehaviour
         "Width, Height, and Depth respectively in X, Y, and Z components.")]
     public Vector3 cellDimensions = new Vector3(5, 5, 5);
 
-[Header("Grid Dimensions")]
+    [Header("Grid Dimensions")]
     [Tooltip("Dimensions of the entire grid in terms of cells.\n" +
-        "Width, Height, and Depth respectively in X, Y, and Z components.")]
+            "Width, Height, and Depth respectively in X, Y, and Z components.")]
     public Vector3 gridDimensions = new Vector3(20, 10, 20);
 
-[Header("Room Parameters")]
+    [Header("Room Parameters")]
     [Tooltip("Prefab of room cell.")]
     [SerializeField] GameObject room;
     [Tooltip("Transform under which all rooms are parented")]
@@ -94,7 +95,7 @@ public class DungeonGenerator : MonoBehaviour
     [Tooltip("Minimum size of room in cells.   Room size is randomized between [minSize, maxSize].")]
     [SerializeField] Vector3 minSize = new Vector3(2, 1, 2);
 
-[Header("Path Parameters")]
+    [Header("Path Parameters")]
     [Tooltip("Transform parent for path prefabs.")]
     [SerializeField] Transform pathParent;
     [SerializeField] GameObject hallPrefab;
@@ -105,7 +106,7 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] GameObject pillarPrefab; //We store this prefab to add the pillar to the southeast corner of rooms it is not automatically added to from a wall
     [SerializeField] GameObject archPrefab; //Add between cells of the same type where a wall was not added
 
-[Header("Other")]
+    [Header("Other")]
     [Tooltip("Percentage chance [0, 1] for lights being placed on a new wall.")]
     [Range(0, 1)]
     [SerializeField] float percentEnableLights = .1f;
@@ -150,8 +151,12 @@ public class DungeonGenerator : MonoBehaviour
         if (room == null || room.cells.Count == 0) return Vector3.zero;
         Cell randomCell = room.cells[UnityEngine.Random.Range(0, room.cells.Count)];
         Vector3 floorPosition = randomCell.center;
-        floorPosition.y -= cellDimensions.y * 0.5f; 
-        floorPosition.y += 1.0f; 
+        floorPosition.y -= cellDimensions.y * 0.5f;
+        floorPosition.y += 1.0f;
+
+        if (NavMesh.SamplePosition(floorPosition, out NavMeshHit hit, cellDimensions.magnitude, NavMesh.AllAreas))
+            return hit.position;
+
         return floorPosition;
     }
 
@@ -171,7 +176,7 @@ public class DungeonGenerator : MonoBehaviour
     void Setup()
     {
         //Grid component should be on the same object as the DungeonGenerator component
-        if(grid == null)
+        if (grid == null)
         {
             grid = GetComponent<Grid>();
         }
@@ -336,7 +341,7 @@ public class DungeonGenerator : MonoBehaviour
         onDungeonGenerate.Invoke();
 
         //Display total time for algorithm
-        if(displayAlgorithmTime)
+        if (displayAlgorithmTime)
         {
             //On an Intel 9th Gen i9, this algorithm takes ~1-5 seconds to run for reference.
             Debug.Log("Algorithm Time: " + (float)(Time.realtimeSinceStartupAsDouble - realtime) + " seconds");
@@ -438,7 +443,7 @@ public class DungeonGenerator : MonoBehaviour
                             Transform trans = Instantiate(room, currentCenter, Quaternion.identity, roomParent).transform;
 
                             trans.localScale = cellDimensions;
-                            
+
                             // Set floor layer
                             int floorLayer = LayerMask.NameToLayer(floorLayerName);
                             if (floorLayer != -1)
@@ -584,11 +589,11 @@ public class DungeonGenerator : MonoBehaviour
                     room2 = room;
                 }
             }
-            
+
             if (room1 != null && room2 != null) //Sanity check, rooms should exist
             {
                 //Add connected room to the value list under room1 key
-                if (adjacencyList.TryGetValue(room1, out List<Room> adjacentRooms)) 
+                if (adjacencyList.TryGetValue(room1, out List<Room> adjacentRooms))
                 {
                     adjacentRooms.Add(room2);
                 }
@@ -614,7 +619,7 @@ public class DungeonGenerator : MonoBehaviour
             foreach (Room room in pair.Value)
             {
                 float realtime = Time.realtimeSinceStartup;
-                
+
                 //Cell closest to the goal room
                 Vector3Int startIndices = pair.Key.ClosestValidStartCell(grid.GetGridIndices(room.center), grid);
 
@@ -623,115 +628,115 @@ public class DungeonGenerator : MonoBehaviour
                     Debug.LogWarning($"Valid starting cell could not be found for path between rooms. Skipping this path.");
                     continue;
                 }
-                
+
                 //Run A* algorithm
                 Stack<AStarNode> path = AStar.Run(startIndices, grid.GetGridIndices(room.center), room, grid);
 
-                    //Set up currentPathParent
-                    Transform currentPathParent = new GameObject().transform;
-                    currentPathParent.name = "Path";
-                    currentPathParent.parent = pathParent;
+                //Set up currentPathParent
+                Transform currentPathParent = new GameObject().transform;
+                currentPathParent.name = "Path";
+                currentPathParent.parent = pathParent;
 
-                    //path might return null if A* failed
-                    if (path == null)
-                    {
-                        Debug.LogError("A-Star Path Failed");
-                        //Log the time this step took
-                        if (displayAlgorithmTime)
-                        {
-                            Debug.Log("Path Time: " + (Time.realtimeSinceStartup - realtime));
-                        }
-                        continue;
-                    }
-
-                    //Store the last Y value so we know when we've added a stairwell
-                    Vector3Int lastIndices = startIndices;
-                    foreach (AStarNode node in path)
-                    {
-                        //Get center position of unit
-                        Vector3 pos = new Vector3(node.indices.x * cellDimensions.x, node.indices.y * cellDimensions.y, node.indices.z * cellDimensions.z);
-
-                        if (node.indices.y < lastIndices.y) //Stairwell down
-                        {
-                            //Stair cell
-                            grid.GetCell(node.indices).cellType = CellTypes.STAIRS; //Mark next space as stairs
-
-                            //Cache rotation so the space above the stairs has the same rotation and its walls appear on the correct sides
-                            Quaternion stairRotation = GetStairRotation(lastIndices, node.indices);
-
-                            Transform trans = Instantiate(stairsPrefab, pos, stairRotation, currentPathParent).transform; //Spawn stairwell
-                            trans.localScale = cellDimensions;  //Scale the unit to fit the grid cell
-                            
-                            // Set floor layer
-                            int floorLayer = LayerMask.NameToLayer(floorLayerName);
-                            if (floorLayer != -1)
-                            {
-                                SetLayerRecursively(trans.gameObject, floorLayer);
-                            }
-
-                            //Stairspace cell
-                            pos += new Vector3(0, cellDimensions.y, 0); //Update position to be the cell above the current node
-                            Vector3Int spaceIndex = new Vector3Int(node.indices.x, node.indices.y + 1, node.indices.z);
-
-                            //Mark space above next space as stairspace so it remains empty and their is space to go down the stairs
-                            grid.GetCell(spaceIndex).cellType = CellTypes.STAIRSPACE;
-                            grid.GetCell(spaceIndex).faceDirection = Cell.OppositeDirection(grid.GetCell(node.indices).faceDirection);
-                            trans = Instantiate(stairSpacePrefab, pos, stairRotation, currentPathParent).transform; //Spawn stairspace
-                            trans.localScale = cellDimensions; //Scale the unit to fit the grid cell
-                        }
-                        else if (node.indices.y > lastIndices.y) //Stairwell up
-                        {
-                            //Stair cell
-                            Vector3Int stairIndex = new Vector3Int(node.indices.x, node.indices.y - 1, node.indices.z);
-
-                            Quaternion stairRotation = GetStairRotation(lastIndices, stairIndex);
-
-                            grid.GetCell(stairIndex).cellType = CellTypes.STAIRS;  //Mark as stairs
-                            Transform trans = Instantiate(stairsPrefab, pos - new Vector3(0, cellDimensions.y, 0), stairRotation, currentPathParent).transform; //Spawn stair, Update position to be the cell below the current node
-                            trans.localScale = cellDimensions; //Scale the unit to fit the grid cell
-                            
-                            // Set floor layer
-                            int floorLayer = LayerMask.NameToLayer(floorLayerName);
-                            if (floorLayer != -1)
-                            {
-                                SetLayerRecursively(trans.gameObject, floorLayer);
-                            }
-
-                            //Stairspace cell, cells up diagonally must be an empty space and the cell below them holds the actual stairs
-                            grid.GetCell(node.indices).cellType = CellTypes.STAIRSPACE; //Mark next space as stairs
-                            grid.GetCell(node.indices).faceDirection = Cell.OppositeDirection(grid.GetCell(stairIndex).faceDirection);
-
-                            trans = Instantiate(stairSpacePrefab, pos, stairRotation, currentPathParent).transform; //Spawn stair space
-                            trans.localScale = cellDimensions;  //Scale the unit to fit the grid cell
-                        }
-                        else //Hallway
-                        {
-                            //Mark grid cell as hallway
-                            grid.GetCell(node.indices).cellType = CellTypes.HALLWAY;
-
-                            //Spawn hallway
-                            Transform trans = Instantiate(hallPrefab, pos, Quaternion.identity, currentPathParent).transform;
-
-                            //Scale the unit to fit the grid cell
-                            trans.localScale = cellDimensions;
-                            
-                            // Set floor layer
-                            int floorLayer = LayerMask.NameToLayer(floorLayerName);
-                            if (floorLayer != -1)
-                            {
-                                SetLayerRecursively(trans.gameObject, floorLayer);
-                            }
-                        }
-
-                        //Update last y with this node's y value
-                        lastIndices = node.indices;
-                    }
-
+                //path might return null if A* failed
+                if (path == null)
+                {
+                    Debug.LogError("A-Star Path Failed");
                     //Log the time this step took
                     if (displayAlgorithmTime)
                     {
                         Debug.Log("Path Time: " + (Time.realtimeSinceStartup - realtime));
                     }
+                    continue;
+                }
+
+                //Store the last Y value so we know when we've added a stairwell
+                Vector3Int lastIndices = startIndices;
+                foreach (AStarNode node in path)
+                {
+                    //Get center position of unit
+                    Vector3 pos = new Vector3(node.indices.x * cellDimensions.x, node.indices.y * cellDimensions.y, node.indices.z * cellDimensions.z);
+
+                    if (node.indices.y < lastIndices.y) //Stairwell down
+                    {
+                        //Stair cell
+                        grid.GetCell(node.indices).cellType = CellTypes.STAIRS; //Mark next space as stairs
+
+                        //Cache rotation so the space above the stairs has the same rotation and its walls appear on the correct sides
+                        Quaternion stairRotation = GetStairRotation(lastIndices, node.indices);
+
+                        Transform trans = Instantiate(stairsPrefab, pos, stairRotation, currentPathParent).transform; //Spawn stairwell
+                        trans.localScale = cellDimensions;  //Scale the unit to fit the grid cell
+
+                        // Set floor layer
+                        int floorLayer = LayerMask.NameToLayer(floorLayerName);
+                        if (floorLayer != -1)
+                        {
+                            SetLayerRecursively(trans.gameObject, floorLayer);
+                        }
+
+                        //Stairspace cell
+                        pos += new Vector3(0, cellDimensions.y, 0); //Update position to be the cell above the current node
+                        Vector3Int spaceIndex = new Vector3Int(node.indices.x, node.indices.y + 1, node.indices.z);
+
+                        //Mark space above next space as stairspace so it remains empty and their is space to go down the stairs
+                        grid.GetCell(spaceIndex).cellType = CellTypes.STAIRSPACE;
+                        grid.GetCell(spaceIndex).faceDirection = Cell.OppositeDirection(grid.GetCell(node.indices).faceDirection);
+                        trans = Instantiate(stairSpacePrefab, pos, stairRotation, currentPathParent).transform; //Spawn stairspace
+                        trans.localScale = cellDimensions; //Scale the unit to fit the grid cell
+                    }
+                    else if (node.indices.y > lastIndices.y) //Stairwell up
+                    {
+                        //Stair cell
+                        Vector3Int stairIndex = new Vector3Int(node.indices.x, node.indices.y - 1, node.indices.z);
+
+                        Quaternion stairRotation = GetStairRotation(lastIndices, stairIndex);
+
+                        grid.GetCell(stairIndex).cellType = CellTypes.STAIRS;  //Mark as stairs
+                        Transform trans = Instantiate(stairsPrefab, pos - new Vector3(0, cellDimensions.y, 0), stairRotation, currentPathParent).transform; //Spawn stair, Update position to be the cell below the current node
+                        trans.localScale = cellDimensions; //Scale the unit to fit the grid cell
+
+                        // Set floor layer
+                        int floorLayer = LayerMask.NameToLayer(floorLayerName);
+                        if (floorLayer != -1)
+                        {
+                            SetLayerRecursively(trans.gameObject, floorLayer);
+                        }
+
+                        //Stairspace cell, cells up diagonally must be an empty space and the cell below them holds the actual stairs
+                        grid.GetCell(node.indices).cellType = CellTypes.STAIRSPACE; //Mark next space as stairs
+                        grid.GetCell(node.indices).faceDirection = Cell.OppositeDirection(grid.GetCell(stairIndex).faceDirection);
+
+                        trans = Instantiate(stairSpacePrefab, pos, stairRotation, currentPathParent).transform; //Spawn stair space
+                        trans.localScale = cellDimensions;  //Scale the unit to fit the grid cell
+                    }
+                    else //Hallway
+                    {
+                        //Mark grid cell as hallway
+                        grid.GetCell(node.indices).cellType = CellTypes.HALLWAY;
+
+                        //Spawn hallway
+                        Transform trans = Instantiate(hallPrefab, pos, Quaternion.identity, currentPathParent).transform;
+
+                        //Scale the unit to fit the grid cell
+                        trans.localScale = cellDimensions;
+
+                        // Set floor layer
+                        int floorLayer = LayerMask.NameToLayer(floorLayerName);
+                        if (floorLayer != -1)
+                        {
+                            SetLayerRecursively(trans.gameObject, floorLayer);
+                        }
+                    }
+
+                    //Update last y with this node's y value
+                    lastIndices = node.indices;
+                }
+
+                //Log the time this step took
+                if (displayAlgorithmTime)
+                {
+                    Debug.Log("Path Time: " + (Time.realtimeSinceStartup - realtime));
+                }
             }
         }
     }
@@ -755,7 +760,7 @@ public class DungeonGenerator : MonoBehaviour
 
                     PlacePillar(currentIndex);
 
-                    switch(type)
+                    switch (type)
                     {
                         case CellTypes.ROOM:
                             //Only check north and east, the previous node will have handled the checks for south and west
@@ -763,11 +768,11 @@ public class DungeonGenerator : MonoBehaviour
                             RoomWall(currentIndex, currentIndex + AStar.constEast);
 
                             //If on grid bounds, there is no previous node to do this check, needs to be done by this node
-                            if(currentIndex.z == 0) //Southern edge of grid
+                            if (currentIndex.z == 0) //Southern edge of grid
                             {
                                 RoomWall(currentIndex, currentIndex + AStar.constSouth);
                             }
-                            if(currentIndex.x == 0) //Eastern edge of grid
+                            if (currentIndex.x == 0) //Eastern edge of grid
                             {
                                 RoomWall(currentIndex, currentIndex + AStar.constWest);
                             }
@@ -849,7 +854,7 @@ public class DungeonGenerator : MonoBehaviour
 
         //Place South West corner
         if ((type != CellTypes.NONE && (!grid.IsValidCell(currentIndex + AStar.constWest) || !grid.IsValidCell(currentIndex + AStar.constSouth) || !grid.IsValidCell(currentIndex + AStar.constWest + AStar.constSouth))) //Cell is filled and south or west or both are not valid (edge of map)
-            || 
+            ||
             (type == CellTypes.NONE //If cell is empty
             && ((!grid.IsValidCell(currentIndex + AStar.constSouth) && (grid.IsValidCell(currentIndex + AStar.constWest) && !grid.IsCellEmpty(currentIndex + AStar.constWest))) //South is invalid (on edge) and West is valid and filled
             || (!grid.IsValidCell(currentIndex + AStar.constWest) && (grid.IsValidCell(currentIndex + AStar.constSouth) && !grid.IsCellEmpty(currentIndex + AStar.constSouth)))))) //West is invalid (on edge) and South is valid and filled 
@@ -889,7 +894,7 @@ public class DungeonGenerator : MonoBehaviour
 
             //Place different prefabs for wall based on adjecent cell type
             //Spawns doorway if leaving or entering a room
-            switch(adjacentCell.cellType)
+            switch (adjacentCell.cellType)
             {
                 //Doorway
                 case CellTypes.HALLWAY:
@@ -932,12 +937,12 @@ public class DungeonGenerator : MonoBehaviour
                     break;
                 //No walls between rooms
                 default:
-                    
+
                     break;
             }
 
             //If the object set to be spawned is not null, instantiate the object
-            if(spawnObject != null)
+            if (spawnObject != null)
             {
                 Transform trans = Instantiate(spawnObject, grid.GetCenterByIndices(currentIndex), GetWallRotation(currentIndex, adjacentIndex), roomParent).transform;
                 trans.localScale = cellDimensions;
@@ -946,7 +951,7 @@ public class DungeonGenerator : MonoBehaviour
                 if (UnityEngine.Random.Range(0f, 1f) < percentEnableLights)
                 {
                     StartLight light = trans.gameObject.GetComponent<StartLight>();
-                    if(light != null ) { light.EnableLight(); }
+                    if (light != null) { light.EnableLight(); }
                 }
             }
         }
@@ -1099,7 +1104,7 @@ public class DungeonGenerator : MonoBehaviour
 
                 //If moving in different directions, plug the wall
                 case CellTypes.STAIRSPACE:
-                    if(adjacentCell.faceDirection != grid.GetCell(currentIndex).faceDirection)
+                    if (adjacentCell.faceDirection != grid.GetCell(currentIndex).faceDirection)
                     {
                         spawnObject = wallPrefab;
                     }
@@ -1183,7 +1188,7 @@ public class DungeonGenerator : MonoBehaviour
 
                 //If moving in different directions, plug the wall
                 case CellTypes.STAIRS:
-                    if(grid.GetCell(currentIndex).faceDirection != adjacentCell.faceDirection)
+                    if (grid.GetCell(currentIndex).faceDirection != adjacentCell.faceDirection)
                     {
                         spawnObject = wallPrefab;
                     }
@@ -1260,15 +1265,15 @@ public class DungeonGenerator : MonoBehaviour
                 Transform trans = Instantiate(spawnObject, grid.GetCenterByIndices(currentIndex), GetWallRotation(currentIndex, adjacentIndex), roomParent).transform;
                 trans.localScale = cellDimensions;
 
-                if (adjacentCell.cellType != CellTypes.STAIRS 
+                if (adjacentCell.cellType != CellTypes.STAIRS
                     && UnityEngine.Random.Range(0f, 1f) < percentEnableLights)
                 {
                     StartLight light = trans.gameObject.GetComponent<StartLight>();
-                    if (light != null) 
-                    { 
+                    if (light != null)
+                    {
                         light.EnableLight();
                         light?.GetLight().transform.Rotate(new Vector3(0, 180f, 0));
-                    }                    
+                    }
                 }
             }
         }
@@ -1288,12 +1293,12 @@ public class DungeonGenerator : MonoBehaviour
             rot = 180f;
             grid.GetCell(currentIndices).faceDirection = Directions.SOUTH;
         }
-        else if(diff.x > 0) //stairs face right
+        else if (diff.x > 0) //stairs face right
         {
             rot = 90f;
             grid.GetCell(currentIndices).faceDirection = Directions.EAST;
         }
-        else if(diff.x < 0) //stairs face left
+        else if (diff.x < 0) //stairs face left
         {
             rot = 270f;
             grid.GetCell(currentIndices).faceDirection = Directions.WEST;
@@ -1305,7 +1310,7 @@ public class DungeonGenerator : MonoBehaviour
 
         //If stairs are going down, we flip the angle, i.e. when moving forward UP stairs, rotation is 0
         //but when going forward DOWN stairs we need to flip them to 180 degrees
-        if (diff.y < 0)  
+        if (diff.y < 0)
         {
             rot += 180;
 
@@ -1350,14 +1355,14 @@ public class DungeonGenerator : MonoBehaviour
     private void SetLayerRecursively(GameObject obj, int layer)
     {
         if (obj == null) return;
-        
+
         // Only set layer on objects named "Floor" or if it's a room/hallway/stair prefab root
-        if (obj.name.Contains("Floor") || obj.name.Contains("Room") || 
+        if (obj.name.Contains("Floor") || obj.name.Contains("Room") ||
             obj.name.Contains("Hall") || obj.name.Contains("Stair"))
         {
             obj.layer = layer;
         }
-        
+
         foreach (Transform child in obj.transform)
         {
             SetLayerRecursively(child.gameObject, layer);
@@ -1371,7 +1376,7 @@ public class DungeonGenerator : MonoBehaviour
     {
         //TETRAHEDRALIZATION includes ROOM_MAP which includes MIN_SPAN_TREE so they are drawn in reverse
         //This displays all edges in Delaunay Tetrahedralization including excluded edges that do not have hallways
-        if((debugMode & DebugMode.TETRAHEDRALIZATION) == DebugMode.TETRAHEDRALIZATION)
+        if ((debugMode & DebugMode.TETRAHEDRALIZATION) == DebugMode.TETRAHEDRALIZATION)
         {
             foreach (KeyValuePair<Vector3, List<Edge>> pair in totalEdges)
             {

@@ -10,6 +10,7 @@ public enum Mode { Training, Inference }
 public class HybridAgent : Agent
 {
     private NavMeshAgent agent;
+    private bool isReady;
 
     [SerializeField] private Transform target;
     [SerializeField] private DungeonRunner dungeonRunner;
@@ -21,6 +22,7 @@ public class HybridAgent : Agent
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        DungeonRunner.OnDungeonReady += () => isReady = true;
     }
 
     public override void OnEpisodeBegin()
@@ -70,6 +72,8 @@ public class HybridAgent : Agent
         sensor.AddObservation(agent.nextPosition); // 3
 
         CheckForStickyFloor(sensor); // 4
+
+        // 14 total observations
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -80,26 +84,29 @@ public class HybridAgent : Agent
         // float forwardMovement = actions.ContinuousActions[++i];
         // Vector3 move = transform.right * sideMovement + transform.forward * forwardMovement;
 
-        // somehow apply movement ke agentnya, biasanya simpen dl di variable terus di FixedUpdate baru dihandle 
+        // somehow apply movement ke agentnya
+        // ganti yang dari agent.setdestination jadi smth else yg bs ad physics
+        // biasanya simpen dl di variable terus di FixedUpdate baru dihandle 
     }
 
     private void CheckIfReachedTarget()
     {
-        // misal nyampe
         if (Vector3.Distance(transform.position, target.position) <= 1f)
         {
             SetReward(1f);
             EndEpisode();
+            isReady = false;
+            dungeonRunner.Reset();
         }
     }
 
     private void FixedUpdate()
     {
-        if (agent != null && agent.isOnNavMesh && agent.isActiveAndEnabled && target != null)
+        if (!isReady) return;
+        if (agent != null && agent.isOnNavMesh && target != null)
         {
             agent.SetDestination(target.position);
         }
-
         CheckIfReachedTarget();
     }
 }

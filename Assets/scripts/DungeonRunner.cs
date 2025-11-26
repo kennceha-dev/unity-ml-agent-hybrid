@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Unity.AI.Navigation;
 using UnityEngine;
@@ -6,6 +7,8 @@ using UnityEngine;
 [RequireComponent(typeof(NavMeshSurface))]
 public class DungeonRunner : MonoBehaviour
 {
+    public static event Action OnDungeonReady;
+
     [SerializeField] private Transform agent;
     [SerializeField] private Transform target;
 
@@ -96,5 +99,9 @@ public class DungeonRunner : MonoBehaviour
         {
             target.position = generator.GetRandomPositionInRoom(targetRoom);
         }
+
+        OnDungeonReady?.Invoke();
     }
+
+    public void Reset() => StartCoroutine(GenerateAndSpawn());
 }

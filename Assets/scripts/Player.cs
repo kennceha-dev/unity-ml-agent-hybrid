@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 public class Player : MonoBehaviour
 {
     CharacterController characterController;
+    private bool isReady;
 
     [SerializeField] private float moveSpeed = 10f;
     [SerializeField] private float lookSpeed = 0.5f;
@@ -24,9 +25,9 @@ public class Player : MonoBehaviour
     {
         characterController = GetComponent<CharacterController>();
         RecalculateJumpValues();
-
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        DungeonRunner.OnDungeonReady += () => isReady = true;
     }
 
     void OnValidate()
@@ -36,6 +37,7 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        if (!isReady) return;
         float mouseX = InputSystem.actions.FindAction("Look").ReadValue<Vector2>().x * lookSpeed;
         float mouseY = InputSystem.actions.FindAction("Look").ReadValue<Vector2>().y * lookSpeed;
 
