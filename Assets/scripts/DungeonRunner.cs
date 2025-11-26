@@ -46,7 +46,7 @@ public class DungeonRunner : MonoBehaviour
         }
     }
 
-    IEnumerator GenerateAndSpawn()
+    public IEnumerator GenerateAndSpawn()
     {
         if (generator == null)
         {
