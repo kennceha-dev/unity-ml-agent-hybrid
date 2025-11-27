@@ -1,0 +1,203 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3778776113222279052
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5035794654872875820}
+  m_Layer: 0
+  m_Name: Rooms
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5035794654872875820
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3778776113222279052}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 70412437446380874}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &9099076906417122435
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 70412437446380874}
+  - component: {fileID: 7789068759378307632}
+  - component: {fileID: 7259860840476511671}
+  - component: {fileID: 9065690440695344975}
+  - component: {fileID: 2039694583433525217}
+  m_Layer: 0
+  m_Name: DungeonRoot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &70412437446380874
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9099076906417122435}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5035794654872875820}
+  - {fileID: 5088355742228559930}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7789068759378307632
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9099076906417122435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a6788a139dbb5441884df5a6bc992de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cellDimensions: {x: 0, y: 0, z: 0}
+  gridDimensions: {x: 0, y: 0, z: 0}
+  drawGrid: 1
+--- !u!114 &7259860840476511671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9099076906417122435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99eedcf8e5ae07c4dab9230191f7b89c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agent: {fileID: 0}
+  target: {fileID: 0}
+--- !u!114 &9065690440695344975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9099076906417122435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9387515ebcd666409dbe3daf8afa441, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useDeterministicSeed: 1
+  dungeonSeed: 12345
+  dungeonParent: {fileID: 0}
+  displayAlgorithmTime: 1
+  debugMode: 0
+  cellDimensions: {x: 4, y: 4, z: 4}
+  gridDimensions: {x: 20, y: 4, z: 20}
+  room: {fileID: 3015041062976946509, guid: 38145bc0a30f14641b1d8742eed18542, type: 3}
+  roomParent: {fileID: 5035794654872875820}
+  floorLayerName: Floor
+  numRandomRooms: 10
+  maxSize: {x: 4, y: 1, z: 4}
+  minSize: {x: 2, y: 1, z: 2}
+  pathParent: {fileID: 5088355742228559930}
+  hallPrefab: {fileID: 3015041062976946509, guid: 71c80cbf98dc35d48bd9441bd7a1dcef, type: 3}
+  stairsPrefab: {fileID: 4511191661846442700, guid: a47d5c71bc0d5a148956db1cc6ffcdc6, type: 3}
+  stairSpacePrefab: {fileID: 3015041062976946509, guid: 5ef3605bfb74d8b4d9eb32dd3096619c, type: 3}
+  wallPrefab: {fileID: 4875715511962008531, guid: afa55f8b9e7c75b4b962896efa9b23b2, type: 3}
+  doorwayPrefab: {fileID: 149328350824309938, guid: 6a727f37b1098974186143ee7996a136, type: 3}
+  pillarPrefab: {fileID: 149328350824309938, guid: 6a727f37b1098974186143ee7996a136, type: 3}
+  archPrefab: {fileID: 149328350824309938, guid: 6a727f37b1098974186143ee7996a136, type: 3}
+  percentEnableLights: 0.1
+  extraHallwaysFactor: 0.5
+  onDungeonClear:
+    m_PersistentCalls:
+      m_Calls: []
+  onDungeonGenerate:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &2039694583433525217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9099076906417122435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 0
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.16666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 0}
+  m_BuildHeightMesh: 0
+--- !u!1 &9117296096740876317
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5088355742228559930}
+  m_Layer: 0
+  m_Name: Paths
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5088355742228559930
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9117296096740876317}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 70412437446380874}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

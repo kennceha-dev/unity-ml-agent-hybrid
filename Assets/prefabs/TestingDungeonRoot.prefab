@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &7890245637187912980
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 70412437446380874, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 70412437446380874, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 70412437446380874, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -10
+      objectReference: {fileID: 0}
+    - target: {fileID: 70412437446380874, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 70412437446380874, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 70412437446380874, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 70412437446380874, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 70412437446380874, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 70412437446380874, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 70412437446380874, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9065690440695344975, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: room
+      value: 
+      objectReference: {fileID: 3015041062976946509, guid: 73ec1aacac6afca4cbce25bb55dc659f, type: 3}
+    - target: {fileID: 9065690440695344975, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: hallPrefab
+      value: 
+      objectReference: {fileID: 3015041062976946509, guid: 73ec1aacac6afca4cbce25bb55dc659f, type: 3}
+    - target: {fileID: 9065690440695344975, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: wallPrefab
+      value: 
+      objectReference: {fileID: 4875715511962008531, guid: 670b394873959c142bb0ca4209105504, type: 3}
+    - target: {fileID: 9065690440695344975, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: stairsPrefab
+      value: 
+      objectReference: {fileID: 4511191661846442700, guid: eaa9a0690ec79674fbcf7b6ea22a1299, type: 3}
+    - target: {fileID: 9065690440695344975, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: stairSpacePrefab
+      value: 
+      objectReference: {fileID: 149328350824309938, guid: 6a727f37b1098974186143ee7996a136, type: 3}
+    - target: {fileID: 9099076906417122435, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
+      propertyPath: m_Name
+      value: TestingDungeonRoot
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
