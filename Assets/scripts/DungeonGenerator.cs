@@ -52,6 +52,12 @@ using UnityEngine.Events;
 [RequireComponent(typeof(Grid))]
 public class DungeonGenerator : MonoBehaviour
 {
+    [SerializeField] bool useDeterministicSeed = true;
+    [SerializeField] int dungeonSeed = 12345;   // you can change this per run in the Inspector
+
+    // Non-serialized runtime RNG
+    PcgRandom rng;
+
     [Flags]
     public enum DebugMode
     {
@@ -143,13 +149,13 @@ public class DungeonGenerator : MonoBehaviour
     public Room GetRandomRoom()
     {
         if (rooms.Count == 0) return null;
-        return rooms[UnityEngine.Random.Range(0, rooms.Count)];
+        return rooms[rng.Range(0, rooms.Count)];
     }
 
     public Vector3 GetRandomPositionInRoom(Room room)
     {
         if (room == null || room.cells.Count == 0) return Vector3.zero;
-        Cell randomCell = room.cells[UnityEngine.Random.Range(0, room.cells.Count)];
+        Cell randomCell = room.cells[rng.Range(0, room.cells.Count)];
         Vector3 floorPosition = randomCell.center;
         floorPosition.y -= cellDimensions.y * 0.5f;
         floorPosition.y += 1.0f;
@@ -287,8 +293,26 @@ public class DungeonGenerator : MonoBehaviour
     {
         Setup();
 
+        InitRng();
+
         StartCoroutine(GenerateDungeon());
     }
+
+    private void InitRng()
+    {
+        // If you want deterministic runs: same seed => same dungeon
+        if (useDeterministicSeed)
+        {
+            rng = new PcgRandom((uint)dungeonSeed);
+        }
+        else
+        {
+            // Non-deterministic: base seed on time (or something else you like)
+            ulong ticks = (ulong)System.DateTime.UtcNow.Ticks;
+            rng = new PcgRandom((uint)(ticks & 0xFFFFFFFFu));
+        }
+    }
+
 
     /// <summary>
     /// Generates dungeon
@@ -365,9 +389,9 @@ public class DungeonGenerator : MonoBehaviour
 
             //Number of room segments in each direction
             Vector3 randSize = new Vector3(
-                UnityEngine.Random.Range(minSize.x, maxSize.x),
-                UnityEngine.Random.Range(minSize.y, maxSize.y),
-                UnityEngine.Random.Range(minSize.z, maxSize.z)
+                rng.Range(minSize.x, maxSize.x),
+                rng.Range(minSize.y, maxSize.y),
+                rng.Range(minSize.z, maxSize.z)
             );
 
             //TODO: Create an elegant solution for degenerate tetrahedrals and triangles of rooms
@@ -400,9 +424,9 @@ public class DungeonGenerator : MonoBehaviour
             //else
             //{
             randPos = new Vector3(
-                cellDimensions.x * UnityEngine.Random.Range(0, gridDimensions.x),
-                cellDimensions.y * UnityEngine.Random.Range(0, gridDimensions.y),
-                cellDimensions.z * UnityEngine.Random.Range(0, gridDimensions.z)
+                cellDimensions.x * rng.Range(0, (int)gridDimensions.x),
+                cellDimensions.y * rng.Range(0, (int)gridDimensions.y),
+                cellDimensions.z * rng.Range(0, (int)gridDimensions.z)
             );
             //}
 
@@ -551,12 +575,10 @@ public class DungeonGenerator : MonoBehaviour
 
         for (int i = 0; i < numHalls; i++)
         {
-            int hallIndex = UnityEngine.Random.Range(0, excluded.Count - 1);
+            int hallIndex = rng.Range(0, excluded.Count); // maxExclusive pattern
 
-            //Add edge to minSpanTree and remove it from excluded, this ensures duplicate edges are not added since
-            //the graph exclided + minSpanTree should not have any duplicates
-            expandedTree.Add(excluded[i]);
-            excluded.RemoveAt(i);
+            expandedTree.Add(excluded[hallIndex]);
+            excluded.RemoveAt(hallIndex);
         }
     }
 
@@ -948,7 +970,7 @@ public class DungeonGenerator : MonoBehaviour
                 trans.localScale = cellDimensions;
 
                 //Random check to enable lights
-                if (UnityEngine.Random.Range(0f, 1f) < percentEnableLights)
+                if (rng.NextFloat() < percentEnableLights)
                 {
                     StartLight light = trans.gameObject.GetComponent<StartLight>();
                     if (light != null) { light.EnableLight(); }
@@ -961,7 +983,7 @@ public class DungeonGenerator : MonoBehaviour
             trans.localScale = cellDimensions;
 
             //Check to enable light
-            if (UnityEngine.Random.Range(0f, 1f) < percentEnableLights)
+            if (rng.NextFloat() < percentEnableLights)
             {
                 StartLight light = trans.gameObject.GetComponent<StartLight>();
                 if (light != null) { light.EnableLight(); }
@@ -1036,7 +1058,7 @@ public class DungeonGenerator : MonoBehaviour
                 Transform trans = Instantiate(spawnObject, grid.GetCenterByIndices(currentIndex), GetWallRotation(currentIndex, adjacentIndex), roomParent).transform;
                 trans.localScale = cellDimensions;
 
-                if (UnityEngine.Random.Range(0f, 1f) < percentEnableLights)
+                if (rng.NextFloat() < percentEnableLights)
                 {
                     StartLight light = trans.gameObject.GetComponent<StartLight>();
                     if (light != null) { light.EnableLight(); }
@@ -1048,7 +1070,7 @@ public class DungeonGenerator : MonoBehaviour
             Transform trans = Instantiate(wallPrefab, grid.GetCenterByIndices(currentIndex), GetWallRotation(currentIndex, adjacentIndex), roomParent).transform;
             trans.localScale = cellDimensions;
 
-            if (UnityEngine.Random.Range(0f, 1f) < percentEnableLights)
+            if (rng.NextFloat() < percentEnableLights)
             {
                 StartLight light = trans.gameObject.GetComponent<StartLight>();
                 if (light != null) { light.EnableLight(); }
@@ -1122,7 +1144,7 @@ public class DungeonGenerator : MonoBehaviour
                 Transform trans = Instantiate(spawnObject, grid.GetCenterByIndices(currentIndex), GetWallRotation(currentIndex, adjacentIndex), roomParent).transform;
                 trans.localScale = cellDimensions;
 
-                if (UnityEngine.Random.Range(0f, 1f) < percentEnableLights)
+                if (rng.NextFloat() < percentEnableLights)
                 {
                     StartLight light = trans.gameObject.GetComponent<StartLight>();
                     if (light != null) { light.EnableLight(); }
@@ -1134,7 +1156,7 @@ public class DungeonGenerator : MonoBehaviour
             Transform trans = Instantiate(wallPrefab, grid.GetCenterByIndices(currentIndex), GetWallRotation(currentIndex, adjacentIndex), roomParent).transform;
             trans.localScale = cellDimensions;
 
-            if (UnityEngine.Random.Range(0f, 1f) < percentEnableLights)
+            if (rng.NextFloat() < percentEnableLights)
             {
                 StartLight light = trans.gameObject.GetComponent<StartLight>();
                 if (light != null) { light.EnableLight(); }
@@ -1214,7 +1236,7 @@ public class DungeonGenerator : MonoBehaviour
                 Transform trans = Instantiate(spawnObject, grid.GetCenterByIndices(currentIndex), GetWallRotation(currentIndex, adjacentIndex), roomParent).transform;
                 trans.localScale = cellDimensions;
 
-                //if (UnityEngine.Random.Range(0f, 1f) < percentEnableLights)
+                //if (rng.NextFloat() < percentEnableLights)
                 //{
                 //    StartLight light = trans.gameObject.GetComponent<StartLight>();
                 //    if (light != null) { light.EnableLight(); }
