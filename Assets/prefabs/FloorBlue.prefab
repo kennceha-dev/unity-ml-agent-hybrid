@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5386637001688726806}
   - component: {fileID: 3299439417926974700}
   m_Layer: 0
-  m_Name: FloorOnlyCell
+  m_Name: FloorBlue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -209,7 +209,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9b34ea8a8f8b61049b373d5b68642b23, type: 2}
+  - {fileID: 2100000, guid: 58daeaae19c63f54e9cab1ff28364e8d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

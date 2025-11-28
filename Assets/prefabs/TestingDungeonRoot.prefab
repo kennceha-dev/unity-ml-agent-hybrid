@@ -55,7 +55,7 @@ PrefabInstance:
     - target: {fileID: 9065690440695344975, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
       propertyPath: hallPrefab
       value: 
-      objectReference: {fileID: 3015041062976946509, guid: 73ec1aacac6afca4cbce25bb55dc659f, type: 3}
+      objectReference: {fileID: 3015041062976946509, guid: 71cf2f04bc53a754db0be21543e5b35b, type: 3}
     - target: {fileID: 9065690440695344975, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
       propertyPath: wallPrefab
       value: 
