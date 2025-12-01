@@ -121,9 +121,6 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        // ! KIRI KANAN 
-        // ! GANTI MOVEMENT JADI PAKE CHARA CONTROLLER
-
         cachedMoveInput = actions.ContinuousActions[0]; // -1..1
         cachedTurnInput = actions.ContinuousActions[1]; // -1..1
 
