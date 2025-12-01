@@ -112,6 +112,19 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] GameObject pillarPrefab; //We store this prefab to add the pillar to the southeast corner of rooms it is not automatically added to from a wall
     [SerializeField] GameObject archPrefab; //Add between cells of the same type where a wall was not added
 
+    [Header("Hazards")]
+    [Tooltip("Slime prefab (must include SlimeZone) spawned across floors.")]
+    [SerializeField] GameObject slimeZonePrefab;
+    [SerializeField] Transform slimeParent;
+    [SerializeField, Range(0f, 0.25f)] float slimeMinCoverage = 0f;
+    [SerializeField, Range(0f, 0.25f)] float slimeMaxCoverage = 0.25f;
+    [SerializeField] float slimeVerticalOffset = 0.5f;
+    [SerializeField] bool scaleSlimeToCell = true;
+    [SerializeField, Min(1)] int slimeMinPatchesPerCell = 1;
+    [SerializeField, Min(1)] int slimeMaxPatchesPerCell = 3;
+    [SerializeField, Range(0.1f, 1.5f)] float slimePatchMinScale = 0.35f;
+    [SerializeField, Range(0.1f, 1.5f)] float slimePatchMaxScale = 0.8f;
+
     [Header("Other")]
     [Tooltip("Percentage chance [0, 1] for lights being placed on a new wall.")]
     [Range(0, 1)]
@@ -123,6 +136,8 @@ public class DungeonGenerator : MonoBehaviour
 
     //All rooms in dungeon
     List<Room> rooms = new();
+    //All hallway sections carved between rooms
+    readonly List<List<Cell>> hallwaySections = new();
 
     //Tetrahedrons used in Delaunay Tetrahedralization
     List<Tetrahedron> tetrahedrons = new List<Tetrahedron>();
@@ -230,6 +245,28 @@ public class DungeonGenerator : MonoBehaviour
                 pathParent.parent = dungeonParent;
             }
         }
+        else
+        {
+            pathParent.parent = dungeonParent;
+        }
+
+        if (slimeParent == null)
+        {
+            GameObject sObject = GameObject.Find("Slimes");
+            if (sObject != null)
+            {
+                slimeParent = sObject.transform;
+            }
+            else
+            {
+                slimeParent = (new GameObject("Slimes")).transform;
+                slimeParent.parent = dungeonParent;
+            }
+        }
+        else
+        {
+            slimeParent.parent = dungeonParent;
+        }
     }
 
     /// <summary>
@@ -247,6 +284,7 @@ public class DungeonGenerator : MonoBehaviour
         totalEdges.Clear();
         minSpanTree.Clear();
         roomMap.Clear();
+        hallwaySections.Clear();
 
         //Setup();
 
@@ -263,6 +301,14 @@ public class DungeonGenerator : MonoBehaviour
             for (int i = pathParent.childCount - 1; i >= 0; i--)
             {
                 AlwaysDestroy(pathParent.GetChild(i).gameObject);
+            }
+        }
+
+        if (slimeParent != null)
+        {
+            for (int i = slimeParent.childCount - 1; i >= 0; i--)
+            {
+                AlwaysDestroy(slimeParent.GetChild(i).gameObject);
             }
         }
 
@@ -360,6 +406,8 @@ public class DungeonGenerator : MonoBehaviour
 
         //Place walls in between rooms and hallways (keeps hallways and rooms from having 
         PlaceWalls();
+
+        PopulateSlimeZones();
 
         //Use event to call external functions after dungeon is generated
         onDungeonGenerate.Invoke();
@@ -562,6 +610,132 @@ public class DungeonGenerator : MonoBehaviour
     }
 
     /// <summary>
+    /// Randomly scatter slime zones across rooms and hallways based on the configured coverage range.
+    /// </summary>
+    private void PopulateSlimeZones()
+    {
+        if (slimeZonePrefab == null)
+        {
+            return;
+        }
+
+        if (slimeParent == null)
+        {
+            Setup();
+        }
+
+        float minCoverage = Mathf.Clamp(Mathf.Min(slimeMinCoverage, slimeMaxCoverage), 0f, 0.25f);
+        float maxCoverage = Mathf.Clamp(Mathf.Max(slimeMinCoverage, slimeMaxCoverage), 0f, 0.25f);
+
+        if (maxCoverage <= 0f)
+        {
+            return;
+        }
+
+        foreach (Room room in rooms)
+        {
+            SpawnSlimeForCells(room.cells, minCoverage, maxCoverage);
+        }
+
+        foreach (List<Cell> hallway in hallwaySections)
+        {
+            SpawnSlimeForCells(hallway, minCoverage, maxCoverage);
+        }
+    }
+
+    private void SpawnSlimeForCells(IList<Cell> cells, float minCoverage, float maxCoverage)
+    {
+        if (cells == null || cells.Count == 0)
+        {
+            return;
+        }
+
+        float coverage = rng.Range(minCoverage, maxCoverage);
+        if (coverage <= 0f)
+        {
+            return;
+        }
+
+        int slimeCount = Mathf.Clamp(Mathf.CeilToInt(coverage * cells.Count), 0, cells.Count);
+        if (slimeCount == 0)
+        {
+            return;
+        }
+
+        List<int> indices = new List<int>(cells.Count);
+        for (int i = 0; i < cells.Count; i++)
+        {
+            indices.Add(i);
+        }
+
+        ShuffleIndices(indices);
+
+        for (int i = 0; i < slimeCount && i < indices.Count; i++)
+        {
+            CreateSlimePatchesForCell(cells[indices[i]]);
+        }
+    }
+
+    private void ShuffleIndices(List<int> indices)
+    {
+        for (int i = indices.Count - 1; i > 0; i--)
+        {
+            int swapIndex = rng.Range(0, i + 1);
+            (indices[i], indices[swapIndex]) = (indices[swapIndex], indices[i]);
+        }
+    }
+
+    private void CreateSlimePatchesForCell(Cell cell)
+    {
+        if (slimeZonePrefab == null || slimeParent == null)
+        {
+            return;
+        }
+
+        int minPatch = Mathf.Max(1, slimeMinPatchesPerCell);
+        int maxPatch = Mathf.Max(minPatch, slimeMaxPatchesPerCell);
+
+        int count = rng.Range(minPatch, maxPatch + 1);
+
+        float minScale = Mathf.Min(slimePatchMinScale, slimePatchMaxScale);
+        float maxScale = Mathf.Max(slimePatchMinScale, slimePatchMaxScale);
+
+        for (int i = 0; i < count; i++)
+        {
+            float scaleFactor = rng.Range(minScale, maxScale);
+
+            Vector3 spawnPos = cell.center;
+            spawnPos.y -= (cellDimensions.y * 0.5f);
+            spawnPos.y += slimeVerticalOffset;
+
+            float scaledX = cellDimensions.x * scaleFactor;
+            float scaledZ = cellDimensions.z * scaleFactor;
+
+            float offsetRangeX = Mathf.Max((cellDimensions.x * 0.5f) - (scaledX * 0.5f), 0f);
+            float offsetRangeZ = Mathf.Max((cellDimensions.z * 0.5f) - (scaledZ * 0.5f), 0f);
+
+            if (offsetRangeX > 0f)
+            {
+                spawnPos.x += rng.Range(-offsetRangeX, offsetRangeX);
+            }
+            if (offsetRangeZ > 0f)
+            {
+                spawnPos.z += rng.Range(-offsetRangeZ, offsetRangeZ);
+            }
+
+            Transform slime = Instantiate(slimeZonePrefab, spawnPos, Quaternion.identity, slimeParent).transform;
+
+            if (scaleSlimeToCell)
+            {
+                Vector3 newScale = slime.localScale;
+                newScale.x = scaledX;
+                newScale.z = scaledZ;
+                slime.localScale = newScale;
+            }
+        }
+    }
+
+    /// <summary>
     /// Add back random hallways after the Minimum Spanning Tree is derived from tetrahedralization
     /// </summary>
     /// <param name="mst">The minimum spanning tree to add edges back to</param>
@@ -636,6 +810,8 @@ public class DungeonGenerator : MonoBehaviour
     /// </summary>
     void CarveHallways(ref Dictionary<Room, List<Room>> adjacencyList)
     {
+        hallwaySections.Clear();
+
         foreach (KeyValuePair<Room, List<Room>> pair in adjacencyList)
         {
             foreach (Room room in pair.Value)
@@ -673,6 +849,8 @@ public class DungeonGenerator : MonoBehaviour
 
                 //Store the last Y value so we know when we've added a stairwell
                 Vector3Int lastIndices = startIndices;
+                List<Cell> hallwayCellsForPath = new List<Cell>();
+
                 foreach (AStarNode node in path)
                 {
                     //Get center position of unit
@@ -736,6 +914,8 @@ public class DungeonGenerator : MonoBehaviour
                         //Mark grid cell as hallway
                         grid.GetCell(node.indices).cellType = CellTypes.HALLWAY;
 
+                        hallwayCellsForPath.Add(grid.GetCell(node.indices));
+
                         //Spawn hallway
                         Transform trans = Instantiate(hallPrefab, pos, Quaternion.identity, currentPathParent).transform;
 
@@ -752,6 +932,11 @@ public class DungeonGenerator : MonoBehaviour
 
                     //Update last y with this node's y value
                     lastIndices = node.indices;
+                }
+
+                if (hallwayCellsForPath.Count > 0)
+                {
+                    hallwaySections.Add(hallwayCellsForPath);
                 }
 
                 //Log the time this step took

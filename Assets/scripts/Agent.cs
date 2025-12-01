@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using Unity.MLAgents;
@@ -7,10 +8,13 @@ using Unity.MLAgents.Sensors;
 public enum Mode { Training, Inference }
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class HybridAgent : Agent
+public class HybridAgent : Agent, ISpeedModifiable
 {
     private NavMeshAgent agent;
     private bool isReady;
+    private float baseMoveSpeed;
+    private float currentSpeedMultiplier = 1f;
+    private readonly Dictionary<Object, float> speedModifiers = new Dictionary<Object, float>();
 
     [SerializeField] private Transform target;
     [SerializeField] private DungeonRunner dungeonRunner;
@@ -22,6 +26,10 @@ public class HybridAgent : Agent
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        if (agent != null)
+        {
+            baseMoveSpeed = agent.speed;
+        }
         DungeonRunner.OnDungeonReady += () => isReady = true;
     }
 
@@ -108,5 +116,55 @@ public class HybridAgent : Agent
             agent.SetDestination(target.position);
         }
         CheckIfReachedTarget();
+    }
+
+    public void ApplySpeedMultiplier(Object source, float multiplier)
+    {
+        if (source == null)
+        {
+            return;
+        }
+
+        speedModifiers[source] = Mathf.Clamp(multiplier, 0.01f, 10f);
+        RecalculateSpeedMultiplier();
+    }
+
+    public void RemoveSpeedMultiplier(Object source)
+    {
+        if (source == null)
+        {
+            return;
+        }
+
+        if (speedModifiers.Remove(source))
+        {
+            RecalculateSpeedMultiplier();
+        }
+    }
+
+    private void RecalculateSpeedMultiplier()
+    {
+        currentSpeedMultiplier = 1f;
+        foreach (float modifier in speedModifiers.Values)
+        {
+            currentSpeedMultiplier *= modifier;
+        }
+        currentSpeedMultiplier = Mathf.Clamp(currentSpeedMultiplier, 0.01f, 10f);
+        UpdateAgentSpeed();
+    }
+
+    private void UpdateAgentSpeed()
+    {
+        if (agent == null)
+        {
+            return;
+        }
+
+        if (baseMoveSpeed <= 0f)
+        {
+            baseMoveSpeed = agent.speed;
+        }
+
+        agent.speed = baseMoveSpeed * currentSpeedMultiplier;
     }
 }
