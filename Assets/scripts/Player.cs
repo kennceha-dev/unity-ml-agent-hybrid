@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, ISpeedModifiable
 {
     CharacterController characterController;
     private bool isReady;
@@ -15,11 +16,15 @@ public class Player : MonoBehaviour
     [SerializeField] private float groundedGravity = -5f;
     [SerializeField] private float terminalVelocity = -45f;
 
+    [SerializeField] private Transform lookPivot;
+
     private float rotationX = 0f;
     private float rotationY = 0f;
     private float verticalVelocity = 0f;
     private float gravity;
     private float initialJumpVelocity;
+    private float currentSpeedMultiplier = 1f;
+    private readonly Dictionary<Object, float> speedModifiers = new Dictionary<Object, float>();
 
     void Start()
     {
@@ -28,6 +33,11 @@ public class Player : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         DungeonRunner.OnDungeonReady += () => isReady = true;
+
+        if (lookPivot == null && Camera.main != null)
+        {
+            lookPivot = Camera.main.transform;
+        }
     }
 
     void OnValidate()
@@ -45,13 +55,18 @@ public class Player : MonoBehaviour
         rotationX -= mouseY;
         rotationX = Mathf.Clamp(rotationX, -90f, 90f);
 
-        transform.rotation = Quaternion.Euler(rotationX, rotationY, 0f);
+        transform.rotation = Quaternion.Euler(0f, rotationY, 0f);
+
+        if (lookPivot != null)
+        {
+            lookPivot.localRotation = Quaternion.Euler(rotationX, 0f, 0f);
+        }
 
         float moveX = InputSystem.actions.FindAction("Move").ReadValue<Vector2>().x;
         float moveZ = InputSystem.actions.FindAction("Move").ReadValue<Vector2>().y;
 
         Vector3 move = transform.right * moveX + transform.forward * moveZ;
-        move *= moveSpeed;
+        move *= moveSpeed * currentSpeedMultiplier;
 
         if (characterController.isGrounded)
         {
@@ -85,5 +100,40 @@ public class Player : MonoBehaviour
         jumpTimeToApex = Mathf.Max(0.05f, jumpTimeToApex);
         gravity = 2f * jumpHeight / (jumpTimeToApex * jumpTimeToApex);
         initialJumpVelocity = gravity * jumpTimeToApex;
+    }
+
+    public void ApplySpeedMultiplier(Object source, float multiplier)
+    {
+        if (source == null)
+        {
+            return;
+        }
+
+        speedModifiers[source] = Mathf.Clamp(multiplier, 0.01f, 10f);
+        RecalculateSpeedMultiplier();
+
+    }
+
+    public void RemoveSpeedMultiplier(Object source)
+    {
+        if (source == null)
+        {
+            return;
+        }
+
+        if (speedModifiers.Remove(source))
+        {
+            RecalculateSpeedMultiplier();
+        }
+    }
+
+    private void RecalculateSpeedMultiplier()
+    {
+        currentSpeedMultiplier = 1f;
+        foreach (float modifier in speedModifiers.Values)
+        {
+            currentSpeedMultiplier *= modifier;
+        }
+        currentSpeedMultiplier = Mathf.Clamp(currentSpeedMultiplier, 0.01f, 10f);
     }
 }

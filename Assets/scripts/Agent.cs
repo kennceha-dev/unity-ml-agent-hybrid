@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using Unity.MLAgents;
@@ -8,16 +9,10 @@ using UnityEngine.InputSystem;
 public enum Mode { Training, Inference }
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class HybridAgent : Agent
+public class HybridAgent : Agent, ISpeedModifiable
 {
     private NavMeshAgent agent;
     private bool isReady;
-
-    private Vector3 previousTargetPos;
-    private float previousDistanceToTarget;
-
-    [SerializeField] private float moveSpeed = 3f;
-    [SerializeField] private float rotateSpeed = 120f;
 
     [SerializeField] private Transform target;
     [SerializeField] private DungeonRunner dungeonRunner;
@@ -38,9 +33,6 @@ public class HybridAgent : Agent
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        agent.updatePosition = false;
-        agent.updateRotation = false;
-
         DungeonRunner.OnDungeonReady += () => isReady = true;
     }
 
@@ -257,5 +249,55 @@ public class HybridAgent : Agent
         var continuousActions = actionsOut.ContinuousActions;
         continuousActions[0] = InputSystem.actions.FindAction("Move").ReadValue<Vector2>().x;
         continuousActions[1] = InputSystem.actions.FindAction("Move").ReadValue<Vector2>().y;
+    }
+
+    public void ApplySpeedMultiplier(Object source, float multiplier)
+    {
+        if (source == null)
+        {
+            return;
+        }
+
+        speedModifiers[source] = Mathf.Clamp(multiplier, 0.01f, 10f);
+        RecalculateSpeedMultiplier();
+    }
+
+    public void RemoveSpeedMultiplier(Object source)
+    {
+        if (source == null)
+        {
+            return;
+        }
+
+        if (speedModifiers.Remove(source))
+        {
+            RecalculateSpeedMultiplier();
+        }
+    }
+
+    private void RecalculateSpeedMultiplier()
+    {
+        currentSpeedMultiplier = 1f;
+        foreach (float modifier in speedModifiers.Values)
+        {
+            currentSpeedMultiplier *= modifier;
+        }
+        currentSpeedMultiplier = Mathf.Clamp(currentSpeedMultiplier, 0.01f, 10f);
+        UpdateAgentSpeed();
+    }
+
+    private void UpdateAgentSpeed()
+    {
+        if (agent == null)
+        {
+            return;
+        }
+
+        if (baseMoveSpeed <= 0f)
+        {
+            baseMoveSpeed = agent.speed;
+        }
+
+        agent.speed = baseMoveSpeed * currentSpeedMultiplier;
     }
 }
