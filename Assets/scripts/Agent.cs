@@ -20,9 +20,14 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private Vector3 previousTargetPos;
     private float previousDistanceToTarget;
+    private float previousDistanceToSteeringTarget;
 
-    [SerializeField] private float moveSpeed = 3f;
+    [SerializeField] private float moveSpeed = 10f;
+    [SerializeField] private float jumpHeight = 1.2f;
+    [SerializeField] private float jumpTimeToApex = 0.28f;
+    [SerializeField] private float fallGravityMultiplier = 2.5f;
     [SerializeField] private float groundedGravity = -5f;
+    [SerializeField] private float terminalVelocity = -45f;
 
     [SerializeField] private Transform target;
     [SerializeField] private DungeonRunner dungeonRunner;
@@ -37,7 +42,10 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private float cachedHorizontalInput; // left/right
     private float cachedVerticalInput;   // forward/backward
+    private bool cachedJumpInput = false;
     private float verticalVelocity = 0f;
+    private float gravity;
+    private float initialJumpVelocity;
     private bool isOnSticky = false;
     private bool isOnWall = false;
 
@@ -52,14 +60,29 @@ public class HybridAgent : Agent, ISpeedModifiable
             agent.updateRotation = false;
         }
 
+        RecalculateJumpValues();
         DungeonRunner.OnDungeonReady += () => isReady = true;
+    }
+
+    void OnValidate()
+    {
+        RecalculateJumpValues();
+    }
+
+    private void RecalculateJumpValues()
+    {
+        jumpHeight = Mathf.Max(0.1f, jumpHeight);
+        jumpTimeToApex = Mathf.Max(0.05f, jumpTimeToApex);
+        gravity = 2f * jumpHeight / (jumpTimeToApex * jumpTimeToApex);
+        initialJumpVelocity = gravity * jumpTimeToApex;
     }
 
     public override void OnEpisodeBegin()
     {
         Debug.Log("New Episode Started");
         previousDistanceToTarget = Vector3.Distance(transform.position, target.position);
-        previousTargetPos = target.position;
+        previousTargetPos = transform.position;
+        previousDistanceToSteeringTarget = 0f;
         isOnSticky = false;
         isOnWall = false;
     }
@@ -101,33 +124,55 @@ public class HybridAgent : Agent, ISpeedModifiable
         sensor.AddObservation(target.position); // 3
         // distance to target
         sensor.AddObservation(Vector3.Distance(transform.position, target.position)); // 1
-        // navmesh next position
-        sensor.AddObservation(agent.nextPosition); // 3
+
+        // NavMesh steering target (next waypoint on the path)
+        Vector3 steeringTarget = agent != null && agent.hasPath ? agent.steeringTarget : target.position;
+        sensor.AddObservation(steeringTarget); // 3
+
+        // Direction to steering target (normalized) - this tells the agent WHERE to go
+        Vector3 dirToSteeringTarget = (steeringTarget - transform.position).normalized;
+        sensor.AddObservation(dirToSteeringTarget); // 3
+
+        // Distance to steering target
+        sensor.AddObservation(Vector3.Distance(transform.position, steeringTarget)); // 1
+
+        // Is grounded (so agent knows when it can jump)
+        sensor.AddObservation(characterController.isGrounded); // 1
 
         CheckForStickyFloor(sensor); // 4
 
-        // 14 total observations
+        // 19 total observations
     }
-
-    // public override void OnActionReceived(ActionBuffers actions)
-    // {
-    // var i = -1;
-
-    // float sideMovement = actions.ContinuousActions[++i];
-    // float forwardMovement = actions.ContinuousActions[++i];
-    // Vector3 move = transform.right * sideMovement + transform.forward * forwardMovement;
-
-    // somehow apply movement ke agentnya
-    // ganti yang dari agent.setdestination jadi smth else yg bs ad physics
-    // biasanya simpen dl di variable terus di FixedUpdate baru dihandle 
-    // }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
         cachedHorizontalInput = actions.ContinuousActions[0]; // left/right (-1..1)
         cachedVerticalInput = actions.ContinuousActions[1];   // forward/backward (-1..1)
 
-        // check penalty or reward towards target
+        // Discrete action for jump: 0 = no jump, 1 = jump
+        int jumpAction = actions.DiscreteActions[0];
+        cachedJumpInput = jumpAction == 1;
+
+        // Reward for following the NavMesh path (steering target)
+        Vector3 steeringTarget = agent != null && agent.hasPath ? agent.steeringTarget : target.position;
+        float distToSteering = Vector3.Distance(transform.position, steeringTarget);
+
+        if (previousDistanceToSteeringTarget > 0f)
+        {
+            float steeringDelta = previousDistanceToSteeringTarget - distToSteering;
+            AddReward(steeringDelta * 0.05f); // Reward for moving closer to the next waypoint
+        }
+        previousDistanceToSteeringTarget = distToSteering;
+
+        // Reward for movement direction alignment with NavMesh path
+        Vector3 moveDirection = new Vector3(cachedHorizontalInput, 0f, cachedVerticalInput).normalized;
+        Vector3 worldMoveDir = transform.TransformDirection(moveDirection);
+        Vector3 desiredDir = (steeringTarget - transform.position).normalized;
+
+        float alignment = Vector3.Dot(worldMoveDir, desiredDir);
+        AddReward(alignment * 0.01f); // Small reward for moving in the right direction
+
+        // check penalty or reward towards final target
         float dist = Vector3.Distance(transform.position, target.position);
         float delta = previousDistanceToTarget - dist;
 
@@ -213,23 +258,45 @@ public class HybridAgent : Agent, ISpeedModifiable
         Vector3 move = transform.right * cachedHorizontalInput + transform.forward * cachedVerticalInput;
         move *= moveSpeed * currentSpeedMultiplier;
 
-        // Apply gravity
+        // Apply gravity and handle jumping (matching Player physics)
         if (characterController.isGrounded)
         {
             verticalVelocity = groundedGravity;
+
+            // Jump if requested while grounded
+            if (cachedJumpInput)
+            {
+                verticalVelocity = initialJumpVelocity;
+                cachedJumpInput = false;
+            }
         }
         else
         {
-            verticalVelocity += Physics.gravity.y * Time.fixedDeltaTime;
+            float appliedGravity = gravity;
+
+            // Fall faster when descending
+            if (verticalVelocity < 0f)
+            {
+                appliedGravity *= fallGravityMultiplier;
+            }
+
+            verticalVelocity -= appliedGravity * Time.fixedDeltaTime;
+            verticalVelocity = Mathf.Max(verticalVelocity, terminalVelocity);
         }
         move.y = verticalVelocity;
 
         characterController.Move(move * Time.fixedDeltaTime);
 
-        // Keep navmesh synced (optional)
+        // Sync NavMesh agent position and update path to moving target (for guidance only)
         if (agent != null)
         {
             agent.nextPosition = transform.position;
+
+            // Update path to moving target so steeringTarget stays current
+            if (agent.isOnNavMesh && target != null)
+            {
+                agent.SetDestination(target.position);
+            }
         }
 
         // if (agent != null && agent.isOnNavMesh && target != null)
@@ -253,7 +320,8 @@ public class HybridAgent : Agent, ISpeedModifiable
         Vector3 toTarget = (target.position - transform.position).normalized;
 
         // Reward actual movement toward the target
-        float deltaPos = Vector3.Dot((transform.position - previousTargetPos), toTarget);
+        Vector3 movement = transform.position - previousTargetPos;
+        float deltaPos = Vector3.Dot(movement, toTarget);
 
         if (deltaPos > 0)
             AddReward(0.001f);
@@ -266,9 +334,15 @@ public class HybridAgent : Agent, ISpeedModifiable
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var continuousActions = actionsOut.ContinuousActions;
+        var discreteActions = actionsOut.DiscreteActions;
+
         Vector2 moveInput = InputSystem.actions.FindAction("Move").ReadValue<Vector2>();
         continuousActions[0] = moveInput.x; // left/right
         continuousActions[1] = moveInput.y; // forward/backward
+
+        // Jump input (space bar or gamepad south button)
+        bool jumpPressed = InputSystem.actions.FindAction("Jump").IsPressed();
+        discreteActions[0] = jumpPressed ? 1 : 0;
     }
 
     public void ApplySpeedMultiplier(Object source, float multiplier)
