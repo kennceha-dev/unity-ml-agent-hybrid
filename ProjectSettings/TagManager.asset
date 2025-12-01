@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - Sticky
+  - Wall
   layers:
   - Default
   - TransparentFX
@@ -12,7 +13,7 @@ TagManager:
   - Floor
   - Water
   - UI
-  - 
+  - Wall
   - 
   - 
   - 
