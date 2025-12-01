@@ -8,9 +8,10 @@ using UnityEngine.InputSystem;
 
 public enum Mode { Training, Inference }
 
-[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(CharacterController))]
 public class HybridAgent : Agent, ISpeedModifiable
 {
+    private CharacterController characterController;
     private NavMeshAgent agent;
     private bool isReady;
     private float baseMoveSpeed;
@@ -21,7 +22,7 @@ public class HybridAgent : Agent, ISpeedModifiable
     private float previousDistanceToTarget;
 
     [SerializeField] private float moveSpeed = 3f;
-    [SerializeField] private float rotateSpeed = 120f;
+    [SerializeField] private float groundedGravity = -5f;
 
     [SerializeField] private Transform target;
     [SerializeField] private DungeonRunner dungeonRunner;
@@ -34,20 +35,22 @@ public class HybridAgent : Agent, ISpeedModifiable
     [SerializeField] private string playerTag = "Player";
     [SerializeField] private float slipperyFloorRayLength = 5f;
 
-    private float cachedMoveInput;
-    private float cachedTurnInput;
+    private float cachedHorizontalInput; // left/right
+    private float cachedVerticalInput;   // forward/backward
+    private float verticalVelocity = 0f;
     private bool isOnSticky = false;
     private bool isOnWall = false;
 
     void Start()
     {
+        characterController = GetComponent<CharacterController>();
         agent = GetComponent<NavMeshAgent>();
         if (agent != null)
         {
             baseMoveSpeed = agent.speed;
+            agent.updatePosition = false;
+            agent.updateRotation = false;
         }
-        agent.updatePosition = false;
-        agent.updateRotation = false;
 
         DungeonRunner.OnDungeonReady += () => isReady = true;
     }
@@ -121,15 +124,8 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        cachedMoveInput = actions.ContinuousActions[0]; // -1..1
-        cachedTurnInput = actions.ContinuousActions[1]; // -1..1
-
-        // Rotate
-        // transform.Rotate(Vector3.up, turnInput * rotateSpeed * Time.deltaTime);
-
-        // // Move
-        // Vector3 move = transform.forward * moveInput * moveSpeed * Time.deltaTime;
-        // transform.position += move;
+        cachedHorizontalInput = actions.ContinuousActions[0]; // left/right (-1..1)
+        cachedVerticalInput = actions.ContinuousActions[1];   // forward/backward (-1..1)
 
         // check penalty or reward towards target
         float dist = Vector3.Distance(transform.position, target.position);
@@ -213,15 +209,28 @@ public class HybridAgent : Agent, ISpeedModifiable
             return;
         }
 
-        // Rotate
-        transform.Rotate(Vector3.up, cachedTurnInput * rotateSpeed * Time.fixedDeltaTime);
+        // Move using CharacterController (left/right + forward/backward)
+        Vector3 move = transform.right * cachedHorizontalInput + transform.forward * cachedVerticalInput;
+        move *= moveSpeed * currentSpeedMultiplier;
 
-        // Move
-        Vector3 move = transform.forward * cachedMoveInput * moveSpeed * Time.fixedDeltaTime;
-        transform.position += move;
+        // Apply gravity
+        if (characterController.isGrounded)
+        {
+            verticalVelocity = groundedGravity;
+        }
+        else
+        {
+            verticalVelocity += Physics.gravity.y * Time.fixedDeltaTime;
+        }
+        move.y = verticalVelocity;
+
+        characterController.Move(move * Time.fixedDeltaTime);
 
         // Keep navmesh synced (optional)
-        agent.nextPosition = transform.position;
+        if (agent != null)
+        {
+            agent.nextPosition = transform.position;
+        }
 
         // if (agent != null && agent.isOnNavMesh && target != null)
         // {
@@ -242,12 +251,6 @@ public class HybridAgent : Agent, ISpeedModifiable
     private void ApplyPredictionReward()
     {
         Vector3 toTarget = (target.position - transform.position).normalized;
-        Vector3 forward = transform.forward;
-
-        float alignment = Vector3.Dot(forward, toTarget);
-
-        // Reward facing the target
-        AddReward(alignment * 0.002f);
 
         // Reward actual movement toward the target
         float deltaPos = Vector3.Dot((transform.position - previousTargetPos), toTarget);
@@ -263,8 +266,9 @@ public class HybridAgent : Agent, ISpeedModifiable
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var continuousActions = actionsOut.ContinuousActions;
-        continuousActions[0] = InputSystem.actions.FindAction("Move").ReadValue<Vector2>().x;
-        continuousActions[1] = InputSystem.actions.FindAction("Move").ReadValue<Vector2>().y;
+        Vector2 moveInput = InputSystem.actions.FindAction("Move").ReadValue<Vector2>();
+        continuousActions[0] = moveInput.x; // left/right
+        continuousActions[1] = moveInput.y; // forward/backward
     }
 
     public void ApplySpeedMultiplier(Object source, float multiplier)

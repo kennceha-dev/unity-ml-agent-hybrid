@@ -73,32 +73,64 @@ public class DungeonRunner : MonoBehaviour
         SpawnAgentAndTarget();
     }
 
+    // void SpawnAgentAndTarget()
+    // {
+    //     var rooms = generator.GetRooms();
+    //     if (rooms.Count < 2)
+    //     {
+    //         Debug.Log("Not enough rooms to spawn agent and target separately.");
+    //         return;
+    //     }
+
+    //     Room agentRoom = generator.GetRandomRoom();
+    //     Room targetRoom = generator.GetRandomRoom();
+
+    //     while (targetRoom == agentRoom && rooms.Count > 1)
+    //     {
+    //         targetRoom = generator.GetRandomRoom();
+    //     }
+
+    //     if (agent != null)
+    //     {
+    //         agent.position = generator.GetRandomPositionInRoom(agentRoom);
+    //     }
+
+    //     if (target != null)
+    //     {
+    //         target.position = generator.GetRandomPositionInRoom(targetRoom);
+    //     }
+
+    //     OnDungeonReady?.Invoke();
+    // }
+
     void SpawnAgentAndTarget()
     {
         var rooms = generator.GetRooms();
-        if (rooms.Count < 2)
-        {
-            Debug.Log("Not enough rooms to spawn agent and target separately.");
-            return;
-        }
+        if (rooms.Count < 2) return;
 
         Room agentRoom = generator.GetRandomRoom();
         Room targetRoom = generator.GetRandomRoom();
 
-        while (targetRoom == agentRoom && rooms.Count > 1)
-        {
+        while (targetRoom == agentRoom)
             targetRoom = generator.GetRandomRoom();
-        }
 
         if (agent != null)
         {
-            agent.position = generator.GetRandomPositionInRoom(agentRoom);
+            CharacterController cc = agent.GetComponent<CharacterController>();
+            if (cc != null)
+            {
+                cc.enabled = false; // IMPORTANT
+                agent.position = generator.GetRandomPositionInRoom(agentRoom);
+                cc.enabled = true;
+            }
+            else
+            {
+                agent.position = generator.GetRandomPositionInRoom(agentRoom);
+            }
         }
 
         if (target != null)
-        {
             target.position = generator.GetRandomPositionInRoom(targetRoom);
-        }
 
         OnDungeonReady?.Invoke();
     }
