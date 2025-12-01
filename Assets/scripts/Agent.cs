@@ -32,6 +32,8 @@ public class HybridAgent : Agent
 
     private float cachedMoveInput;
     private float cachedTurnInput;
+    private bool isOnSticky = false;
+    private bool isOnWall = false;
 
     void Start()
     {
@@ -47,6 +49,8 @@ public class HybridAgent : Agent
         Debug.Log("New Episode Started");
         previousDistanceToTarget = Vector3.Distance(transform.position, target.position);
         previousTargetPos = target.position;
+        isOnSticky = false;
+        isOnWall = false;
     }
 
     private void CheckForStickyFloor(VectorSensor sensor)
@@ -133,11 +137,19 @@ public class HybridAgent : Agent
     {
         if (collision.collider.CompareTag(wallTag))
         {
-            AddReward(-0.2f);
+            if (!isOnWall)
+            {
+                AddReward(-0.2f);
+                isOnWall = true;
+            }
         }
         else if (collision.collider.CompareTag(stickyTag))
         {
-            AddReward(-0.3f);
+            if (!isOnSticky)
+            {
+                AddReward(-0.3f);
+                isOnSticky = true;
+            }
         }
         else if (collision.collider.CompareTag(playerTag))
         {
@@ -146,6 +158,18 @@ public class HybridAgent : Agent
             EndEpisode();
             isReady = false;
             dungeonRunner.Reset();
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.collider.CompareTag(wallTag))
+        {
+            isOnWall = false;
+        }
+        else if (collision.collider.CompareTag(stickyTag))
+        {
+            isOnSticky = false;
         }
     }
 
