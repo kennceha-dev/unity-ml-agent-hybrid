@@ -200,14 +200,6 @@ public class HybridAgent : Agent, ISpeedModifiable
                 isOnSticky = true;
             }
         }
-        else if (collision.collider.CompareTag(playerTag))
-        {
-            Debug.Log("Collided with Player");
-            SetReward(1f);
-            EndEpisode();
-            isReady = false;
-            dungeonRunner.Reset();
-        }
     }
 
     private void OnCollisionExit(Collision collision)
@@ -234,13 +226,17 @@ public class HybridAgent : Agent, ISpeedModifiable
         }
     }
 
-    // private void CheckIfReachedTarget()
-    // {
-    //     if (Vector3.Distance(transform.position, target.position) <= 1f)
-    //     {
-
-    //     }
-    // }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag(playerTag))
+        {
+            Debug.Log("Caught the Player!");
+            SetReward(1f);
+            EndEpisode();
+            isReady = false;
+            dungeonRunner.Reset();
+        }
+    }
 
     private void FixedUpdate()
     {
