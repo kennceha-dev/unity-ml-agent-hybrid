@@ -712,6 +712,7 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   moveSpeed: 3
+  rotationSpeed: 180
   jumpHeight: 1.2
   jumpTimeToApex: 0.28
   fallGravityMultiplier: 2.5
@@ -723,6 +724,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   mode: 0
+  trainingPhase: 0
+  timePenaltyPerStep: 0.001
   stickyTag: Sticky
   wallTag: Wall
   exitTag: Exit
@@ -869,7 +872,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 19
+    VectorObservationSize: 22
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2

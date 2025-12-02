@@ -8,6 +8,14 @@ using UnityEngine.InputSystem;
 
 public enum Mode { Training, Inference }
 
+public enum TrainingPhase
+{
+    BasePathfinding,  // Phase 1: No slimes, no wall penalties - just learn to follow path
+    AvoidWalls,       // Phase 2: Add wall collision penalties
+    AvoidSlime,       // Phase 3: Add slime penalties and jumping
+    MovingTarget      // Phase 4: Target moves (placeholder for later)
+}
+
 [RequireComponent(typeof(CharacterController))]
 public class HybridAgent : Agent, ISpeedModifiable
 {
@@ -23,6 +31,7 @@ public class HybridAgent : Agent, ISpeedModifiable
     private float previousDistanceToSteeringTarget;
 
     [SerializeField] private float moveSpeed = 10f;
+    [SerializeField] private float rotationSpeed = 180f; // degrees per second
     [SerializeField] private float jumpHeight = 1.2f;
     [SerializeField] private float jumpTimeToApex = 0.28f;
     [SerializeField] private float fallGravityMultiplier = 2.5f;
@@ -34,20 +43,26 @@ public class HybridAgent : Agent, ISpeedModifiable
     [SerializeField] private LayerMask floorLayer;
     [SerializeField] private Mode mode = Mode.Training;
 
+    [Header("Training Settings")]
+    [SerializeField] private TrainingPhase trainingPhase = TrainingPhase.BasePathfinding;
+    [SerializeField] private float timePenaltyPerStep = 0.001f; // Negative reward over time to encourage progress
+
     [SerializeField] private string stickyTag = "Sticky";
     [SerializeField] private string wallTag = "Wall";
     [SerializeField] private string exitTag = "Exit";
     [SerializeField] private string playerTag = "Player";
     [SerializeField] private float slipperyFloorRayLength = 5f;
 
-    private float cachedHorizontalInput; // left/right
-    private float cachedVerticalInput;   // forward/backward
+    private float cachedRotationInput;  // rotate left/right (-1..1)
+    private float cachedForwardInput;    // forward/backward (-1..1)
     private bool cachedJumpInput = false;
     private float verticalVelocity = 0f;
     private float gravity;
     private float initialJumpVelocity;
     private bool isOnSticky = false;
     private bool isOnWall = false;
+
+    private int episode = 0;
 
     void Start()
     {
@@ -79,6 +94,7 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     public override void OnEpisodeBegin()
     {
+        episode++;
         Debug.Log("New Episode Started");
         previousDistanceToTarget = Vector3.Distance(transform.position, target.position);
         previousTargetPos = transform.position;
@@ -97,6 +113,13 @@ public class HybridAgent : Agent, ISpeedModifiable
         };
         foreach (var cardinalDir in cardinalDirections)
         {
+            // In phases before AvoidSlime, don't report slime (treat all floor as normal)
+            if (trainingPhase < TrainingPhase.AvoidSlime)
+            {
+                sensor.AddObservation(slipperyFloorRayLength);
+                continue;
+            }
+
             Vector3 floorOrigin = transform.position
                                 + cardinalDir
                                 + Vector3.up;
@@ -139,19 +162,23 @@ public class HybridAgent : Agent, ISpeedModifiable
         // Is grounded (so agent knows when it can jump)
         sensor.AddObservation(characterController.isGrounded); // 1
 
+        // Current forward direction (so agent knows its orientation)
+        sensor.AddObservation(transform.forward); // 3
+
         CheckForStickyFloor(sensor); // 4
 
-        // 19 total observations
+        // 22 total observations
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        cachedHorizontalInput = actions.ContinuousActions[0]; // left/right (-1..1)
-        cachedVerticalInput = actions.ContinuousActions[1];   // forward/backward (-1..1)
+        cachedRotationInput = actions.ContinuousActions[0];  // rotate left/right (-1..1)
+        cachedForwardInput = actions.ContinuousActions[1];   // forward/backward (-1..1)
 
         // Discrete action for jump: 0 = no jump, 1 = jump
+        // Only allow jumping in AvoidSlime phase and above
         int jumpAction = actions.DiscreteActions[0];
-        cachedJumpInput = jumpAction == 1;
+        cachedJumpInput = (jumpAction == 1) && (trainingPhase >= TrainingPhase.AvoidSlime);
 
         // Reward for following the NavMesh path (steering target)
         Vector3 steeringTarget = agent != null && agent.hasPath ? agent.steeringTarget : target.position;
@@ -160,17 +187,14 @@ public class HybridAgent : Agent, ISpeedModifiable
         if (previousDistanceToSteeringTarget > 0f)
         {
             float steeringDelta = previousDistanceToSteeringTarget - distToSteering;
-            AddReward(steeringDelta * 0.05f); // Reward for moving closer to the next waypoint
+            AddReward(steeringDelta * (0.05f / Mathf.Max(episode / 10, 1))); // Reward for moving closer to the next waypoint
         }
         previousDistanceToSteeringTarget = distToSteering;
 
-        // Reward for movement direction alignment with NavMesh path
-        Vector3 moveDirection = new Vector3(cachedHorizontalInput, 0f, cachedVerticalInput).normalized;
-        Vector3 worldMoveDir = transform.TransformDirection(moveDirection);
+        // Reward for facing the right direction (alignment between forward and desired direction)
         Vector3 desiredDir = (steeringTarget - transform.position).normalized;
-
-        float alignment = Vector3.Dot(worldMoveDir, desiredDir);
-        AddReward(alignment * 0.01f); // Small reward for moving in the right direction
+        float facingAlignment = Vector3.Dot(transform.forward, desiredDir);
+        AddReward(facingAlignment * 0.01f); // Small reward for facing the right direction
 
         // check penalty or reward towards final target
         float dist = Vector3.Distance(transform.position, target.position);
@@ -179,45 +203,56 @@ public class HybridAgent : Agent, ISpeedModifiable
         AddReward(delta * 0.01f);
         previousDistanceToTarget = dist;
 
+        // Time penalty to encourage faster completion
+        AddReward(-timePenaltyPerStep);
+
         ApplyPredictionReward();
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.collider.CompareTag(wallTag))
-        {
-            if (!isOnWall)
-            {
-                AddReward(-0.2f);
-                isOnWall = true;
-            }
-        }
-        else if (collision.collider.CompareTag(stickyTag))
-        {
-            if (!isOnSticky)
-            {
-                AddReward(-0.3f);
-                isOnSticky = true;
-            }
-        }
-    }
+    // private void OnCollisionEnter(Collision collision)
+    // {
+    //     if (collision.collider.CompareTag(wallTag))
+    //     {
+    //         if (!isOnWall)
+    //         {
+    //             AddReward(-0.2f);
+    //             isOnWall = true;
+    //         }
+    //     }
+    //     else if (collision.collider.CompareTag(stickyTag))
+    //     {
+    //         if (!isOnSticky)
+    //         {
+    //             AddReward(-0.3f);
+    //             isOnSticky = true;
+    //         }
+    //     }
+    // }
 
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.collider.CompareTag(wallTag))
-        {
-            isOnWall = false;
-        }
-        else if (collision.collider.CompareTag(stickyTag))
-        {
-            isOnSticky = false;
-        }
-    }
+    // private void OnCollisionExit(Collision collision)
+    // {
+    //     if (collision.collider.CompareTag(wallTag))
+    //     {
+    //         isOnWall = false;
+    //     }
+    //     else if (collision.collider.CompareTag(stickyTag))
+    //     {
+    //         isOnSticky = false;
+    //     }
+    // }
 
     // exit without kelarin (for now)
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag(exitTag))
+        if (other.CompareTag(wallTag))
+        {
+            isOnWall = false;
+        }
+        else if (other.CompareTag(stickyTag))
+        {
+            isOnSticky = false;
+        }
+        else if (other.CompareTag(exitTag))
         {
             // AddReward(-0.4f);  
             AddReward(-0.1f);
@@ -228,7 +263,31 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag(playerTag))
+        if (other.CompareTag(wallTag))
+        {
+            if (!isOnWall)
+            {
+                // Only penalize wall hits in Phase 2+ (AvoidWalls and above)
+                if (trainingPhase >= TrainingPhase.AvoidWalls)
+                {
+                    AddReward(-0.2f);
+                }
+                isOnWall = true;
+            }
+        }
+        else if (other.CompareTag(stickyTag))
+        {
+            if (!isOnSticky)
+            {
+                // Only penalize slime in Phase 3+ (AvoidSlime and above)
+                if (trainingPhase >= TrainingPhase.AvoidSlime)
+                {
+                    AddReward(-0.3f);
+                }
+                isOnSticky = true;
+            }
+        }
+        else if (other.CompareTag(playerTag))
         {
             Debug.Log("Caught the Player!");
             SetReward(1f);
@@ -250,8 +309,12 @@ public class HybridAgent : Agent, ISpeedModifiable
             return;
         }
 
-        // Move using CharacterController (left/right + forward/backward)
-        Vector3 move = transform.right * cachedHorizontalInput + transform.forward * cachedVerticalInput;
+        // Rotate the agent based on rotation input
+        float rotationAmount = cachedRotationInput * rotationSpeed * Time.fixedDeltaTime;
+        transform.Rotate(0f, rotationAmount, 0f);
+
+        // Move forward/backward based on forward input
+        Vector3 move = transform.forward * cachedForwardInput;
         move *= moveSpeed * currentSpeedMultiplier;
 
         // Apply gravity and handle jumping (matching Player physics)
@@ -284,12 +347,13 @@ public class HybridAgent : Agent, ISpeedModifiable
         characterController.Move(move * Time.fixedDeltaTime);
 
         // Sync NavMesh agent position and update path to moving target (for guidance only)
-        if (agent != null)
+        if (agent != null && agent.isOnNavMesh)
         {
-            agent.nextPosition = transform.position;
+            // Warp the NavMeshAgent to match CharacterController position
+            agent.Warp(transform.position);
 
-            // Update path to moving target so steeringTarget stays current
-            if (agent.isOnNavMesh && target != null)
+            // Recalculate path to target every frame so steeringTarget stays current
+            if (target != null)
             {
                 agent.SetDestination(target.position);
             }
@@ -333,7 +397,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         var discreteActions = actionsOut.DiscreteActions;
 
         Vector2 moveInput = InputSystem.actions.FindAction("Move").ReadValue<Vector2>();
-        continuousActions[0] = moveInput.x; // left/right
+        continuousActions[0] = moveInput.x; // rotate left/right
         continuousActions[1] = moveInput.y; // forward/backward
 
         // Jump input (space bar or gamepad south button)
@@ -347,6 +411,13 @@ public class HybridAgent : Agent, ISpeedModifiable
         {
             return;
         }
+
+        // // Only apply slow effects in AvoidSlime phase and above
+        // if (trainingPhase < TrainingPhase.AvoidSlime && multiplier < 1f)
+        // {
+        //     currentSpeedMultiplier = 1f;
+        //     return;
+        // }
 
         speedModifiers[source] = Mathf.Clamp(multiplier, 0.01f, 10f);
         RecalculateSpeedMultiplier();
