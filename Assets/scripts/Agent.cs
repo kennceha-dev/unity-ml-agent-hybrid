@@ -43,6 +43,12 @@ public class HybridAgent : Agent, ISpeedModifiable
     [SerializeField] private LayerMask floorLayer;
     [SerializeField] private Mode mode = Mode.Training;
 
+    [Header("Dungeon Seed")]
+    [SerializeField]
+    private int initialSeed = 12345;
+    // Current seed used for the next dungeon generation. This will be incremented on episode end.
+    private int currentSeed;
+
     [Header("Training Settings")]
     [SerializeField] private TrainingPhase trainingPhase = TrainingPhase.BasePathfinding;
     [SerializeField] private float timePenaltyPerStep = 0.001f; // Negative reward over time to encourage progress
@@ -77,6 +83,9 @@ public class HybridAgent : Agent, ISpeedModifiable
 
         RecalculateJumpValues();
         DungeonRunner.OnDungeonReady += () => isReady = true;
+
+        // Initialize seed counter
+        currentSeed = initialSeed;
     }
 
     void OnValidate()
@@ -256,8 +265,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         {
             // AddReward(-0.4f);  
             AddReward(-0.1f);
-            EndEpisode();
-            dungeonRunner.Reset();
+            HandleEpisodeEnd();
         }
     }
 
@@ -291,8 +299,27 @@ public class HybridAgent : Agent, ISpeedModifiable
         {
             Debug.Log("Caught the Player!");
             SetReward(1f);
-            EndEpisode();
-            isReady = false;
+            // Mark not ready and end episode with incremented seed and reset
+            HandleEpisodeEnd(true);
+        }
+    }
+
+    /// <summary>
+    /// Centralized episode end handler.
+    /// Increments the seed, applies it to the DungeonRunner, and resets the dungeon.
+    /// If setNotReady is true, sets isReady = false before resetting (used when the agent is caught).
+    /// </summary>
+    /// <param name="setNotReady">If true, marks the agent as not ready before reset.</param>
+    private void HandleEpisodeEnd(bool setNotReady = false)
+    {
+        EndEpisode();
+        if (setNotReady) isReady = false;
+
+        // Increment seed for next episode and apply it to the dungeon runner
+        currentSeed += 1;
+        if (dungeonRunner != null)
+        {
+            dungeonRunner.SetSeed(currentSeed);
             dungeonRunner.Reset();
         }
     }
@@ -304,8 +331,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         if (agent != null && !agent.isOnNavMesh)
         {
             AddReward(-0.5f);
-            EndEpisode();
-            dungeonRunner.Reset();
+            HandleEpisodeEnd();
             return;
         }
 

@@ -135,5 +135,14 @@ public class DungeonRunner : MonoBehaviour
         OnDungeonReady?.Invoke();
     }
 
+    /// <summary>
+    /// Set the seed on the internal DungeonGenerator (for deterministic generation).
+    /// </summary>
+    public void SetSeed(int seed)
+    {
+        if (generator != null)
+            generator.SetSeed(seed);
+    }
+
     public void Reset() => StartCoroutine(GenerateAndSpawn());
 }

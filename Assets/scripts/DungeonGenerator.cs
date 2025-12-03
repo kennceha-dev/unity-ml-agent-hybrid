@@ -161,6 +161,15 @@ public class DungeonGenerator : MonoBehaviour
 
     public List<Room> GetRooms() { return rooms; }
 
+    /// <summary>
+    /// Set the deterministic seed used by the generator.
+    /// Calling this will change the seed used the next time Generate() is called.
+    /// </summary>
+    /// <param name="seed">New seed value</param>
+    public void SetSeed(int seed)
+    {
+        dungeonSeed = seed;
+    }
     public Room GetRandomRoom()
     {
         if (rooms.Count == 0) return null;
