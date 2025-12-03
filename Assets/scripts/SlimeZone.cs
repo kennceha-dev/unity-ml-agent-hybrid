@@ -30,7 +30,6 @@ public class SlimeZone : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("ontriggerenter");
         ISpeedModifiable target = other.GetComponentInParent<ISpeedModifiable>();
         if (target == null || slowedTargets.Contains(target))
         {
@@ -43,7 +42,6 @@ public class SlimeZone : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        Debug.Log("ontriggerexit");
         ISpeedModifiable target = other.GetComponentInParent<ISpeedModifiable>();
         if (target == null)
         {

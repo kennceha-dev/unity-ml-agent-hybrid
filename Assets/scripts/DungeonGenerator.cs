@@ -55,6 +55,12 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] bool useDeterministicSeed = true;
     [SerializeField] int dungeonSeed = 12345;   // you can change this per run in the Inspector
 
+    [Header("Training")]
+    [Tooltip("When enabled the generator will create a minimal training map (2 rooms).")]
+    [SerializeField] bool trainingMode = false;
+    [Tooltip("Reference to the HybridAgent to get the current training phase.")]
+    [SerializeField] HybridAgent hybridAgent;
+
     // Non-serialized runtime RNG
     PcgRandom rng;
 
@@ -379,11 +385,48 @@ public class DungeonGenerator : MonoBehaviour
         //Clear old dungeon info
         Clear();
 
+        // If in training mode, temporarily force a very small map (2 rooms)
+        int __originalNumRandomRooms = numRandomRooms;
+        if (trainingMode)
+        {
+            numRandomRooms = 2;
+        }
+
         //Randomly place rooms
         GenerateRandomRooms();
 
         //Delaunay Tetrahedralization to create streamlined map
         CreateConnectedMap(ref totalEdges, ref rooms);
+
+        // If only two rooms exist (e.g. training mode), Delaunay/Tetrahedralization
+        // may produce no edges. Create a direct edge between the two rooms so
+        // the MST and hallway carving steps still have a connection to work with.
+        if (rooms != null && rooms.Count == 2 && (totalEdges == null || totalEdges.Count == 0))
+        {
+            Vector3 a = rooms[0].center;
+            Vector3 b = rooms[1].center;
+
+            // Ensure dictionary entries exist for both endpoints
+            if (totalEdges == null) totalEdges = new Dictionary<Vector3, List<Edge>>();
+            if (!totalEdges.TryGetValue(a, out List<Edge> listA))
+            {
+                listA = new List<Edge>();
+                totalEdges[a] = listA;
+            }
+            if (!totalEdges.TryGetValue(b, out List<Edge> listB))
+            {
+                listB = new List<Edge>();
+                totalEdges[b] = listB;
+            }
+
+            // Add the edge in both directions for the adjacency representation
+            Edge e = new Edge(a, b);
+            Edge eRev = new Edge(b, a);
+            if (!listA.Contains(e)) listA.Add(e);
+            if (!listB.Contains(eRev)) listB.Add(eRev);
+
+            Debug.Log("Created fallback edge between two training rooms.");
+        }
 
         //Check that the dictionary of all edges in the delaunay tetrahedralization actually has edges
         Vector3 start = Vector3.zero;
@@ -420,6 +463,12 @@ public class DungeonGenerator : MonoBehaviour
 
         //Use event to call external functions after dungeon is generated
         onDungeonGenerate.Invoke();
+
+        // Restore original room count if we temporarily changed it for training
+        if (trainingMode)
+        {
+            numRandomRooms = __originalNumRandomRooms;
+        }
 
         //Display total time for algorithm
         if (displayAlgorithmTime)
@@ -623,6 +672,12 @@ public class DungeonGenerator : MonoBehaviour
     /// </summary>
     private void PopulateSlimeZones()
     {
+        // Skip slime spawning if training phase is before AvoidSlime
+        if (hybridAgent != null && hybridAgent.CurrentTrainingPhase < TrainingPhase.AvoidSlime)
+        {
+            return;
+        }
+
         if (slimeZonePrefab == null)
         {
             return;

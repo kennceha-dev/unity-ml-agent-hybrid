@@ -168,9 +168,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1043899800}
     - target: {fileID: 1202467655473539675, guid: 7c11381b753a1424fa70b5dab7e73718, type: 3}
+      propertyPath: hybridAgent
+      value: 
+      objectReference: {fileID: 1298789836}
+    - target: {fileID: 1202467655473539675, guid: 7c11381b753a1424fa70b5dab7e73718, type: 3}
       propertyPath: slimeParent
       value: 
       objectReference: {fileID: 1919822942}
+    - target: {fileID: 1202467655473539675, guid: 7c11381b753a1424fa70b5dab7e73718, type: 3}
+      propertyPath: trainingMode
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1202467655473539675, guid: 7c11381b753a1424fa70b5dab7e73718, type: 3}
       propertyPath: dungeonParent
       value: 
@@ -519,9 +527,9 @@ MonoBehaviour:
   lookSpeed: 0.15
   jumpHeight: 1.2
   jumpTimeToApex: 0.28
-  fallGravityMultiplier: 2
+  fallGravityMultiplier: 2.5
   groundedGravity: -5
-  terminalVelocity: -40
+  terminalVelocity: -45
   lookPivot: {fileID: 0}
 --- !u!143 &1043899802
 CharacterController:
@@ -711,7 +719,7 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  moveSpeed: 3
+  moveSpeed: 10
   rotationSpeed: 180
   jumpHeight: 1.2
   jumpTimeToApex: 0.28
@@ -724,13 +732,21 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   mode: 0
+  initialSeed: 12345
   trainingPhase: 0
   timePenaltyPerStep: 0.001
+  closeDistanceThreshold: 2
+  closeMoveAwayPenalty: -0.25
+  closeMoveCloserReward: 0.05
   stickyTag: Sticky
   wallTag: Wall
   exitTag: Exit
   playerTag: Player
   slipperyFloorRayLength: 3
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  wallRayLength: 5
 --- !u!195 &1298789837
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -872,7 +888,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 22
+    VectorObservationSize: 26
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2

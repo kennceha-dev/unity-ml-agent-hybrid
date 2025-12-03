@@ -51,13 +51,26 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     [Header("Training Settings")]
     [SerializeField] private TrainingPhase trainingPhase = TrainingPhase.BasePathfinding;
+    public TrainingPhase CurrentTrainingPhase => trainingPhase;
     [SerializeField] private float timePenaltyPerStep = 0.001f; // Negative reward over time to encourage progress
+
+    [Header("Close-Range Feedback")]
+    [Tooltip("Distance (world units) considered 'close' to the target. If the agent was within this distance and then moves away, a penalty is applied.")]
+    [SerializeField] private float closeDistanceThreshold = 2f;
+    [Tooltip("Penalty applied when agent was close to the target and then moves away (negative value).")]
+    [SerializeField] private float closeMoveAwayPenalty = -0.25f;
+    [Tooltip("Small reward applied when agent was close and moves even closer.")]
+    [SerializeField] private float closeMoveCloserReward = 0.05f;
 
     [SerializeField] private string stickyTag = "Sticky";
     [SerializeField] private string wallTag = "Wall";
     [SerializeField] private string exitTag = "Exit";
     [SerializeField] private string playerTag = "Player";
     [SerializeField] private float slipperyFloorRayLength = 5f;
+
+    [Header("Wall Detection")]
+    [SerializeField] private LayerMask wallLayer;
+    [SerializeField] private float wallRayLength = 5f;
 
     private float cachedRotationInput;  // rotate left/right (-1..1)
     private float cachedForwardInput;    // forward/backward (-1..1)
@@ -110,6 +123,40 @@ public class HybridAgent : Agent, ISpeedModifiable
         previousDistanceToSteeringTarget = 0f;
         isOnSticky = false;
         isOnWall = false;
+    }
+
+    /// <summary>
+    /// Raycast horizontally in the 4 cardinal directions to detect walls.
+    /// Adds 4 observations: distance to wall (or max ray length if none).
+    /// </summary>
+    private void CheckForWalls(VectorSensor sensor)
+    {
+        Vector3[] directions = {
+            transform.forward,
+            -transform.forward,
+            transform.right,
+            -transform.right,
+        };
+
+        foreach (var dir in directions)
+        {
+            // In phases before AvoidWalls, don't report walls (treat as clear)
+            if (trainingPhase < TrainingPhase.AvoidWalls)
+            {
+                sensor.AddObservation(wallRayLength);
+                continue;
+            }
+
+            Vector3 origin = transform.position + Vector3.up * 0.5f; // slightly above ground
+            if (Physics.Raycast(origin, dir, out RaycastHit hit, wallRayLength, wallLayer))
+            {
+                sensor.AddObservation(hit.distance);
+            }
+            else
+            {
+                sensor.AddObservation(wallRayLength);
+            }
+        }
     }
 
     private void CheckForStickyFloor(VectorSensor sensor)
@@ -174,9 +221,10 @@ public class HybridAgent : Agent, ISpeedModifiable
         // Current forward direction (so agent knows its orientation)
         sensor.AddObservation(transform.forward); // 3
 
+        CheckForWalls(sensor); // 4 (wall distances in 4 directions)
         CheckForStickyFloor(sensor); // 4
 
-        // 22 total observations
+        // 26 total observations
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -209,7 +257,23 @@ public class HybridAgent : Agent, ISpeedModifiable
         float dist = Vector3.Distance(transform.position, target.position);
         float delta = previousDistanceToTarget - dist;
 
+        // Small incremental reward/penalty based on change in distance
         AddReward(delta * 0.01f);
+
+        // If agent was close to the target and then moved away, apply a stronger penalty.
+        // Conversely, give a small extra reward if it was close and moved even closer.
+        if (previousDistanceToTarget <= closeDistanceThreshold)
+        {
+            if (dist > previousDistanceToTarget)
+            {
+                AddReward(closeMoveAwayPenalty);
+            }
+            else if (dist < previousDistanceToTarget)
+            {
+                AddReward(closeMoveCloserReward);
+            }
+        }
+
         previousDistanceToTarget = dist;
 
         // Time penalty to encourage faster completion
@@ -271,15 +335,17 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log("Trigger Entered: " + other.gameObject.name);
         if (other.CompareTag(wallTag))
         {
             if (!isOnWall)
             {
                 // Only penalize wall hits in Phase 2+ (AvoidWalls and above)
-                if (trainingPhase >= TrainingPhase.AvoidWalls)
-                {
-                    AddReward(-0.2f);
-                }
+                // if (trainingPhase >= TrainingPhase.AvoidWalls || true)
+                // {
+                // }
+                Debug.Log("Hit Wall!");
+                AddReward(-0.2f);
                 isOnWall = true;
             }
         }
@@ -290,6 +356,7 @@ public class HybridAgent : Agent, ISpeedModifiable
                 // Only penalize slime in Phase 3+ (AvoidSlime and above)
                 if (trainingPhase >= TrainingPhase.AvoidSlime)
                 {
+                    Debug.Log("Hit Sticky!");
                     AddReward(-0.3f);
                 }
                 isOnSticky = true;
@@ -417,19 +484,23 @@ public class HybridAgent : Agent, ISpeedModifiable
         previousTargetPos = transform.position;
     }
 
-    public override void Heuristic(in ActionBuffers actionsOut)
-    {
-        var continuousActions = actionsOut.ContinuousActions;
-        var discreteActions = actionsOut.DiscreteActions;
+    // public override void Heuristic(in ActionBuffers actionsOut)
+    // {
+    //     var continuousActions = actionsOut.ContinuousActions;
+    //     var discreteActions = actionsOut.DiscreteActions;
 
-        Vector2 moveInput = InputSystem.actions.FindAction("Move").ReadValue<Vector2>();
-        continuousActions[0] = moveInput.x; // rotate left/right
-        continuousActions[1] = moveInput.y; // forward/backward
+    //     // Use mouse X for rotation (like Player's mouse look)
+    //     float mouseX = InputSystem.actions.FindAction("Look").ReadValue<Vector2>().x;
+    //     continuousActions[0] = Mathf.Clamp(mouseX * 0.1f, -1f, 1f); // Scale mouse input to rotation range
 
-        // Jump input (space bar or gamepad south button)
-        bool jumpPressed = InputSystem.actions.FindAction("Jump").IsPressed();
-        discreteActions[0] = jumpPressed ? 1 : 0;
-    }
+    //     // Use W/S for forward/backward movement
+    //     Vector2 moveInput = InputSystem.actions.FindAction("Move").ReadValue<Vector2>();
+    //     continuousActions[1] = moveInput.y; // forward/backward
+
+    //     // Jump input (space bar or gamepad south button)
+    //     bool jumpPressed = InputSystem.actions.FindAction("Jump").IsPressed();
+    //     discreteActions[0] = jumpPressed ? 1 : 0;
+    // }
 
     public void ApplySpeedMultiplier(Object source, float multiplier)
     {
