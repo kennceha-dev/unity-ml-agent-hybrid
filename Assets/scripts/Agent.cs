@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using Unity.MLAgents;
@@ -16,27 +15,19 @@ public enum TrainingPhase
     MovingTarget      // Phase 4: Target moves (placeholder for later)
 }
 
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(CharacterMovement))]
+[RequireComponent(typeof(SpeedModifierHandler))]
 public class HybridAgent : Agent, ISpeedModifiable
 {
-    private CharacterController characterController;
+    private CharacterMovement characterMovement;
+    private SpeedModifierHandler speedModifierHandler;
     private NavMeshAgent agent;
     private bool isReady;
     private float baseMoveSpeed;
-    private float currentSpeedMultiplier = 1f;
-    private readonly Dictionary<Object, float> speedModifiers = new Dictionary<Object, float>();
 
     private Vector3 previousTargetPos;
     private float previousDistanceToTarget;
     private float previousDistanceToSteeringTarget;
-
-    [SerializeField] private float moveSpeed = 10f;
-    [SerializeField] private float rotationSpeed = 180f; // degrees per second
-    [SerializeField] private float jumpHeight = 1.2f;
-    [SerializeField] private float jumpTimeToApex = 0.28f;
-    [SerializeField] private float fallGravityMultiplier = 2.5f;
-    [SerializeField] private float groundedGravity = -5f;
-    [SerializeField] private float terminalVelocity = -45f;
 
     [SerializeField] private Transform target;
     [SerializeField] private DungeonRunner dungeonRunner;
@@ -62,9 +53,6 @@ public class HybridAgent : Agent, ISpeedModifiable
     private float cachedRotationInput;  // rotate left/right (-1..1)
     private float cachedForwardInput;    // forward/backward (-1..1)
     private bool cachedJumpInput = false;
-    private float verticalVelocity = 0f;
-    private float gravity;
-    private float initialJumpVelocity;
     private bool isOnSticky = false;
     private bool isOnWall = false;
 
@@ -72,8 +60,17 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     void Start()
     {
-        characterController = GetComponent<CharacterController>();
+        characterMovement = GetComponent<CharacterMovement>();
+        speedModifierHandler = GetComponent<SpeedModifierHandler>();
         agent = GetComponent<NavMeshAgent>();
+
+        // Sync speed multiplier changes to the movement component
+        speedModifierHandler.OnSpeedMultiplierChanged += (multiplier) =>
+        {
+            characterMovement.CurrentSpeedMultiplier = multiplier;
+            UpdateAgentSpeed(multiplier);
+        };
+
         if (agent != null)
         {
             baseMoveSpeed = agent.speed;
@@ -81,24 +78,10 @@ public class HybridAgent : Agent, ISpeedModifiable
             agent.updateRotation = false;
         }
 
-        RecalculateJumpValues();
         DungeonRunner.OnDungeonReady += () => isReady = true;
 
         // Initialize seed counter
         currentSeed = initialSeed;
-    }
-
-    void OnValidate()
-    {
-        RecalculateJumpValues();
-    }
-
-    private void RecalculateJumpValues()
-    {
-        jumpHeight = Mathf.Max(0.1f, jumpHeight);
-        jumpTimeToApex = Mathf.Max(0.05f, jumpTimeToApex);
-        gravity = 2f * jumpHeight / (jumpTimeToApex * jumpTimeToApex);
-        initialJumpVelocity = gravity * jumpTimeToApex;
     }
 
     public override void OnEpisodeBegin()
@@ -169,7 +152,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         sensor.AddObservation(Vector3.Distance(transform.position, steeringTarget)); // 1
 
         // Is grounded (so agent knows when it can jump)
-        sensor.AddObservation(characterController.isGrounded); // 1
+        sensor.AddObservation(characterMovement.IsGrounded); // 1
 
         // Current forward direction (so agent knows its orientation)
         sensor.AddObservation(transform.forward); // 3
@@ -336,41 +319,19 @@ public class HybridAgent : Agent, ISpeedModifiable
         }
 
         // Rotate the agent based on rotation input
-        float rotationAmount = cachedRotationInput * rotationSpeed * Time.fixedDeltaTime;
-        transform.Rotate(0f, rotationAmount, 0f);
+        characterMovement.Rotate(cachedRotationInput, useFixedDeltaTime: true);
 
         // Move forward/backward based on forward input
         Vector3 move = transform.forward * cachedForwardInput;
-        move *= moveSpeed * currentSpeedMultiplier;
 
-        // Apply gravity and handle jumping (matching Player physics)
-        if (characterController.isGrounded)
+        // Process jump and vertical movement
+        if (characterMovement.ProcessVerticalMovementFixed(cachedJumpInput))
         {
-            verticalVelocity = groundedGravity;
-
-            // Jump if requested while grounded
-            if (cachedJumpInput)
-            {
-                verticalVelocity = initialJumpVelocity;
-                cachedJumpInput = false;
-            }
+            cachedJumpInput = false; // Jump was consumed
         }
-        else
-        {
-            float appliedGravity = gravity;
 
-            // Fall faster when descending
-            if (verticalVelocity < 0f)
-            {
-                appliedGravity *= fallGravityMultiplier;
-            }
-
-            verticalVelocity -= appliedGravity * Time.fixedDeltaTime;
-            verticalVelocity = Mathf.Max(verticalVelocity, terminalVelocity);
-        }
-        move.y = verticalVelocity;
-
-        characterController.Move(move * Time.fixedDeltaTime);
+        // Apply movement
+        characterMovement.Move(move, useFixedDeltaTime: true);
 
         // Sync NavMesh agent position and update path to moving target (for guidance only)
         if (agent != null && agent.isOnNavMesh)
@@ -384,21 +345,6 @@ public class HybridAgent : Agent, ISpeedModifiable
                 agent.SetDestination(target.position);
             }
         }
-
-        // if (agent != null && agent.isOnNavMesh && target != null)
-        // {
-        //     agent.SetDestination(target.position);
-        // }
-
-        // if (agent != null && !agent.isOnNavMesh)
-        // {
-        //     AddReward(-0.5f);
-        //     EndEpisode();
-        //     dungeonRunner.Reset();
-        //     return;
-        // }
-
-        // CheckIfReachedTarget();
     }
 
     private void ApplyPredictionReward()
@@ -422,8 +368,12 @@ public class HybridAgent : Agent, ISpeedModifiable
         var continuousActions = actionsOut.ContinuousActions;
         var discreteActions = actionsOut.DiscreteActions;
 
+        // Use mouse X for rotation (like Player's mouse look)
+        float mouseX = InputSystem.actions.FindAction("Look").ReadValue<Vector2>().x;
+        continuousActions[0] = Mathf.Clamp(mouseX * 0.1f, -1f, 1f); // Scale mouse input to rotation range
+
+        // Use W/S for forward/backward movement
         Vector2 moveInput = InputSystem.actions.FindAction("Move").ReadValue<Vector2>();
-        continuousActions[0] = moveInput.x; // rotate left/right
         continuousActions[1] = moveInput.y; // forward/backward
 
         // Jump input (space bar or gamepad south button)
@@ -433,47 +383,15 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     public void ApplySpeedMultiplier(Object source, float multiplier)
     {
-        if (source == null)
-        {
-            return;
-        }
-
-        // // Only apply slow effects in AvoidSlime phase and above
-        // if (trainingPhase < TrainingPhase.AvoidSlime && multiplier < 1f)
-        // {
-        //     currentSpeedMultiplier = 1f;
-        //     return;
-        // }
-
-        speedModifiers[source] = Mathf.Clamp(multiplier, 0.01f, 10f);
-        RecalculateSpeedMultiplier();
+        speedModifierHandler.ApplySpeedMultiplier(source, multiplier);
     }
 
     public void RemoveSpeedMultiplier(Object source)
     {
-        if (source == null)
-        {
-            return;
-        }
-
-        if (speedModifiers.Remove(source))
-        {
-            RecalculateSpeedMultiplier();
-        }
+        speedModifierHandler.RemoveSpeedMultiplier(source);
     }
 
-    private void RecalculateSpeedMultiplier()
-    {
-        currentSpeedMultiplier = 1f;
-        foreach (float modifier in speedModifiers.Values)
-        {
-            currentSpeedMultiplier *= modifier;
-        }
-        currentSpeedMultiplier = Mathf.Clamp(currentSpeedMultiplier, 0.01f, 10f);
-        UpdateAgentSpeed();
-    }
-
-    private void UpdateAgentSpeed()
+    private void UpdateAgentSpeed(float multiplier)
     {
         if (agent == null)
         {
@@ -485,6 +403,6 @@ public class HybridAgent : Agent, ISpeedModifiable
             baseMoveSpeed = agent.speed;
         }
 
-        agent.speed = baseMoveSpeed * currentSpeedMultiplier;
+        agent.speed = baseMoveSpeed * multiplier;
     }
 }
