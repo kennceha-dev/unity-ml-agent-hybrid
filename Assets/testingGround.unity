@@ -119,6 +119,53 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &27273020
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 27273022}
+  - component: {fileID: 27273021}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &27273021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 27273020}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5c75e6c9acd0be4b97f6db6fefb6921, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dungeonRunner: {fileID: 0}
+  player: {fileID: 0}
+  agent: {fileID: 0}
+--- !u!4 &27273022
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 27273020}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 9.520195, y: -48.616375, z: 12.035607}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &504556234
 GameObject:
   m_ObjectHideFlags: 0
@@ -384,6 +431,8 @@ GameObject:
   - component: {fileID: 1043899802}
   - component: {fileID: 1043899796}
   - component: {fileID: 1043899801}
+  - component: {fileID: 1043899804}
+  - component: {fileID: 1043899803}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -515,13 +564,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf444dfc312d69f49a735c7fe084e64e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 10
   lookSpeed: 0.15
-  jumpHeight: 1.2
-  jumpTimeToApex: 0.28
-  fallGravityMultiplier: 2
-  groundedGravity: -5
-  terminalVelocity: -40
   lookPivot: {fileID: 0}
 --- !u!143 &1043899802
 CharacterController:
@@ -548,6 +591,37 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1043899803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1043899795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 580c603a42da42c49908a4933b30726f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1043899804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1043899795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7533f54863ef14247a9aca49ca9e6bd4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 10
+  rotationSpeed: 180
+  jumpHeight: 1.2
+  jumpTimeToApex: 0.28
+  fallGravityMultiplier: 2.5
+  groundedGravity: -5
+  terminalVelocity: -45
 --- !u!1 &1182804257
 GameObject:
   m_ObjectHideFlags: 0
@@ -685,9 +759,10 @@ GameObject:
   - component: {fileID: 1298789836}
   - component: {fileID: 1298789843}
   - component: {fileID: 1298789842}
-  - component: {fileID: 1298789844}
   - component: {fileID: 1298789845}
   - component: {fileID: 1298789846}
+  - component: {fileID: 1298789848}
+  - component: {fileID: 1298789847}
   m_Layer: 0
   m_Name: Agent
   m_TagString: Untagged
@@ -711,19 +786,13 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  moveSpeed: 3
-  rotationSpeed: 180
-  jumpHeight: 1.2
-  jumpTimeToApex: 0.28
-  fallGravityMultiplier: 2.5
-  groundedGravity: -5
-  terminalVelocity: -45
   target: {fileID: 1043899800}
   dungeonRunner: {fileID: 1823781927}
   floorLayer:
     serializedVersion: 2
     m_Bits: 0
   mode: 0
+  initialSeed: 12345
   trainingPhase: 0
   timePenaltyPerStep: 0.001
   stickyTag: Sticky
@@ -890,33 +959,6 @@ MonoBehaviour:
   m_UseChildActuators: 1
   m_DeterministicInference: 0
   m_ObservableAttributeHandling: 0
---- !u!54 &1298789844
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1298789835}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!143 &1298789845
 CharacterController:
   m_ObjectHideFlags: 0
@@ -963,6 +1005,37 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.61
   m_Center: {x: 0, y: -0.59, z: 0}
+--- !u!114 &1298789847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1298789835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 580c603a42da42c49908a4933b30726f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1298789848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1298789835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7533f54863ef14247a9aca49ca9e6bd4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 10
+  rotationSpeed: 180
+  jumpHeight: 1.2
+  jumpTimeToApex: 0.28
+  fallGravityMultiplier: 2.5
+  groundedGravity: -5
+  terminalVelocity: -45
 --- !u!114 &1823781927 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 702557565140486307, guid: 7c11381b753a1424fa70b5dab7e73718, type: 3}
@@ -1014,3 +1087,4 @@ SceneRoots:
   - {fileID: 1298789841}
   - {fileID: 1043899800}
   - {fileID: 673871643}
+  - {fileID: 27273022}
