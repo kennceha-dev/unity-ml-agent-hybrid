@@ -119,6 +119,63 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &442292571
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 442292573}
+  - component: {fileID: 442292572}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &442292572
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 442292571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f98db5ef1eca2f4c867af2ff7f36d84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trainingPhase: 0
+  trainingMode: 0
+  initialSeed: 12345
+  timePenaltyPerStep: 0.001
+  closeDistanceThreshold: 2
+  closeMoveAwayPenalty: -0.25
+  closeMoveCloserReward: 0.05
+  wallRayLength: 5
+  slipperyFloorRayLength: 5
+  stickyTag: Sticky
+  wallTag: Wall
+  exitTag: Exit
+  playerTag: Player
+--- !u!4 &442292573
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 442292571}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 30.69624, y: 20.114948, z: 33.64436}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &504556234
 GameObject:
   m_ObjectHideFlags: 0
@@ -719,6 +776,7 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  rewardConfig: {fileID: 0}
   moveSpeed: 10
   rotationSpeed: 180
   jumpHeight: 1.2
@@ -731,22 +789,9 @@ MonoBehaviour:
   floorLayer:
     serializedVersion: 2
     m_Bits: 0
-  mode: 0
-  initialSeed: 12345
-  trainingPhase: 0
-  timePenaltyPerStep: 0.001
-  closeDistanceThreshold: 2
-  closeMoveAwayPenalty: -0.25
-  closeMoveCloserReward: 0.05
-  stickyTag: Sticky
-  wallTag: Wall
-  exitTag: Exit
-  playerTag: Player
-  slipperyFloorRayLength: 3
   wallLayer:
     serializedVersion: 2
     m_Bits: 0
-  wallRayLength: 5
 --- !u!195 &1298789837
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1030,3 +1075,4 @@ SceneRoots:
   - {fileID: 1298789841}
   - {fileID: 1043899800}
   - {fileID: 673871643}
+  - {fileID: 442292573}
