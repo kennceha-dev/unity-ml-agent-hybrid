@@ -106,12 +106,11 @@ public class DungeonRunner : MonoBehaviour
     void SpawnAgentAndTarget()
     {
         var rooms = generator.GetRooms();
-        if (rooms.Count < 2) return;
 
         Room agentRoom = generator.GetRandomRoom();
         Room targetRoom = generator.GetRandomRoom();
 
-        while (targetRoom == agentRoom)
+        while (targetRoom == agentRoom && rooms.Count > 1)
             targetRoom = generator.GetRandomRoom();
 
         if (agent != null)

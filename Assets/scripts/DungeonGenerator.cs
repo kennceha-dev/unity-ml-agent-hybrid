@@ -468,12 +468,16 @@ public class DungeonGenerator : MonoBehaviour
     {
         //TODO: add noise for pseudo-randomness, we could sample perlin noise at the worldspace position of each cell (or average perlin noise in each cell from
         //a set of candidate points) and, if it is above some threshold, we make it a room.
-
-        if (GameManager.Instance != null && (GameManager.Instance.IsTrainingMode
-        || GameManager.Instance.CurrentTrainingPhase == TrainingPhase.BasePathfinding))
+        switch (GameManager.Instance.CurrentTrainingPhase)
         {
-            numRandomRooms = 2;
+            case TrainingPhase.ReachTarget:
+                numRandomRooms = 1;
+                break;
+            case TrainingPhase.BasePathfinding:
+                numRandomRooms = 2;
+                break;
         }
+
         //Loop through for each room
         for (int i = 0; i < numRandomRooms; i++)
         {

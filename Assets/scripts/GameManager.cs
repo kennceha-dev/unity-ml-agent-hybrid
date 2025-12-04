@@ -5,6 +5,7 @@ using UnityEngine;
 /// </summary>
 public enum TrainingPhase
 {
+    ReachTarget,       // Initial phase: just reach the target
     BasePathfinding,  // Phase 1: No slimes, no wall penalties - just learn to follow path
     AvoidWalls,       // Phase 2: Add wall collision penalties
     AvoidSlime,       // Phase 3: Add slime penalties and jumping
@@ -23,12 +24,6 @@ public class GameManager : MonoBehaviour
     [Header("Training Settings")]
     [SerializeField] private TrainingPhase trainingPhase = TrainingPhase.BasePathfinding;
     public TrainingPhase CurrentTrainingPhase => trainingPhase;
-
-    [SerializeField] private bool trainingMode = false;
-    /// <summary>
-    /// When true, the dungeon generator creates a minimal training map (2 rooms).
-    /// </summary>
-    public bool IsTrainingMode => trainingMode;
 
     [Header("Dungeon Seed")]
     [SerializeField] private int initialSeed = 12345;
