@@ -55,12 +55,6 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] bool useDeterministicSeed = true;
     [SerializeField] int dungeonSeed = 12345;   // you can change this per run in the Inspector
 
-    [Header("Training")]
-    [Tooltip("When enabled the generator will create a minimal training map (2 rooms).")]
-    [SerializeField] bool trainingMode = false;
-    [Tooltip("Reference to the HybridAgent to get the current training phase.")]
-    [SerializeField] HybridAgent hybridAgent;
-
     // Non-serialized runtime RNG
     PcgRandom rng;
 
@@ -385,13 +379,6 @@ public class DungeonGenerator : MonoBehaviour
         //Clear old dungeon info
         Clear();
 
-        // If in training mode, temporarily force a very small map (2 rooms)
-        int __originalNumRandomRooms = numRandomRooms;
-        if (trainingMode)
-        {
-            numRandomRooms = 2;
-        }
-
         //Randomly place rooms
         GenerateRandomRooms();
 
@@ -464,12 +451,6 @@ public class DungeonGenerator : MonoBehaviour
         //Use event to call external functions after dungeon is generated
         onDungeonGenerate.Invoke();
 
-        // Restore original room count if we temporarily changed it for training
-        if (trainingMode)
-        {
-            numRandomRooms = __originalNumRandomRooms;
-        }
-
         //Display total time for algorithm
         if (displayAlgorithmTime)
         {
@@ -488,6 +469,11 @@ public class DungeonGenerator : MonoBehaviour
         //TODO: add noise for pseudo-randomness, we could sample perlin noise at the worldspace position of each cell (or average perlin noise in each cell from
         //a set of candidate points) and, if it is above some threshold, we make it a room.
 
+        if (GameManager.Instance != null && (GameManager.Instance.IsTrainingMode
+        || GameManager.Instance.CurrentTrainingPhase == TrainingPhase.BasePathfinding))
+        {
+            numRandomRooms = 2;
+        }
         //Loop through for each room
         for (int i = 0; i < numRandomRooms; i++)
         {
@@ -500,35 +486,6 @@ public class DungeonGenerator : MonoBehaviour
                 rng.Range(minSize.z, maxSize.z)
             );
 
-            //TODO: Create an elegant solution for degenerate tetrahedrals and triangles of rooms
-            //I have this commented out because there are too many variables that go into preventing degenerate tetrahedrals.
-            //If the 4 given points lie on the same plane (the plane can have any orientation) then tetrahedralization on those points fails
-            //It may be simpler to just remove rooms that have a degenerate tetrahedral
-            //The likely solution is to go back into the git history and add back the 2d triangulation oriented to the plane
-            //in these cases, but that doesn't fix degenerate triangles (all rooms in a straight line).
-            //The system below won't work because rooms can still be placed in between the 4 extremal rooms which, with only 5 rooms for example,
-            //tetrahedralization would fail between the first room and the room on the other side of the fifth room
-
-            //Ensure the first four rooms are in the corners, ensures that tetrahedralization will not be degenerate
-            //if(i == 0)  //stick first room at first cell
-            //{
-            //    //randSize.y = 1;
-            //}
-            //else if(i == 1)
-            //{
-            //    randPos = new Vector3(CellDimensions.x * (GridDimensions.x - randSize.x), 0, 0);
-            //    //randSize.y = 1;
-            //}
-            //else if(i == 2)
-            //{
-            //    randPos = new Vector3(0, CellDimensions.y * (GridDimensions.y - randSize.y), 0);
-            //}
-            //else if (i == 3)
-            //{
-            //    randPos = new Vector3(0, 0, CellDimensions.z * (GridDimensions.z - randSize.z));
-            //}
-            //else
-            //{
             randPos = new Vector3(
                 cellDimensions.x * rng.Range(0, (int)gridDimensions.x),
                 cellDimensions.y * rng.Range(0, (int)gridDimensions.y),
@@ -673,7 +630,7 @@ public class DungeonGenerator : MonoBehaviour
     private void PopulateSlimeZones()
     {
         // Skip slime spawning if training phase is before AvoidSlime
-        if (hybridAgent != null && hybridAgent.CurrentTrainingPhase < TrainingPhase.AvoidSlime)
+        if (GameManager.Instance != null && !GameManager.Instance.ShouldSpawnSlime)
         {
             return;
         }

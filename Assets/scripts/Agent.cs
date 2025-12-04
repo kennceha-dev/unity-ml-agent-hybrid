@@ -4,17 +4,6 @@ using UnityEngine.AI;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
-using UnityEngine.InputSystem;
-
-public enum Mode { Training, Inference }
-
-public enum TrainingPhase
-{
-    BasePathfinding,  // Phase 1: No slimes, no wall penalties - just learn to follow path
-    AvoidWalls,       // Phase 2: Add wall collision penalties
-    AvoidSlime,       // Phase 3: Add slime penalties and jumping
-    MovingTarget      // Phase 4: Target moves (placeholder for later)
-}
 
 [RequireComponent(typeof(CharacterController))]
 public class HybridAgent : Agent, ISpeedModifiable
@@ -30,6 +19,7 @@ public class HybridAgent : Agent, ISpeedModifiable
     private float previousDistanceToTarget;
     private float previousDistanceToSteeringTarget;
 
+    [Header("Movement")]
     [SerializeField] private float moveSpeed = 10f;
     [SerializeField] private float rotationSpeed = 180f; // degrees per second
     [SerializeField] private float jumpHeight = 1.2f;
@@ -38,39 +28,11 @@ public class HybridAgent : Agent, ISpeedModifiable
     [SerializeField] private float groundedGravity = -5f;
     [SerializeField] private float terminalVelocity = -45f;
 
+    [Header("References")]
     [SerializeField] private Transform target;
     [SerializeField] private DungeonRunner dungeonRunner;
     [SerializeField] private LayerMask floorLayer;
-    [SerializeField] private Mode mode = Mode.Training;
-
-    [Header("Dungeon Seed")]
-    [SerializeField]
-    private int initialSeed = 12345;
-    // Current seed used for the next dungeon generation. This will be incremented on episode end.
-    private int currentSeed;
-
-    [Header("Training Settings")]
-    [SerializeField] private TrainingPhase trainingPhase = TrainingPhase.BasePathfinding;
-    public TrainingPhase CurrentTrainingPhase => trainingPhase;
-    [SerializeField] private float timePenaltyPerStep = 0.001f; // Negative reward over time to encourage progress
-
-    [Header("Close-Range Feedback")]
-    [Tooltip("Distance (world units) considered 'close' to the target. If the agent was within this distance and then moves away, a penalty is applied.")]
-    [SerializeField] private float closeDistanceThreshold = 2f;
-    [Tooltip("Penalty applied when agent was close to the target and then moves away (negative value).")]
-    [SerializeField] private float closeMoveAwayPenalty = -0.25f;
-    [Tooltip("Small reward applied when agent was close and moves even closer.")]
-    [SerializeField] private float closeMoveCloserReward = 0.05f;
-
-    [SerializeField] private string stickyTag = "Sticky";
-    [SerializeField] private string wallTag = "Wall";
-    [SerializeField] private string exitTag = "Exit";
-    [SerializeField] private string playerTag = "Player";
-    [SerializeField] private float slipperyFloorRayLength = 5f;
-
-    [Header("Wall Detection")]
     [SerializeField] private LayerMask wallLayer;
-    [SerializeField] private float wallRayLength = 5f;
 
     private float cachedRotationInput;  // rotate left/right (-1..1)
     private float cachedForwardInput;    // forward/backward (-1..1)
@@ -96,9 +58,6 @@ public class HybridAgent : Agent, ISpeedModifiable
 
         RecalculateJumpValues();
         DungeonRunner.OnDungeonReady += () => isReady = true;
-
-        // Initialize seed counter
-        currentSeed = initialSeed;
     }
 
     void OnValidate()
@@ -141,20 +100,20 @@ public class HybridAgent : Agent, ISpeedModifiable
         foreach (var dir in directions)
         {
             // In phases before AvoidWalls, don't report walls (treat as clear)
-            if (trainingPhase < TrainingPhase.AvoidWalls)
+            if (!GameManager.Instance.ShouldPenalizeWalls)
             {
-                sensor.AddObservation(wallRayLength);
+                sensor.AddObservation(GameManager.Instance.WallRayLength);
                 continue;
             }
 
             Vector3 origin = transform.position + Vector3.up * 0.5f; // slightly above ground
-            if (Physics.Raycast(origin, dir, out RaycastHit hit, wallRayLength, wallLayer))
+            if (Physics.Raycast(origin, dir, out RaycastHit hit, GameManager.Instance.WallRayLength, wallLayer))
             {
                 sensor.AddObservation(hit.distance);
             }
             else
             {
-                sensor.AddObservation(wallRayLength);
+                sensor.AddObservation(GameManager.Instance.WallRayLength);
             }
         }
     }
@@ -170,9 +129,9 @@ public class HybridAgent : Agent, ISpeedModifiable
         foreach (var cardinalDir in cardinalDirections)
         {
             // In phases before AvoidSlime, don't report slime (treat all floor as normal)
-            if (trainingPhase < TrainingPhase.AvoidSlime)
+            if (!GameManager.Instance.ShouldPenalizeSlime)
             {
-                sensor.AddObservation(slipperyFloorRayLength);
+                sensor.AddObservation(GameManager.Instance.SlipperyFloorRayLength);
                 continue;
             }
 
@@ -182,15 +141,15 @@ public class HybridAgent : Agent, ISpeedModifiable
 
             Vector3 floorRayDir = (cardinalDir + (Vector3.down * 1.5f)).normalized;
 
-            if (Physics.Raycast(floorOrigin, floorRayDir, out RaycastHit floorHit, slipperyFloorRayLength, floorLayer))
+            if (Physics.Raycast(floorOrigin, floorRayDir, out RaycastHit floorHit, GameManager.Instance.SlipperyFloorRayLength, floorLayer))
             {
-                bool isSticky = floorHit.collider.CompareTag(stickyTag);
-                float obs = isSticky ? floorHit.distance : slipperyFloorRayLength;
+                bool isSticky = floorHit.collider.CompareTag(GameManager.Instance.StickyTag);
+                float obs = isSticky ? floorHit.distance : GameManager.Instance.SlipperyFloorRayLength;
                 sensor.AddObservation(obs);
             }
             else
             {
-                sensor.AddObservation(slipperyFloorRayLength);
+                sensor.AddObservation(GameManager.Instance.SlipperyFloorRayLength);
             }
         }
     }
@@ -235,7 +194,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         // Discrete action for jump: 0 = no jump, 1 = jump
         // Only allow jumping in AvoidSlime phase and above
         int jumpAction = actions.DiscreteActions[0];
-        cachedJumpInput = (jumpAction == 1) && (trainingPhase >= TrainingPhase.AvoidSlime);
+        cachedJumpInput = (jumpAction == 1) && GameManager.Instance.CanJump;
 
         // Reward for following the NavMesh path (steering target)
         Vector3 steeringTarget = agent != null && agent.hasPath ? agent.steeringTarget : target.position;
@@ -262,22 +221,22 @@ public class HybridAgent : Agent, ISpeedModifiable
 
         // If agent was close to the target and then moved away, apply a stronger penalty.
         // Conversely, give a small extra reward if it was close and moved even closer.
-        if (previousDistanceToTarget <= closeDistanceThreshold)
+        if (previousDistanceToTarget <= GameManager.Instance.CloseDistanceThreshold)
         {
             if (dist > previousDistanceToTarget)
             {
-                AddReward(closeMoveAwayPenalty);
+                AddReward(GameManager.Instance.CloseMoveAwayPenalty);
             }
             else if (dist < previousDistanceToTarget)
             {
-                AddReward(closeMoveCloserReward);
+                AddReward(GameManager.Instance.CloseMoveCloserReward);
             }
         }
 
         previousDistanceToTarget = dist;
 
         // Time penalty to encourage faster completion
-        AddReward(-timePenaltyPerStep);
+        AddReward(-GameManager.Instance.TimePenaltyPerStep);
 
         ApplyPredictionReward();
     }
@@ -317,15 +276,15 @@ public class HybridAgent : Agent, ISpeedModifiable
     // exit without kelarin (for now)
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag(wallTag))
+        if (other.CompareTag(GameManager.Instance.WallTag))
         {
             isOnWall = false;
         }
-        else if (other.CompareTag(stickyTag))
+        else if (other.CompareTag(GameManager.Instance.StickyTag))
         {
             isOnSticky = false;
         }
-        else if (other.CompareTag(exitTag))
+        else if (other.CompareTag(GameManager.Instance.ExitTag))
         {
             // AddReward(-0.4f);  
             AddReward(-0.1f);
@@ -336,25 +295,25 @@ public class HybridAgent : Agent, ISpeedModifiable
     private void OnTriggerEnter(Collider other)
     {
         Debug.Log("Trigger Entered: " + other.gameObject.name);
-        if (other.CompareTag(wallTag))
+        if (other.CompareTag(GameManager.Instance.WallTag))
         {
             if (!isOnWall)
             {
                 // Only penalize wall hits in Phase 2+ (AvoidWalls and above)
-                // if (trainingPhase >= TrainingPhase.AvoidWalls || true)
-                // {
-                // }
-                Debug.Log("Hit Wall!");
-                AddReward(-0.2f);
+                if (GameManager.Instance.ShouldPenalizeWalls)
+                {
+                    Debug.Log("Hit Wall!");
+                    AddReward(-0.2f);
+                }
                 isOnWall = true;
             }
         }
-        else if (other.CompareTag(stickyTag))
+        else if (other.CompareTag(GameManager.Instance.StickyTag))
         {
             if (!isOnSticky)
             {
                 // Only penalize slime in Phase 3+ (AvoidSlime and above)
-                if (trainingPhase >= TrainingPhase.AvoidSlime)
+                if (GameManager.Instance.ShouldPenalizeSlime)
                 {
                     Debug.Log("Hit Sticky!");
                     AddReward(-0.3f);
@@ -362,7 +321,7 @@ public class HybridAgent : Agent, ISpeedModifiable
                 isOnSticky = true;
             }
         }
-        else if (other.CompareTag(playerTag))
+        else if (other.CompareTag(GameManager.Instance.PlayerTag))
         {
             Debug.Log("Caught the Player!");
             SetReward(1f);
@@ -383,10 +342,10 @@ public class HybridAgent : Agent, ISpeedModifiable
         if (setNotReady) isReady = false;
 
         // Increment seed for next episode and apply it to the dungeon runner
-        currentSeed += 1;
+        GameManager.Instance.IncrementSeed();
         if (dungeonRunner != null)
         {
-            dungeonRunner.SetSeed(currentSeed);
+            dungeonRunner.SetSeed(GameManager.Instance.CurrentSeed);
             dungeonRunner.Reset();
         }
     }
