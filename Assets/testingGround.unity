@@ -148,14 +148,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f98db5ef1eca2f4c867af2ff7f36d84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trainingPhase: 0
-  trainingMode: 0
+  trainingPhase: 1
+  trainingMode: 1
   initialSeed: 12345
   timePenaltyPerStep: 0.001
   closeDistanceThreshold: 2
   closeMoveAwayPenalty: -0.25
   closeMoveCloserReward: 0.05
-  wallRayLength: 5
+  wallRayLength: 0.75
   slipperyFloorRayLength: 5
   stickyTag: Sticky
   wallTag: Wall
@@ -745,14 +745,14 @@ GameObject:
   - component: {fileID: 1298789841}
   - component: {fileID: 1298789840}
   - component: {fileID: 1298789839}
-  - component: {fileID: 1298789838}
   - component: {fileID: 1298789837}
   - component: {fileID: 1298789836}
   - component: {fileID: 1298789843}
   - component: {fileID: 1298789842}
-  - component: {fileID: 1298789844}
-  - component: {fileID: 1298789845}
+  - component: {fileID: 1298789838}
   - component: {fileID: 1298789846}
+  - component: {fileID: 1298789845}
+  - component: {fileID: 1298789847}
   m_Layer: 0
   m_Name: Agent
   m_TagString: Untagged
@@ -776,7 +776,6 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  rewardConfig: {fileID: 0}
   moveSpeed: 10
   rotationSpeed: 180
   jumpHeight: 1.2
@@ -788,10 +787,10 @@ MonoBehaviour:
   dungeonRunner: {fileID: 1823781927}
   floorLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   wallLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
 --- !u!195 &1298789837
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -951,33 +950,6 @@ MonoBehaviour:
   m_UseChildActuators: 1
   m_DeterministicInference: 0
   m_ObservableAttributeHandling: 0
---- !u!54 &1298789844
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1298789835}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!143 &1298789845
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1023,7 +995,34 @@ SphereCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.61
-  m_Center: {x: 0, y: -0.59, z: 0}
+  m_Center: {x: 0, y: -0.61, z: 0}
+--- !u!54 &1298789847
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1298789835}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!114 &1823781927 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 702557565140486307, guid: 7c11381b753a1424fa70b5dab7e73718, type: 3}
