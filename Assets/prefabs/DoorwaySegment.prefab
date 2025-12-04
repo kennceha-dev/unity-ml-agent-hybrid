@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 7072427336493089258}
   - component: {fileID: 8736173724924873301}
   - component: {fileID: 2463492007127212240}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Left
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -118,7 +118,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9210633465886417110}
   - component: {fileID: 4714932981915758733}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: DoorwaySegment
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -166,7 +166,7 @@ GameObject:
   m_Component:
   - component: {fileID: 629129729803626064}
   - component: {fileID: 6464200137835704233}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: WallLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -265,9 +265,9 @@ GameObject:
   - component: {fileID: 8300008131307904887}
   - component: {fileID: 2583054543373236618}
   - component: {fileID: 7094283853401277197}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Right
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

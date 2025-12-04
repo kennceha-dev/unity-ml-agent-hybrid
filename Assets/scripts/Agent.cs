@@ -109,6 +109,8 @@ public class HybridAgent : Agent, ISpeedModifiable
         sensor.AddObservation(Vector3.Distance(transform.position, steeringTarget));
         sensor.AddObservation(characterController.isGrounded);
         sensor.AddObservation(transform.forward);
+        sensor.AddObservation(isOnSticky);
+        sensor.AddObservation(isOnWall);
 
         CollectWallObservations(sensor);
         CollectFloorObservations(sensor);
@@ -338,48 +340,56 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     #region Collision
 
-    private void OnTriggerEnter(Collider other)
+    private void OnCollisionEnter(Collision other)
     {
-        if (other.CompareTag(GameManager.Instance.WallTag))
+        if (other.gameObject.CompareTag(GameManager.Instance.WallTag))
+        {
             HandleWallEnter();
-        else if (other.CompareTag(GameManager.Instance.StickyTag))
+        }
+        else if (other.gameObject.CompareTag(GameManager.Instance.StickyTag))
+        {
             HandleStickyEnter();
-        else if (other.CompareTag(GameManager.Instance.PlayerTag))
+        }
+        else if (other.gameObject.CompareTag(GameManager.Instance.PlayerTag))
+        {
             HandlePlayerCaught();
-    }
-
-    private void OnTriggerStay(Collider other)
-    {
-        if (other.CompareTag(GameManager.Instance.WallTag) && GameManager.Instance.ShouldPenalizeWalls)
-        {
-            AddReward(-0.05f);
-
-            if (cachedForwardInput > 0.2f)
-                AddReward(-0.03f);
         }
-        else if (other.CompareTag(GameManager.Instance.StickyTag) && GameManager.Instance.ShouldPenalizeSlime)
-        {
-            AddReward(-0.02f);
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag(GameManager.Instance.WallTag))
-            isOnWall = false;
-        else if (other.CompareTag(GameManager.Instance.StickyTag))
-            isOnSticky = false;
-        else if (other.CompareTag(GameManager.Instance.ExitTag))
+        else if (other.gameObject.CompareTag(GameManager.Instance.ExitTag))
         {
             AddReward(-0.1f);
             HandleEpisodeEnd();
         }
     }
 
+    private void OnCollisionStay(Collision other)
+    {
+        if (other.gameObject.CompareTag(GameManager.Instance.WallTag) && GameManager.Instance.ShouldPenalizeWalls)
+        {
+            AddReward(-0.05f);
+
+            if (cachedForwardInput > 0.2f)
+                AddReward(-0.03f);
+        }
+        else if (other.gameObject.CompareTag(GameManager.Instance.StickyTag) && GameManager.Instance.ShouldPenalizeSlime)
+        {
+            AddReward(-0.02f);
+        }
+    }
+
+    private void OnCollisionExit(Collision other)
+    {
+        if (other.gameObject.CompareTag(GameManager.Instance.WallTag))
+        {
+            isOnWall = false;
+        }
+        else if (other.gameObject.CompareTag(GameManager.Instance.StickyTag))
+        {
+            isOnSticky = false;
+        }
+    }
+
     private void HandleWallEnter()
     {
-        if (isOnWall) return;
-
         if (GameManager.Instance.ShouldPenalizeWalls)
             AddReward(-0.4f);
 
@@ -388,8 +398,6 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void HandleStickyEnter()
     {
-        if (isOnSticky) return;
-
         if (GameManager.Instance.ShouldPenalizeSlime)
             AddReward(-0.3f);
 
@@ -399,6 +407,7 @@ public class HybridAgent : Agent, ISpeedModifiable
     private void HandlePlayerCaught()
     {
         SetReward(1f);
+        // AddReward(5f); // coba add?
         HandleEpisodeEnd(true);
     }
 

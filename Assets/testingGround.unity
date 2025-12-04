@@ -148,14 +148,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f98db5ef1eca2f4c867af2ff7f36d84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trainingPhase: 1
-  trainingMode: 1
+  trainingPhase: 0
   initialSeed: 12345
   timePenaltyPerStep: 0.001
   closeDistanceThreshold: 2
   closeMoveAwayPenalty: -0.25
   closeMoveCloserReward: 0.05
-  wallRayLength: 0.75
+  wallRayLength: 1.5
   slipperyFloorRayLength: 5
   stickyTag: Sticky
   wallTag: Wall
@@ -247,6 +246,10 @@ PrefabInstance:
     - target: {fileID: 1202467655473539675, guid: 7c11381b753a1424fa70b5dab7e73718, type: 3}
       propertyPath: slimeVerticalOffset
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1202467655473539675, guid: 7c11381b753a1424fa70b5dab7e73718, type: 3}
+      propertyPath: displayAlgorithmTime
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1385317196621326743, guid: 7c11381b753a1424fa70b5dab7e73718, type: 3}
       propertyPath: m_Name
@@ -750,7 +753,6 @@ GameObject:
   - component: {fileID: 1298789843}
   - component: {fileID: 1298789842}
   - component: {fileID: 1298789838}
-  - component: {fileID: 1298789846}
   - component: {fileID: 1298789845}
   - component: {fileID: 1298789847}
   m_Layer: 0
@@ -826,7 +828,7 @@ CapsuleCollider:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 128
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
@@ -932,7 +934,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 26
+    VectorObservationSize: 28
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2
@@ -975,27 +977,6 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
---- !u!135 &1298789846
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1298789835}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.61
-  m_Center: {x: 0, y: -0.61, z: 0}
 --- !u!54 &1298789847
 Rigidbody:
   m_ObjectHideFlags: 0

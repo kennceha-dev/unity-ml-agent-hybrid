@@ -113,7 +113,7 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Check if wall penalties should be active based on training phase.
     /// </summary>
-    public bool ShouldPenalizeWalls => trainingPhase >= TrainingPhase.AvoidWalls;
+    public bool ShouldPenalizeWalls => trainingPhase >= TrainingPhase.BasePathfinding;
 
     /// <summary>
     /// Check if slime penalties should be active based on training phase.
