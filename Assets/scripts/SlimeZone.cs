@@ -21,8 +21,7 @@ public class SlimeZone : MonoBehaviour
 
     private void SetColliderAsTrigger()
     {
-        var zoneCollider = GetComponent<Collider>();
-        if (zoneCollider != null)
+        if (TryGetComponent<Collider>(out var zoneCollider))
         {
             zoneCollider.isTrigger = true;
         }

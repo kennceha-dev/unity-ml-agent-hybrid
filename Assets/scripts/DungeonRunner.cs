@@ -9,6 +9,7 @@ public class DungeonRunner : MonoBehaviour
 {
     public static event Action OnDungeonReady;
 
+    [SerializeField] private Transform basicAgent;
     [SerializeField] private Transform agent;
     [SerializeField] private Transform target;
 
@@ -115,16 +116,19 @@ public class DungeonRunner : MonoBehaviour
 
         if (agent != null)
         {
-            CharacterController cc = agent.GetComponent<CharacterController>();
-            if (cc != null)
+            if (agent.TryGetComponent<CharacterController>(out var cc))
             {
                 cc.enabled = false; // IMPORTANT
-                agent.position = generator.GetRandomPositionInRoom(agentRoom);
+                Vector3 position = generator.GetRandomPositionInRoom(agentRoom);
+                agent.position = position;
+                basicAgent.position = position;
                 cc.enabled = true;
             }
             else
             {
-                agent.position = generator.GetRandomPositionInRoom(agentRoom);
+                Vector3 position = generator.GetRandomPositionInRoom(agentRoom);
+                agent.position = position;
+                basicAgent.position = position;
             }
         }
 
