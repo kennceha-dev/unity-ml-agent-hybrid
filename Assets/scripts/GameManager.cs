@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -20,6 +21,11 @@ public enum TrainingPhase
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
+
+    /// <summary>
+    /// Event fired when BasicAgent reaches the target. HybridAgent subscribes to end its episode.
+    /// </summary>
+    public static event Action OnBasicAgentReachedTargetEvent;
 
     [Header("Training Settings")]
     [SerializeField] private TrainingPhase trainingPhase = TrainingPhase.BasePathfinding;
@@ -113,7 +119,7 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Check if wall penalties should be active based on training phase.
     /// </summary>
-    public bool ShouldPenalizeWalls => trainingPhase >= TrainingPhase.BasePathfinding;
+    public bool ShouldPenalizeWalls => trainingPhase >= TrainingPhase.ReachTarget;
 
     /// <summary>
     /// Check if slime penalties should be active based on training phase.
@@ -124,4 +130,13 @@ public class GameManager : MonoBehaviour
     /// Check if jumping should be allowed based on training phase.
     /// </summary>
     public bool CanJump => trainingPhase >= TrainingPhase.AvoidSlime;
+
+    /// <summary>
+    /// Called by BasicAgent when it reaches the target.
+    /// Fires event to notify HybridAgent to end episode and reset.
+    /// </summary>
+    public void OnBasicAgentReachedTarget()
+    {
+        OnBasicAgentReachedTargetEvent?.Invoke();
+    }
 }

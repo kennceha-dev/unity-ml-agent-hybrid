@@ -11,7 +11,6 @@ public class HybridAgent : Agent, ISpeedModifiable
 {
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 10f;
-    [SerializeField] private float rotationSpeed = 180f;
     [SerializeField] private float jumpHeight = 1.2f;
     [SerializeField] private float jumpTimeToApex = 0.28f;
     [SerializeField] private float fallGravityMultiplier = 2.5f;
@@ -23,6 +22,9 @@ public class HybridAgent : Agent, ISpeedModifiable
     [SerializeField] private DungeonRunner dungeonRunner;
     [SerializeField] private LayerMask floorLayer;
     [SerializeField] private LayerMask wallLayer;
+
+    [Header("Timeout")]
+    [SerializeField] private float catchUpTimeout = 3f;
 
     private CharacterController characterController;
     private NavMeshAgent navAgent;
@@ -37,31 +39,60 @@ public class HybridAgent : Agent, ISpeedModifiable
     private int stuckCounter;
     private int episode;
 
-    private float cachedRotationInput;
     private float cachedForwardInput;
+    private float cachedStrafeInput;
     private bool cachedJumpInput;
     private float verticalVelocity;
     private float gravity;
     private float initialJumpVelocity;
     private bool isOnSticky;
     private bool isOnWall;
+    private float timeoutTimer;
+    private bool isInTimeout;
 
     #region Unity Lifecycle
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        // Disable NavMeshAgent rotation as early as possible
+        navAgent = GetComponent<NavMeshAgent>();
+        if (navAgent != null)
+        {
+            navAgent.updateRotation = false;
+            navAgent.updatePosition = false;
+        }
+    }
 
     private void Start()
     {
         characterController = GetComponent<CharacterController>();
-        navAgent = GetComponent<NavMeshAgent>();
 
         if (navAgent != null)
         {
             baseMoveSpeed = navAgent.speed;
-            navAgent.updatePosition = false;
-            navAgent.updateRotation = false;
         }
 
         RecalculateJumpValues();
         DungeonRunner.OnDungeonReady += () => isReady = true;
+        GameManager.OnBasicAgentReachedTargetEvent += OnBasicAgentReachedTarget;
+    }
+
+    private void OnDestroy()
+    {
+        DungeonRunner.OnDungeonReady -= () => isReady = true;
+        GameManager.OnBasicAgentReachedTargetEvent -= OnBasicAgentReachedTarget;
+    }
+
+    private void OnBasicAgentReachedTarget()
+    {
+        // BasicAgent reached target - start timeout for RL agent to catch up
+        if (!isInTimeout)
+        {
+            isInTimeout = true;
+            timeoutTimer = catchUpTimeout;
+        }
     }
 
     private void OnValidate() => RecalculateJumpValues();
@@ -70,6 +101,19 @@ public class HybridAgent : Agent, ISpeedModifiable
     {
         if (!isReady) return;
 
+        // Handle timeout countdown
+        if (isInTimeout)
+        {
+            timeoutTimer -= Time.fixedDeltaTime;
+            if (timeoutTimer <= 0f)
+            {
+                // Timeout expired - RL agent failed to catch up
+                AddReward(-1f);
+                HandleEpisodeEnd();
+                return;
+            }
+        }
+
         if (navAgent != null && !navAgent.isOnNavMesh)
         {
             AddReward(-0.5f);
@@ -77,7 +121,6 @@ public class HybridAgent : Agent, ISpeedModifiable
             return;
         }
 
-        ApplyRotation();
         ApplyMovement();
         SyncNavMeshAgent();
     }
@@ -88,12 +131,16 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     public override void OnEpisodeBegin()
     {
+        transform.rotation = Quaternion.identity;
+
         previousDistanceToTarget = Vector3.Distance(transform.position, target.position);
         previousDistanceToSteeringTarget = 0f;
         lastSignificantPosition = transform.position;
         stuckCounter = 0;
         isOnSticky = false;
         isOnWall = false;
+        isInTimeout = false;
+        timeoutTimer = 0f;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -108,7 +155,6 @@ public class HybridAgent : Agent, ISpeedModifiable
         sensor.AddObservation(dirToSteeringTarget);
         sensor.AddObservation(Vector3.Distance(transform.position, steeringTarget));
         sensor.AddObservation(characterController.isGrounded);
-        sensor.AddObservation(transform.forward);
         sensor.AddObservation(isOnSticky);
         sensor.AddObservation(isOnWall);
 
@@ -122,11 +168,9 @@ public class HybridAgent : Agent, ISpeedModifiable
 
         Vector3 steeringTarget = GetSteeringTarget();
         Vector3 desiredDir = (steeringTarget - transform.position).normalized;
-        float facingAlignment = Vector3.Dot(transform.forward, desiredDir);
 
         RewardSteeringProgress(steeringTarget);
-        RewardRotation(desiredDir);
-        RewardAlignment(facingAlignment);
+        RewardMovementAlignment(desiredDir);
         PenalizeWallProximity();
         RewardTargetProgress();
         PenalizeStuck();
@@ -140,8 +184,8 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void ProcessActions(ActionBuffers actions)
     {
-        cachedRotationInput = actions.ContinuousActions[0];
-        cachedForwardInput = (actions.ContinuousActions[1] + 1f) * 0.5f;
+        cachedForwardInput = actions.ContinuousActions[0];  // -1 to 1: backward to forward
+        cachedStrafeInput = actions.ContinuousActions[1];   // -1 to 1: left to right
         cachedJumpInput = (actions.DiscreteActions[0] == 1) && GameManager.Instance.CanJump;
     }
 
@@ -162,25 +206,21 @@ public class HybridAgent : Agent, ISpeedModifiable
         previousDistanceToSteeringTarget = distToSteering;
     }
 
-    private void RewardRotation(Vector3 desiredDir)
+    private void RewardMovementAlignment(Vector3 desiredDir)
     {
-        float turnDirection = Vector3.Cross(transform.forward, desiredDir).y;
+        // Calculate the agent's current movement direction
+        Vector3 moveDir = new Vector3(cachedStrafeInput, 0f, cachedForwardInput).normalized;
 
-        if (Mathf.Abs(turnDirection) > 0.1f)
+        if (moveDir.sqrMagnitude > 0.01f)
         {
-            float correctTurn = Mathf.Sign(turnDirection) * cachedRotationInput;
-            if (correctTurn > 0)
-                AddReward(0.01f * Mathf.Abs(cachedRotationInput));
+            // Reward moving in the direction of the target
+            float alignment = Vector3.Dot(moveDir, desiredDir);
+            AddReward(alignment * 0.05f);
+
+            // Additional small reward for any forward movement to encourage exploration
+            float movementMagnitude = Mathf.Sqrt(cachedForwardInput * cachedForwardInput + cachedStrafeInput * cachedStrafeInput);
+            AddReward(movementMagnitude * 0.005f);
         }
-    }
-
-    private void RewardAlignment(float facingAlignment)
-    {
-        if (cachedForwardInput > 0.1f)
-            AddReward(facingAlignment * 0.03f * cachedForwardInput);
-
-        if (facingAlignment < 0f && cachedForwardInput > 0.3f)
-            AddReward(-0.02f);
     }
 
     private void PenalizeWallProximity()
@@ -189,15 +229,13 @@ public class HybridAgent : Agent, ISpeedModifiable
 
         float minWallDist = GetMinWallDistance();
 
-        if (minWallDist < 2.0f)
+        // Only penalize when very close to walls (about to collide)
+        if (minWallDist < 0.1f)
         {
-            float normalizedDist = minWallDist / 2.0f;
-            float penalty = (1f - normalizedDist) * (1f - normalizedDist) * 0.05f;
+            float normalizedDist = minWallDist / 0.1f;
+            float penalty = (1f - normalizedDist) * 0.02f;
             AddReward(-penalty);
         }
-
-        if (minWallDist > 2.5f)
-            AddReward(0.005f);
     }
 
     private void RewardTargetProgress()
@@ -241,7 +279,8 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void CollectWallObservations(VectorSensor sensor)
     {
-        Vector3[] directions = { transform.forward, -transform.forward, transform.right, -transform.right };
+        // Use world-space directions since agent no longer rotates
+        Vector3[] directions = { Vector3.forward, Vector3.back, Vector3.right, Vector3.left };
 
         foreach (var dir in directions)
         {
@@ -253,13 +292,14 @@ public class HybridAgent : Agent, ISpeedModifiable
 
             bool hit = Physics.Raycast(transform.position, dir, out RaycastHit hitInfo, GameManager.Instance.WallRayLength, wallLayer);
             sensor.AddObservation(hit ? hitInfo.distance : GameManager.Instance.WallRayLength);
-            Debug.DrawLine(transform.position, transform.position + dir * GameManager.Instance.WallRayLength, Color.red);
+            Debug.DrawLine(transform.position, transform.position + dir * GameManager.Instance.WallRayLength, Color.green);
         }
     }
 
     private void CollectFloorObservations(VectorSensor sensor)
     {
-        Vector3[] directions = { transform.forward, -transform.forward, transform.right, -transform.right };
+        // Use world-space directions since agent no longer rotates
+        Vector3[] directions = { Vector3.forward, Vector3.back, Vector3.right, Vector3.left };
 
         foreach (var dir in directions)
         {
@@ -287,15 +327,10 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     #region Movement
 
-    private void ApplyRotation()
-    {
-        float amount = cachedRotationInput * rotationSpeed * Time.fixedDeltaTime;
-        transform.Rotate(0f, amount, 0f);
-    }
-
     private void ApplyMovement()
     {
-        Vector3 move = cachedForwardInput * currentSpeedMultiplier * moveSpeed * transform.forward;
+        // Calculate movement in world space (forward = +Z, right = +X)
+        Vector3 move = currentSpeedMultiplier * moveSpeed * new Vector3(cachedStrafeInput, 0f, cachedForwardInput);
 
         if (characterController.isGrounded)
         {
@@ -406,8 +441,8 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void HandlePlayerCaught()
     {
-        // SetReward(1f);
-        AddReward(5f); // coba add?
+        SetReward(1f);
+        // AddReward(5f); // coba add?
         HandleEpisodeEnd(true);
     }
 
@@ -421,7 +456,7 @@ public class HybridAgent : Agent, ISpeedModifiable
     private float GetMinWallDistance()
     {
         float minDist = GameManager.Instance.WallRayLength;
-        Vector3[] directions = { transform.forward, -transform.forward, transform.right, -transform.right };
+        Vector3[] directions = { Vector3.forward, Vector3.back, Vector3.right, Vector3.left };
 
         foreach (var dir in directions)
         {

@@ -7,6 +7,7 @@ using UnityEngine.AI;
 public class BasicAgent : Agent, ISpeedModifiable
 {
     [SerializeField] private Transform target;
+    [SerializeField] private float targetReachedThreshold = 1.5f;
 
     private NavMeshAgent agent;
     private float baseMoveSpeed;
@@ -24,6 +25,13 @@ public class BasicAgent : Agent, ISpeedModifiable
         if (target != null)
         {
             agent.SetDestination(target.position);
+
+            // Check if we've reached the target
+            float distanceToTarget = Vector3.Distance(transform.position, target.position);
+            if (distanceToTarget <= targetReachedThreshold)
+            {
+                GameManager.Instance.OnBasicAgentReachedTarget();
+            }
         }
     }
 
