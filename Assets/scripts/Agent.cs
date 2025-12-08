@@ -406,8 +406,8 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void HandlePlayerCaught()
     {
-        SetReward(1f);
-        // AddReward(5f); // coba add?
+        // SetReward(1f);
+        AddReward(5f); // coba add?
         HandleEpisodeEnd(true);
     }
 

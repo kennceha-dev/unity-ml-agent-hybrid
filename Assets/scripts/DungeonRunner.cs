@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.AI;
 
 [RequireComponent(typeof(DungeonGenerator))]
 [RequireComponent(typeof(NavMeshSurface))]
@@ -46,6 +47,8 @@ public class DungeonRunner : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.G))
         {
+            GameManager.Instance.IncrementSeed();
+            SetSeed(GameManager.Instance.CurrentSeed);
             StartCoroutine(GenerateAndSpawn());
         }
     }
@@ -116,18 +119,25 @@ public class DungeonRunner : MonoBehaviour
 
         if (agent != null)
         {
+            Vector3 position = generator.GetRandomPositionInRoom(agentRoom);
             if (agent.TryGetComponent<CharacterController>(out var cc))
             {
-                cc.enabled = false; // IMPORTANT
-                Vector3 position = generator.GetRandomPositionInRoom(agentRoom);
+                cc.enabled = false;
                 agent.position = position;
-                basicAgent.position = position;
                 cc.enabled = true;
             }
             else
             {
-                Vector3 position = generator.GetRandomPositionInRoom(agentRoom);
                 agent.position = position;
+            }
+
+            if (basicAgent != null && basicAgent.TryGetComponent<NavMeshAgent>(out var basicNavAgent))
+            {
+                basicNavAgent.Warp(position);
+                basicNavAgent.ResetPath();
+            }
+            else if (basicAgent != null)
+            {
                 basicAgent.position = position;
             }
         }
