@@ -1,14 +1,18 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// Training phases that control what obstacles/penalties are active.
 /// </summary>
 public enum TrainingPhase
 {
-    ReachTarget,       // Initial phase: just reach the target
-    BasePathfinding,  // Phase 1: No slimes, no wall penalties - just learn to follow path
-    AvoidWalls,       // Phase 2: Add wall collision penalties
+    ReachTarget,       // Initial phase: just reach the target, 1 Room
+    BasePathfinding,  // Phase 1: No slimes - just learn to follow path, 2 Room
+    FullPathfinding,  // Phase 2: No slimes, full map
     AvoidSlime,       // Phase 3: Add slime penalties and jumping
     MovingTarget      // Phase 4: Target moves (placeholder for later)
 }
@@ -73,6 +77,31 @@ public class GameManager : MonoBehaviour
     [SerializeField] private string playerTag = "Player";
     public string PlayerTag => playerTag;
 
+    [Header("Auto Progression")]
+    [SerializeField] private int performanceWindow = 50;
+    [SerializeField] private int minEpisodesForEvaluation = 15;
+    [SerializeField] private float minSuccessRateForPromotion = 0.6f;
+    [SerializeField] private float successMargin = 0.05f;
+
+    private class PhaseData
+    {
+        public readonly Queue<bool> BeatBaseResults = new();
+        public bool HybridBeatBaseOnce;
+        public bool TrackingEnabled;
+        public int HybridTotalSuccesses;
+        public int LastHybridEpisodeReported = -1;
+    }
+
+    private readonly Dictionary<TrainingPhase, PhaseData> phaseData = new();
+
+#if UNITY_EDITOR
+    [Header("Scene HUD")]
+    [SerializeField] private bool showTrainingHud = true;
+    [SerializeField] private Vector2 trainingHudPosition = new Vector2(10f, 110f);
+    [SerializeField] private Vector2 trainingHudSize = new Vector2(280f, 180f);
+    [SerializeField] private HybridAgent hudAgent;
+#endif
+
     private void Awake()
     {
         // Singleton pattern
@@ -111,6 +140,95 @@ public class GameManager : MonoBehaviour
         currentSeed = seed;
     }
 
+    public void ReportHybridEpisodeResult(bool success, bool beatBase, int episodeNumber)
+    {
+        PhaseData data = GetPhaseData(trainingPhase);
+
+        if (episodeNumber == data.LastHybridEpisodeReported)
+            return;
+        data.LastHybridEpisodeReported = episodeNumber;
+
+        if (success)
+            data.HybridTotalSuccesses++;
+
+        if (beatBase && !data.HybridBeatBaseOnce)
+        {
+            data.HybridBeatBaseOnce = true;
+            EnableTracking(data);
+        }
+
+        if (!data.TrackingEnabled) return;
+
+        RecordResult(data.BeatBaseResults, beatBase);
+        CheckAutoProgression(data);
+    }
+
+    public void ReportBasicEpisodeResult(bool success)
+    {
+        // Base result is implied via beatBase flag passed from HybridAgent; nothing to track per-seed here.
+    }
+
+    private void EnableTracking(PhaseData data)
+    {
+        data.TrackingEnabled = true;
+        data.BeatBaseResults.Clear();
+    }
+
+    private PhaseData GetPhaseData(TrainingPhase phase)
+    {
+        if (!phaseData.TryGetValue(phase, out PhaseData data))
+        {
+            data = new PhaseData();
+            phaseData[phase] = data;
+        }
+
+        return data;
+    }
+
+    private void RecordResult(Queue<bool> queue, bool success)
+    {
+        queue.Enqueue(success);
+
+        int window = Mathf.Max(1, performanceWindow);
+        while (queue.Count > window)
+            queue.Dequeue();
+    }
+
+    private float GetSuccessRate(Queue<bool> queue)
+    {
+        if (queue.Count == 0) return 0f;
+
+        int successCount = 0;
+        foreach (bool result in queue)
+        {
+            if (result) successCount++;
+        }
+
+        return (float)successCount / queue.Count;
+    }
+
+    private void CheckAutoProgression(PhaseData data)
+    {
+        if (!data.TrackingEnabled) return;
+        if (trainingPhase >= TrainingPhase.MovingTarget) return;
+        if (data.BeatBaseResults.Count < minEpisodesForEvaluation) return;
+
+        float beatRate = GetSuccessRate(data.BeatBaseResults);
+
+        if (beatRate < minSuccessRateForPromotion) return;
+
+        var nextPhase = (TrainingPhase)Mathf.Min((int)trainingPhase + 1, (int)TrainingPhase.MovingTarget);
+        if (nextPhase != trainingPhase)
+        {
+            trainingPhase = nextPhase;
+            Debug.Log($"Auto-advanced to training phase: {trainingPhase}");
+            // Reset tracking flags for the new phase; data will be re-fetched per phase
+            PhaseData nextData = GetPhaseData(trainingPhase);
+            nextData.TrackingEnabled = false;
+            nextData.HybridBeatBaseOnce = false;
+        }
+    }
+
     /// <summary>
     /// Check if slime spawning should be enabled based on training phase.
     /// </summary>
@@ -137,6 +255,52 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void OnBasicAgentReachedTarget()
     {
+        ReportBasicEpisodeResult(true);
         OnBasicAgentReachedTargetEvent?.Invoke();
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        if (!Application.isPlaying || !showTrainingHud) return;
+
+        PhaseData data = GetPhaseData(trainingPhase);
+
+        float beatRate = GetSuccessRate(data.BeatBaseResults);
+
+        string text =
+            $"Phase: {trainingPhase}\n" +
+            $"Hybrid beats base ({data.BeatBaseResults.Count}): {beatRate:P1}\n" +
+            $"Promote if win rate >= {minSuccessRateForPromotion:P0}\n" +
+            $"Hybrid total successes: {data.HybridTotalSuccesses}\n" +
+            $"Beat base once (this phase): {data.HybridBeatBaseOnce}";
+
+        if (hudAgent != null)
+        {
+            text +=
+                $"\n\nAgent Ep: {hudAgent.Episode}\n" +
+                $"Current: {hudAgent.CurrentReward:F2}\n" +
+                $"Last: {hudAgent.LastEpisodeReward:F2}\n" +
+                $"Best: {hudAgent.BestEpisodeReward:F2}";
+        }
+
+        if (!data.HybridBeatBaseOnce)
+            text += "\n\nTracking starts once hybrid beats base first.";
+
+        Handles.BeginGUI();
+        GUI.Label(new Rect(trainingHudPosition.x, trainingHudPosition.y, trainingHudSize.x, trainingHudSize.y), text, GetHudStyle());
+        Handles.EndGUI();
+    }
+
+    private GUIStyle GetHudStyle()
+    {
+        var style = new GUIStyle(EditorStyles.boldLabel)
+        {
+            alignment = TextAnchor.UpperLeft,
+            wordWrap = true
+        };
+        style.normal.textColor = Color.white;
+        return style;
+    }
+#endif
 }

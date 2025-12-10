@@ -96,6 +96,7 @@ public class DungeonGenerator : MonoBehaviour
 
     [Tooltip("Number of rooms to randomly place within the dungeon space.")]
     [SerializeField] int numRandomRooms = 10;
+    int defaultNumRandomRooms;
     [Tooltip("Maximum size of room in cells.  Room size is randomized between [minSize, maxSize].")]
     [SerializeField] Vector3 maxSize = new Vector3(4, 1, 4);
     [Tooltip("Minimum size of room in cells.   Room size is randomized between [minSize, maxSize].")]
@@ -205,6 +206,10 @@ public class DungeonGenerator : MonoBehaviour
 
     void Setup()
     {
+        if (defaultNumRandomRooms == 0)
+        {
+            defaultNumRandomRooms = Mathf.Max(1, numRandomRooms);
+        }
         //Grid component should be on the same object as the DungeonGenerator component
         if (grid == null)
         {
@@ -415,18 +420,31 @@ public class DungeonGenerator : MonoBehaviour
             Debug.Log("Created fallback edge between two training rooms.");
         }
 
-        //Check that the dictionary of all edges in the delaunay tetrahedralization actually has edges
-        Vector3 start = Vector3.zero;
-        IEnumerator enumerator = totalEdges.Keys.GetEnumerator(); //Get enumerator of keys
-        bool success = enumerator.MoveNext();   //Move to first key
-        if (success) //Check that key exists
+        Vector3 start = rooms.Count > 0 ? rooms[0].center : Vector3.zero;
+        bool hasEdges = totalEdges != null && totalEdges.Count > 0;
+
+        if (!hasEdges && rooms.Count == 1)
         {
-            start = (Vector3)enumerator.Current;    //Get key
+            totalEdges ??= new Dictionary<Vector3, List<Edge>>();
+            if (!totalEdges.ContainsKey(start))
+            {
+                totalEdges[start] = new List<Edge>();
+            }
+            hasEdges = true;
         }
-        else
+        else if (!hasEdges)
         {
             Debug.LogError("No keys in edge map from tetrahedralization.  Can not execute MST.\n" +
                 "Try checking that rooms are actually getting created and that tetrahedralization is functioning.");
+        }
+
+        if (hasEdges)
+        {
+            IEnumerator enumerator = totalEdges.Keys.GetEnumerator();
+            if (enumerator.MoveNext())
+            {
+                start = (Vector3)enumerator.Current;
+            }
         }
 
         //Create MST
@@ -475,6 +493,9 @@ public class DungeonGenerator : MonoBehaviour
                 break;
             case TrainingPhase.BasePathfinding:
                 numRandomRooms = 2;
+                break;
+            default:
+                numRandomRooms = defaultNumRandomRooms;
                 break;
         }
 

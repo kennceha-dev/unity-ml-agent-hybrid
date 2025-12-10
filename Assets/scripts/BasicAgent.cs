@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using Unity.MLAgents;
 using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class BasicAgent : Agent, ISpeedModifiable
+public class BasicAgent : MonoBehaviour, ISpeedModifiable
 {
     [SerializeField] private Transform target;
     [SerializeField] private float targetReachedThreshold = 1.5f;
@@ -22,7 +21,7 @@ public class BasicAgent : Agent, ISpeedModifiable
 
     void Update()
     {
-        if (target != null)
+        if (target != null && agent != null && agent.isOnNavMesh)
         {
             agent.SetDestination(target.position);
 

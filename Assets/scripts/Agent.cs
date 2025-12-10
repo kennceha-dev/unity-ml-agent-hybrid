@@ -24,8 +24,11 @@ public class HybridAgent : Agent, ISpeedModifiable
     [SerializeField] private LayerMask wallLayer;
 
     [Header("Timeout")]
-    [SerializeField] private float catchUpTimeout = 3f;
-
+    [SerializeField] private float catchUpTimeout = 60f;
+    [SerializeField] private float progressThreshold = 0.05f;
+    [SerializeField] private float regressionThreshold = 1f;
+    [SerializeField] private float baseCatchTolerance = 5f;
+    private enum ProgressState { Unknown, Progressing, NoProgress, Regressing }
     private CharacterController characterController;
     private NavMeshAgent navAgent;
     private bool isReady;
@@ -49,6 +52,11 @@ public class HybridAgent : Agent, ISpeedModifiable
     private bool isOnWall;
     private float timeoutTimer;
     private bool isInTimeout;
+    private float baseCatchElapsed;
+    private float previousPathRemainingDistance = -1f;
+    private float previousSteeringDistance = -1f;
+    private float lastEpisodeReward;
+    private float bestEpisodeReward = float.MinValue;
 
     #region Unity Lifecycle
 
@@ -92,6 +100,9 @@ public class HybridAgent : Agent, ISpeedModifiable
         {
             isInTimeout = true;
             timeoutTimer = catchUpTimeout;
+            baseCatchElapsed = 0f;
+            previousPathRemainingDistance = -1f;
+            previousSteeringDistance = -1f;
         }
     }
 
@@ -101,28 +112,26 @@ public class HybridAgent : Agent, ISpeedModifiable
     {
         if (!isReady) return;
 
-        // Handle timeout countdown
-        if (isInTimeout)
-        {
-            timeoutTimer -= Time.fixedDeltaTime;
-            if (timeoutTimer <= 0f)
-            {
-                // Timeout expired - RL agent failed to catch up
-                AddReward(-1f);
-                HandleEpisodeEnd();
-                return;
-            }
-        }
-
         if (navAgent != null && !navAgent.isOnNavMesh)
         {
             AddReward(-0.5f);
-            HandleEpisodeEnd();
+            HandleEpisodeEnd(false, false, false);
             return;
         }
 
         ApplyMovement();
         SyncNavMeshAgent();
+
+        if (isInTimeout)
+        {
+            baseCatchElapsed += Time.fixedDeltaTime;
+            if (HandleProgressBasedTimeout())
+                return;
+        }
+        else
+        {
+            baseCatchElapsed = 0f;
+        }
     }
 
     #endregion
@@ -131,6 +140,7 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     public override void OnEpisodeBegin()
     {
+        episode++;
         transform.rotation = Quaternion.identity;
 
         previousDistanceToTarget = Vector3.Distance(transform.position, target.position);
@@ -140,7 +150,10 @@ public class HybridAgent : Agent, ISpeedModifiable
         isOnSticky = false;
         isOnWall = false;
         isInTimeout = false;
-        timeoutTimer = 0f;
+        timeoutTimer = catchUpTimeout;
+        baseCatchElapsed = 0f;
+        previousPathRemainingDistance = -1f;
+        previousSteeringDistance = -1f;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -373,6 +386,65 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     #endregion
 
+    #region Timeout Management
+
+    private bool HandleProgressBasedTimeout()
+    {
+        float remainingDistance = GetRemainingDistance();
+        float steeringDistance = Vector3.Distance(transform.position, GetSteeringTarget());
+        ProgressState state = EvaluateProgressState(remainingDistance, steeringDistance);
+
+        previousPathRemainingDistance = remainingDistance;
+        previousSteeringDistance = steeringDistance;
+
+        switch (state)
+        {
+            case ProgressState.Progressing:
+                timeoutTimer = catchUpTimeout;
+                return false;
+            case ProgressState.NoProgress:
+                timeoutTimer -= Time.fixedDeltaTime;
+                if (timeoutTimer <= 0f)
+                {
+                    AddReward(-1f);
+                    HandleEpisodeEnd(false, false, false);
+                    return true;
+                }
+                return false;
+            case ProgressState.Regressing:
+                AddReward(-1f);
+                HandleEpisodeEnd(false, false, false);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private ProgressState EvaluateProgressState(float remainingDistance, float steeringDistance)
+    {
+        if (previousPathRemainingDistance < 0f || previousSteeringDistance < 0f)
+            return ProgressState.Unknown;
+
+        float pathDelta = previousPathRemainingDistance - remainingDistance;
+        float steeringDelta = previousSteeringDistance - steeringDistance;
+
+        if (pathDelta < -regressionThreshold || steeringDelta < -regressionThreshold)
+            return ProgressState.Regressing;
+
+        bool closingTarget = pathDelta > progressThreshold;
+        bool followingPath = steeringDelta > -progressThreshold;
+
+        if (closingTarget && followingPath)
+            return ProgressState.Progressing;
+
+        if (Mathf.Abs(pathDelta) <= progressThreshold && Mathf.Abs(steeringDelta) <= progressThreshold)
+            return ProgressState.NoProgress;
+
+        return ProgressState.NoProgress;
+    }
+
+    #endregion
+
     #region Collision
 
     private void OnCollisionEnter(Collision other)
@@ -392,7 +464,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         else if (other.gameObject.CompareTag(GameManager.Instance.ExitTag))
         {
             AddReward(-0.1f);
-            HandleEpisodeEnd();
+            HandleEpisodeEnd(false, false, false);
         }
     }
 
@@ -443,15 +515,29 @@ public class HybridAgent : Agent, ISpeedModifiable
     {
         SetReward(1f);
         // AddReward(5f); // coba add?
-        HandleEpisodeEnd(true);
+        bool beatBase = !isInTimeout || baseCatchElapsed <= baseCatchTolerance;
+        HandleEpisodeEnd(true, true, beatBase);
     }
 
     #endregion
 
     #region Utility
 
+    public int Episode => episode;
+    public float LastEpisodeReward => lastEpisodeReward;
+    public float BestEpisodeReward => bestEpisodeReward;
+    public float CurrentReward => GetCumulativeReward();
+
     private Vector3 GetSteeringTarget() =>
         navAgent != null && navAgent.hasPath ? navAgent.steeringTarget : target.position;
+
+    private float GetRemainingDistance()
+    {
+        if (navAgent != null && navAgent.isOnNavMesh && navAgent.hasPath)
+            return navAgent.remainingDistance;
+
+        return Vector3.Distance(transform.position, target.position);
+    }
 
     private float GetMinWallDistance()
     {
@@ -467,8 +553,14 @@ public class HybridAgent : Agent, ISpeedModifiable
         return minDist;
     }
 
-    private void HandleEpisodeEnd(bool setNotReady = false)
+    private void HandleEpisodeEnd(bool setNotReady = false, bool isSuccess = false, bool beatBase = false)
     {
+        float finalReward = GetCumulativeReward();
+        lastEpisodeReward = finalReward;
+        if (finalReward > bestEpisodeReward)
+            bestEpisodeReward = finalReward;
+
+        GameManager.Instance.ReportHybridEpisodeResult(isSuccess, beatBase, episode);
         EndEpisode();
 
         if (setNotReady)

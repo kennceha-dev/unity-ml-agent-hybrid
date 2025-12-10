@@ -148,18 +148,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f98db5ef1eca2f4c867af2ff7f36d84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trainingPhase: 1
+  trainingPhase: 0
   initialSeed: 12345
   timePenaltyPerStep: 0.001
   closeDistanceThreshold: 2
   closeMoveAwayPenalty: -0.25
   closeMoveCloserReward: 0.05
-  wallRayLength: 1.5
+  wallRayLength: 2
   slipperyFloorRayLength: 5
   stickyTag: Sticky
   wallTag: Wall
   exitTag: Exit
   playerTag: Player
+  performanceWindow: 50
+  minEpisodesForEvaluation: 15
+  minSuccessRateForPromotion: 0.6
+  successMargin: 0.05
+  showTrainingHud: 1
+  trainingHudPosition: {x: 60, y: 10}
+  trainingHudSize: {x: 300, y: 300}
+  hudAgent: {fileID: 1298789836}
 --- !u!4 &442292573
 Transform:
   m_ObjectHideFlags: 0
@@ -221,7 +229,6 @@ GameObject:
   - component: {fileID: 551007035}
   - component: {fileID: 551007034}
   - component: {fileID: 551007033}
-  - component: {fileID: 551007039}
   m_Layer: 0
   m_Name: BasicAgent
   m_TagString: Untagged
@@ -241,11 +248,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49f63a9793e26b0419c9d4df78187f1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentParameters:
-    maxStep: 0
-  hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
   target: {fileID: 1043899800}
+  targetReachedThreshold: 1.5
 --- !u!195 &551007034
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -256,13 +260,13 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 35
-  m_Acceleration: 8
+  m_Speed: 10
+  m_Acceleration: 50
   avoidancePriority: 50
-  m_AngularSpeed: 120
+  m_AngularSpeed: 900
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 1
+  m_AutoBraking: 0
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 1
@@ -359,37 +363,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &551007039
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 551007032}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d1c4e0b1822b495aa52bc52839ecb30, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_BrainParameters:
-    VectorObservationSize: 1
-    NumStackedVectorObservations: 1
-    m_ActionSpec:
-      m_NumContinuousActions: 0
-      BranchSizes: 01000000
-    VectorActionSize: 01000000
-    VectorActionDescriptions: []
-    VectorActionSpaceType: 0
-    hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 0}
-  m_InferenceDevice: 0
-  m_BehaviorType: 0
-  m_BehaviorName: My Behavior
-  TeamId: 0
-  m_UseChildSensors: 1
-  m_UseChildActuators: 1
-  m_DeterministicInference: 0
-  m_ObservableAttributeHandling: 0
 --- !u!1001 &673871643
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -972,13 +945,17 @@ MonoBehaviour:
   groundedGravity: -5
   terminalVelocity: -45
   target: {fileID: 1043899800}
-  dungeonRunner: {fileID: 1823781927}
+  dungeonRunner: {fileID: 1593571142}
   floorLayer:
     serializedVersion: 2
     m_Bits: 8
   wallLayer:
     serializedVersion: 2
     m_Bits: 64
+  catchUpTimeout: 60
+  progressThreshold: 0.05
+  regressionThreshold: 0.15
+  baseCatchTolerance: 5
 --- !u!195 &1298789837
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1190,7 +1167,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!114 &1823781927 stripped
+--- !u!114 &1593571142 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 702557565140486307, guid: 7c11381b753a1424fa70b5dab7e73718, type: 3}
   m_PrefabInstance: {fileID: 673871643}
