@@ -17,6 +17,12 @@ public class DungeonRunner : MonoBehaviour
     private DungeonGenerator generator;
     private NavMeshSurface surface;
 
+    /// <summary>
+    /// Tracks whether a dungeon has been generated at least once.
+    /// Used to decide if we can skip regeneration during training.
+    /// </summary>
+    private bool dungeonGenerated = false;
+
     void Awake()
     {
         generator = GetComponent<DungeonGenerator>();
@@ -49,7 +55,7 @@ public class DungeonRunner : MonoBehaviour
         {
             GameManager.Instance.IncrementSeed();
             SetSeed(GameManager.Instance.CurrentSeed);
-            StartCoroutine(GenerateAndSpawn());
+            ForceRegenerate();
         }
     }
 
@@ -62,6 +68,7 @@ public class DungeonRunner : MonoBehaviour
         }
 
         generator.Generate();
+        dungeonGenerated = true;
 
         yield return null;
 
@@ -157,5 +164,44 @@ public class DungeonRunner : MonoBehaviour
             generator.SetSeed(seed);
     }
 
-    public void Reset() => StartCoroutine(GenerateAndSpawn());
+    /// <summary>
+    /// Reset the dungeon. During training phases, only respawn agent and target
+    /// without regenerating the entire dungeon map.
+    /// </summary>
+    public void Reset()
+    {
+        // During training, if dungeon already exists, just respawn agent/target
+        if (dungeonGenerated && IsTrainingPhase())
+        {
+            SpawnAgentAndTarget();
+        }
+        else
+        {
+            StartCoroutine(GenerateAndSpawn());
+        }
+    }
+
+    /// <summary>
+    /// Force full dungeon regeneration regardless of training phase.
+    /// </summary>
+    public void ForceRegenerate()
+    {
+        StartCoroutine(GenerateAndSpawn());
+    }
+
+    /// <summary>
+    /// Check if we're currently in a training phase where we want to keep the same map.
+    /// </summary>
+    private bool IsTrainingPhase()
+    {
+        if (GameManager.Instance == null)
+            return false;
+
+        // All phases except MovingTarget are considered training phases where we keep the map
+        var phase = GameManager.Instance.CurrentTrainingPhase;
+        return phase == TrainingPhase.ReachTarget ||
+               phase == TrainingPhase.BasePathfinding ||
+               phase == TrainingPhase.FullPathfinding ||
+               phase == TrainingPhase.AvoidSlime;
+    }
 }

@@ -503,20 +503,36 @@ public class DungeonGenerator : MonoBehaviour
         for (int i = 0; i < numRandomRooms; i++)
         {
             Vector3 randPos = Vector3.zero;
+            Vector3 randSize;
 
-            //Number of room segments in each direction
-            Vector3 randSize = new Vector3(
-                rng.Range(minSize.x, maxSize.x),
-                rng.Range(minSize.y, maxSize.y),
-                rng.Range(minSize.z, maxSize.z)
-            );
+            // Special handling for ReachTarget phase: fixed large room at center
+            if (GameManager.Instance.CurrentTrainingPhase == TrainingPhase.ReachTarget)
+            {
+                // Large fixed room size for initial training
+                randSize = new Vector3(8, 1, 8);
 
-            randPos = new Vector3(
-                cellDimensions.x * rng.Range(0, (int)gridDimensions.x),
-                cellDimensions.y * rng.Range(0, (int)gridDimensions.y),
-                cellDimensions.z * rng.Range(0, (int)gridDimensions.z)
-            );
-            //}
+                // Fixed position at the center of the grid
+                randPos = new Vector3(
+                    cellDimensions.x * Mathf.FloorToInt(gridDimensions.x / 2f - randSize.x / 2f),
+                    cellDimensions.y * Mathf.FloorToInt(gridDimensions.y / 2f),
+                    cellDimensions.z * Mathf.FloorToInt(gridDimensions.z / 2f - randSize.z / 2f)
+                );
+            }
+            else
+            {
+                //Number of room segments in each direction
+                randSize = new Vector3(
+                    rng.Range(minSize.x, maxSize.x),
+                    rng.Range(minSize.y, maxSize.y),
+                    rng.Range(minSize.z, maxSize.z)
+                );
+
+                randPos = new Vector3(
+                    cellDimensions.x * rng.Range(0, (int)gridDimensions.x),
+                    cellDimensions.y * rng.Range(0, (int)gridDimensions.y),
+                    cellDimensions.z * rng.Range(0, (int)gridDimensions.z)
+                );
+            }
 
             Vector3 gridCenter = grid.GetCenter(randPos);
             Vector3Int gridIndices = grid.GetGridIndices(randPos);
