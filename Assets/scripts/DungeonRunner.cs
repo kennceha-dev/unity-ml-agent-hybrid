@@ -47,6 +47,20 @@ public class DungeonRunner : MonoBehaviour
     void Start()
     {
         StartCoroutine(GenerateAndSpawn());
+        GameManager.OnTrainingPhaseChanged += OnPhaseChanged;
+    }
+
+    void OnDestroy()
+    {
+        GameManager.OnTrainingPhaseChanged -= OnPhaseChanged;
+    }
+
+    private void OnPhaseChanged(TrainingPhase newPhase)
+    {
+        Debug.Log($"Training phase changed to {newPhase}, regenerating dungeon...");
+        GameManager.Instance.IncrementSeed();
+        SetSeed(GameManager.Instance.CurrentSeed);
+        ForceRegenerate();
     }
 
     void Update()

@@ -31,6 +31,11 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public static event Action OnBasicAgentReachedTargetEvent;
 
+    /// <summary>
+    /// Event fired when training phase changes. DungeonRunner subscribes to regenerate the map.
+    /// </summary>
+    public static event Action<TrainingPhase> OnTrainingPhaseChanged;
+
     [Header("Training Settings")]
     [SerializeField] private TrainingPhase trainingPhase = TrainingPhase.BasePathfinding;
     public TrainingPhase CurrentTrainingPhase => trainingPhase;
@@ -226,6 +231,9 @@ public class GameManager : MonoBehaviour
             PhaseData nextData = GetPhaseData(trainingPhase);
             nextData.TrackingEnabled = false;
             nextData.HybridBeatBaseOnce = false;
+
+            // Notify listeners (e.g., DungeonRunner) to regenerate the map
+            OnTrainingPhaseChanged?.Invoke(trainingPhase);
         }
     }
 
