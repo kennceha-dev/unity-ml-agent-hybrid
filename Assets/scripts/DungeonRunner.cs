@@ -138,33 +138,63 @@ public class DungeonRunner : MonoBehaviour
         while (targetRoom == agentRoom && rooms.Count > 1)
             targetRoom = generator.GetRandomRoom();
 
+        Vector3 agentPosition = Vector3.zero;
+        Vector3 targetPosition = Vector3.zero;
+
+        // Minimum distance to prevent spawning on top of each other
+        const float minDistance = 2.0f;
+        const int maxAttempts = 20;
+
         if (agent != null)
         {
-            Vector3 position = generator.GetRandomPositionInRoom(agentRoom);
+            agentPosition = generator.GetRandomPositionInRoom(agentRoom);
+        }
+
+        if (target != null)
+        {
+            // Try to find a target position that's far enough from the agent
+            for (int i = 0; i < maxAttempts; i++)
+            {
+                targetPosition = generator.GetRandomPositionInRoom(targetRoom);
+                float distance = Vector3.Distance(agentPosition, targetPosition);
+                if (distance >= minDistance)
+                    break;
+
+                // If same room and still too close, try a different position
+                if (i == maxAttempts - 1 && distance < minDistance)
+                {
+                    Debug.LogWarning($"Could not find spawn positions with minimum distance after {maxAttempts} attempts. Forcing dungeon regeneration.");
+                    StartCoroutine(GenerateAndSpawn());
+                    return;
+                }
+            }
+            target.position = targetPosition;
+        }
+
+        if (agent != null)
+        {
             if (agent.TryGetComponent<CharacterController>(out var cc))
             {
                 cc.enabled = false;
-                agent.position = position;
+                agent.position = agentPosition;
                 cc.enabled = true;
             }
             else
             {
-                agent.position = position;
+                agent.position = agentPosition;
             }
 
             if (basicAgent != null && basicAgent.TryGetComponent<NavMeshAgent>(out var basicNavAgent))
             {
-                basicNavAgent.Warp(position);
-                basicNavAgent.ResetPath();
+                basicNavAgent.Warp(agentPosition);
+                if (basicNavAgent.isOnNavMesh)
+                    basicNavAgent.ResetPath();
             }
             else if (basicAgent != null)
             {
-                basicAgent.position = position;
+                basicAgent.position = agentPosition;
             }
         }
-
-        if (target != null)
-            target.position = generator.GetRandomPositionInRoom(targetRoom);
 
         OnDungeonReady?.Invoke();
     }
@@ -185,14 +215,14 @@ public class DungeonRunner : MonoBehaviour
     public void Reset()
     {
         // During training, if dungeon already exists, just respawn agent/target
-        if (dungeonGenerated && IsTrainingPhase())
-        {
-            SpawnAgentAndTarget();
-        }
-        else
-        {
-            StartCoroutine(GenerateAndSpawn());
-        }
+        // if (dungeonGenerated && IsTrainingPhase())
+        // {
+        //     SpawnAgentAndTarget();
+        // }
+        // else
+        // {
+        // }
+        StartCoroutine(GenerateAndSpawn());
     }
 
     /// <summary>

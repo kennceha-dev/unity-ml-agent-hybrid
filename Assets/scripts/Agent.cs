@@ -28,6 +28,7 @@ public class HybridAgent : Agent, ISpeedModifiable
     [SerializeField] private float progressThreshold = 0.05f;
     [SerializeField] private float regressionThreshold = 1f;
     [SerializeField] private float baseCatchTolerance = 5f;
+    [SerializeField] private float wallContactTimeout = 5f;
     private enum ProgressState { Unknown, Progressing, NoProgress, Regressing }
     private CharacterController characterController;
     private NavMeshAgent navAgent;
@@ -52,6 +53,7 @@ public class HybridAgent : Agent, ISpeedModifiable
     private bool isOnWall;
     private float timeoutTimer;
     private bool isInTimeout;
+    private float wallContactTimer;
     private float baseCatchElapsed;
     private float previousPathRemainingDistance = -1f;
     private float previousSteeringDistance = -1f;
@@ -150,6 +152,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         isOnSticky = false;
         isOnWall = false;
         isInTimeout = false;
+        wallContactTimer = 0f;
         timeoutTimer = catchUpTimeout;
         baseCatchElapsed = 0f;
         previousPathRemainingDistance = -1f;
@@ -221,18 +224,22 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void RewardMovementAlignment(Vector3 desiredDir)
     {
-        // Calculate the agent's current movement direction
-        Vector3 moveDir = new Vector3(cachedStrafeInput, 0f, cachedForwardInput).normalized;
+        // Use actual velocity instead of input to avoid rewarding wall-ramming
+        Vector3 actualVelocity = characterController.velocity;
+        Vector3 horizontalVelocity = new Vector3(actualVelocity.x, 0f, actualVelocity.z);
 
-        if (moveDir.sqrMagnitude > 0.01f)
+        float speed = horizontalVelocity.magnitude;
+        if (speed > 0.1f)
         {
+            Vector3 moveDir = horizontalVelocity.normalized;
+
             // Reward moving in the direction of the target
             float alignment = Vector3.Dot(moveDir, desiredDir);
             AddReward(alignment * 0.05f);
 
             // Additional small reward for any forward movement to encourage exploration
-            float movementMagnitude = Mathf.Sqrt(cachedForwardInput * cachedForwardInput + cachedStrafeInput * cachedStrafeInput);
-            AddReward(movementMagnitude * 0.005f);
+            float normalizedSpeed = Mathf.Clamp01(speed / moveSpeed);
+            AddReward(normalizedSpeed * 0.005f);
         }
     }
 
@@ -241,13 +248,29 @@ public class HybridAgent : Agent, ISpeedModifiable
         if (!GameManager.Instance.ShouldPenalizeWalls) return;
 
         float minWallDist = GetMinWallDistance();
+        bool isTouchingWall = minWallDist < 0.6f;
 
         // Only penalize when very close to walls (about to collide)
-        if (minWallDist < 0.1f)
+        if (minWallDist < 0.6f)
         {
-            float normalizedDist = minWallDist / 0.1f;
+            float normalizedDist = minWallDist / 0.6f;
             float penalty = (1f - normalizedDist) * 0.02f;
             AddReward(-penalty);
+        }
+
+        // Track wall contact time and end episode if too long
+        if (isTouchingWall)
+        {
+            wallContactTimer += Time.fixedDeltaTime;
+            if (wallContactTimer >= wallContactTimeout)
+            {
+                AddReward(-1f);
+                HandleEpisodeEnd(false, false, false);
+            }
+        }
+        else
+        {
+            wallContactTimer = 0f;
         }
     }
 
@@ -372,7 +395,8 @@ public class HybridAgent : Agent, ISpeedModifiable
 
         navAgent.Warp(transform.position);
 
-        if (target != null)
+        // Check again after Warp - agent may have been moved off NavMesh
+        if (target != null && navAgent.isOnNavMesh)
             navAgent.SetDestination(target.position);
     }
 

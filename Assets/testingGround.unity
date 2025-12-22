@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f98db5ef1eca2f4c867af2ff7f36d84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trainingPhase: 0
+  trainingPhase: 1
   initialSeed: 12345
   timePenaltyPerStep: 0.001
   closeDistanceThreshold: 2
@@ -956,6 +956,7 @@ MonoBehaviour:
   progressThreshold: 0.05
   regressionThreshold: 0.15
   baseCatchTolerance: 5
+  wallContactTimeout: 5
 --- !u!195 &1298789837
 NavMeshAgent:
   m_ObjectHideFlags: 0
