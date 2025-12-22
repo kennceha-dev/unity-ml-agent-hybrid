@@ -165,7 +165,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         Vector3 dirToSteeringTarget = (steeringTarget - transform.position).normalized;
 
         sensor.AddObservation(transform.position);
-        sensor.AddObservation(target.position);
+        // sensor.AddObservation(target.position);
         sensor.AddObservation(Vector3.Distance(transform.position, target.position));
         sensor.AddObservation(steeringTarget);
         sensor.AddObservation(dirToSteeringTarget);

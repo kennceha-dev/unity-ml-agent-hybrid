@@ -23,6 +23,13 @@ public class DungeonRunner : MonoBehaviour
     /// </summary>
     private bool dungeonGenerated = false;
 
+    /// <summary>
+    /// Guards against multiple simultaneous reset/regeneration calls.
+    /// </summary>
+    private bool isResetting = false;
+    private float lastResetTime = 0f;
+    private const float MIN_RESET_INTERVAL = 0.5f;
+
     void Awake()
     {
         generator = GetComponent<DungeonGenerator>();
@@ -75,11 +82,20 @@ public class DungeonRunner : MonoBehaviour
 
     public IEnumerator GenerateAndSpawn()
     {
+        if (isResetting)
+        {
+            Debug.Log("GenerateAndSpawn skipped - already resetting");
+            yield break;
+        }
+
         if (generator == null)
         {
             Debug.LogError("DungeonGenerator component not found!");
             yield break;
         }
+
+        isResetting = true;
+        lastResetTime = Time.time;
 
         generator.Generate();
         dungeonGenerated = true;
@@ -96,37 +112,8 @@ public class DungeonRunner : MonoBehaviour
         }
 
         SpawnAgentAndTarget();
+        isResetting = false;
     }
-
-    // void SpawnAgentAndTarget()
-    // {
-    //     var rooms = generator.GetRooms();
-    //     if (rooms.Count < 2)
-    //     {
-    //         Debug.Log("Not enough rooms to spawn agent and target separately.");
-    //         return;
-    //     }
-
-    //     Room agentRoom = generator.GetRandomRoom();
-    //     Room targetRoom = generator.GetRandomRoom();
-
-    //     while (targetRoom == agentRoom && rooms.Count > 1)
-    //     {
-    //         targetRoom = generator.GetRandomRoom();
-    //     }
-
-    //     if (agent != null)
-    //     {
-    //         agent.position = generator.GetRandomPositionInRoom(agentRoom);
-    //     }
-
-    //     if (target != null)
-    //     {
-    //         target.position = generator.GetRandomPositionInRoom(targetRoom);
-    //     }
-
-    //     OnDungeonReady?.Invoke();
-    // }
 
     void SpawnAgentAndTarget()
     {
@@ -214,14 +201,14 @@ public class DungeonRunner : MonoBehaviour
     /// </summary>
     public void Reset()
     {
-        // During training, if dungeon already exists, just respawn agent/target
-        // if (dungeonGenerated && IsTrainingPhase())
-        // {
-        //     SpawnAgentAndTarget();
-        // }
-        // else
-        // {
-        // }
+        // Prevent rapid successive resets
+        if (isResetting || Time.time - lastResetTime < MIN_RESET_INTERVAL)
+        {
+            Debug.Log($"Reset skipped - too soon since last reset ({Time.time - lastResetTime:F2}s)");
+            return;
+        }
+
+        lastResetTime = Time.time;
         StartCoroutine(GenerateAndSpawn());
     }
 
@@ -230,22 +217,12 @@ public class DungeonRunner : MonoBehaviour
     /// </summary>
     public void ForceRegenerate()
     {
+        // Prevent rapid successive regenerations
+        if (isResetting)
+        {
+            Debug.Log("ForceRegenerate skipped - already resetting");
+            return;
+        }
         StartCoroutine(GenerateAndSpawn());
-    }
-
-    /// <summary>
-    /// Check if we're currently in a training phase where we want to keep the same map.
-    /// </summary>
-    private bool IsTrainingPhase()
-    {
-        if (GameManager.Instance == null)
-            return false;
-
-        // All phases except MovingTarget are considered training phases where we keep the map
-        var phase = GameManager.Instance.CurrentTrainingPhase;
-        return phase == TrainingPhase.ReachTarget ||
-               phase == TrainingPhase.BasePathfinding ||
-               phase == TrainingPhase.FullPathfinding ||
-               phase == TrainingPhase.AvoidSlime;
     }
 }
