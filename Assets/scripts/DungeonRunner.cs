@@ -18,17 +18,11 @@ public class DungeonRunner : MonoBehaviour
     private NavMeshSurface surface;
 
     /// <summary>
-    /// Tracks whether a dungeon has been generated at least once.
-    /// Used to decide if we can skip regeneration during training.
-    /// </summary>
-    private bool dungeonGenerated = false;
-
-    /// <summary>
     /// Guards against multiple simultaneous reset/regeneration calls.
     /// </summary>
     private bool isResetting = false;
-    private float lastResetTime = 0f;
-    private const float MIN_RESET_INTERVAL = 0.5f;
+    private int lastResetFrame = 0;
+    private const int MIN_RESET_FRAME_INTERVAL = 5;
 
     void Awake()
     {
@@ -95,10 +89,9 @@ public class DungeonRunner : MonoBehaviour
         }
 
         isResetting = true;
-        lastResetTime = Time.time;
+        lastResetFrame = Time.frameCount;
 
         generator.Generate();
-        dungeonGenerated = true;
 
         yield return null;
 
@@ -202,13 +195,13 @@ public class DungeonRunner : MonoBehaviour
     public void Reset()
     {
         // Prevent rapid successive resets
-        if (isResetting || Time.time - lastResetTime < MIN_RESET_INTERVAL)
+        if (isResetting || Time.frameCount - lastResetFrame < MIN_RESET_FRAME_INTERVAL)
         {
-            Debug.Log($"Reset skipped - too soon since last reset ({Time.time - lastResetTime:F2}s)");
+            Debug.Log($"Reset skipped - too soon since last reset ({Time.frameCount - lastResetFrame} frames)");
             return;
         }
 
-        lastResetTime = Time.time;
+        lastResetFrame = Time.frameCount;
         StartCoroutine(GenerateAndSpawn());
     }
 

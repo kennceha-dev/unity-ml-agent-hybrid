@@ -156,6 +156,11 @@ MonoBehaviour:
   closeMoveCloserReward: 0.05
   wallRayLength: 2
   slipperyFloorRayLength: 5
+  enableRewardLogging: 0
+  logToFile: 1
+  logToConsole: 1
+  logFileName: reward_log.txt
+  phaseLogInterval: 10
   stickyTag: Sticky
   wallTag: Wall
   exitTag: Exit
@@ -1098,7 +1103,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 25
+    VectorObservationSize: 22
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2

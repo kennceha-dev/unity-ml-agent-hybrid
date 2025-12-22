@@ -116,7 +116,7 @@ public class HybridAgent : Agent, ISpeedModifiable
 
         if (navAgent != null && !navAgent.isOnNavMesh)
         {
-            AddReward(-0.5f);
+            LoggedAddReward(-0.5f, "Off NavMesh");
             HandleEpisodeEnd(false, false, false);
             return;
         }
@@ -191,7 +191,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         RewardTargetProgress();
         PenalizeStuck();
 
-        AddReward(-GameManager.Instance.TimePenaltyPerStep);
+        LoggedAddReward(-GameManager.Instance.TimePenaltyPerStep, "Time penalty");
     }
 
     #endregion
@@ -216,7 +216,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         if (previousDistanceToSteeringTarget > 0f)
         {
             float delta = previousDistanceToSteeringTarget - distToSteering;
-            AddReward(delta * 0.1f);
+            LoggedAddReward(delta * 0.1f, "Steering progress");
         }
 
         previousDistanceToSteeringTarget = distToSteering;
@@ -235,11 +235,11 @@ public class HybridAgent : Agent, ISpeedModifiable
 
             // Reward moving in the direction of the target
             float alignment = Vector3.Dot(moveDir, desiredDir);
-            AddReward(alignment * 0.05f);
+            LoggedAddReward(alignment * 0.05f, "Movement alignment");
 
             // Additional small reward for any forward movement to encourage exploration
             float normalizedSpeed = Mathf.Clamp01(speed / moveSpeed);
-            AddReward(normalizedSpeed * 0.005f);
+            LoggedAddReward(normalizedSpeed * 0.005f, "Forward movement");
         }
     }
 
@@ -255,7 +255,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         {
             float normalizedDist = minWallDist / 0.6f;
             float penalty = (1f - normalizedDist) * 0.02f;
-            AddReward(-penalty);
+            LoggedAddReward(-penalty, "Wall proximity");
         }
 
         // Track wall contact time and end episode if too long
@@ -264,7 +264,7 @@ public class HybridAgent : Agent, ISpeedModifiable
             wallContactTimer += Time.fixedDeltaTime;
             if (wallContactTimer >= wallContactTimeout)
             {
-                AddReward(-1f);
+                LoggedAddReward(-1f, "Wall contact timeout");
                 HandleEpisodeEnd(false, false, false);
             }
         }
@@ -278,14 +278,14 @@ public class HybridAgent : Agent, ISpeedModifiable
     {
         float dist = Vector3.Distance(transform.position, target.position);
         float delta = previousDistanceToTarget - dist;
-        AddReward(delta * 0.05f);
+        LoggedAddReward(delta * 0.05f, "Target progress");
 
         if (previousDistanceToTarget <= GameManager.Instance.CloseDistanceThreshold)
         {
             if (dist > previousDistanceToTarget)
-                AddReward(GameManager.Instance.CloseMoveAwayPenalty);
+                LoggedAddReward(GameManager.Instance.CloseMoveAwayPenalty, "Close move away");
             else if (dist < previousDistanceToTarget)
-                AddReward(GameManager.Instance.CloseMoveCloserReward);
+                LoggedAddReward(GameManager.Instance.CloseMoveCloserReward, "Close move closer");
         }
 
         previousDistanceToTarget = dist;
@@ -299,13 +299,13 @@ public class HybridAgent : Agent, ISpeedModifiable
         {
             stuckCounter++;
             if (stuckCounter > 50)
-                AddReward(-0.05f);
+                LoggedAddReward(-0.05f, "Stuck penalty");
         }
         else
         {
             stuckCounter = 0;
             lastSignificantPosition = transform.position;
-            AddReward(0.01f);
+            LoggedAddReward(0.01f, "Movement reward");
         }
     }
 
@@ -430,13 +430,13 @@ public class HybridAgent : Agent, ISpeedModifiable
                 timeoutTimer -= Time.fixedDeltaTime;
                 if (timeoutTimer <= 0f)
                 {
-                    AddReward(-1f);
+                    LoggedAddReward(-1f, "No progress timeout");
                     HandleEpisodeEnd(false, false, false);
                     return true;
                 }
                 return false;
             case ProgressState.Regressing:
-                AddReward(-1f);
+                LoggedAddReward(-1f, "Regressing");
                 HandleEpisodeEnd(false, false, false);
                 return true;
             default:
@@ -487,7 +487,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         }
         else if (other.gameObject.CompareTag(GameManager.Instance.ExitTag))
         {
-            AddReward(-0.1f);
+            LoggedAddReward(-0.1f, "Exit collision");
             HandleEpisodeEnd(false, false, false);
         }
     }
@@ -496,14 +496,14 @@ public class HybridAgent : Agent, ISpeedModifiable
     {
         if (other.gameObject.CompareTag(GameManager.Instance.WallTag) && GameManager.Instance.ShouldPenalizeWalls)
         {
-            AddReward(-0.05f);
+            LoggedAddReward(-0.05f, "Wall collision");
 
             if (cachedForwardInput > 0.2f)
-                AddReward(-0.03f);
+                LoggedAddReward(-0.03f, "Pushing into wall");
         }
         else if (other.gameObject.CompareTag(GameManager.Instance.StickyTag) && GameManager.Instance.ShouldPenalizeSlime)
         {
-            AddReward(-0.02f);
+            LoggedAddReward(-0.02f, "Sticky collision");
         }
     }
 
@@ -522,7 +522,7 @@ public class HybridAgent : Agent, ISpeedModifiable
     private void HandleWallEnter()
     {
         if (GameManager.Instance.ShouldPenalizeWalls)
-            AddReward(-0.4f);
+            LoggedAddReward(-0.4f, "Wall enter");
 
         isOnWall = true;
     }
@@ -530,15 +530,14 @@ public class HybridAgent : Agent, ISpeedModifiable
     private void HandleStickyEnter()
     {
         if (GameManager.Instance.ShouldPenalizeSlime)
-            AddReward(-0.3f);
+            LoggedAddReward(-0.3f, "Sticky enter");
 
         isOnSticky = true;
     }
 
     private void HandlePlayerCaught()
     {
-        SetReward(1f);
-        // AddReward(5f); // coba add?
+        LoggedSetReward(1f, "Player caught");
         bool beatBase = !isInTimeout || baseCatchElapsed <= baseCatchTolerance;
         HandleEpisodeEnd(true, true, beatBase);
     }
@@ -638,6 +637,30 @@ public class HybridAgent : Agent, ISpeedModifiable
             baseMoveSpeed = navAgent.speed;
 
         navAgent.speed = baseMoveSpeed * currentSpeedMultiplier;
+    }
+
+    #endregion
+
+    #region Reward Logging
+
+    private void LoggedAddReward(float reward, string reason)
+    {
+        if (GameManager.Instance.EnableRewardLogging && reward != 0f)
+        {
+            string message = $"[Reward] Episode {episode} | {reason}: {reward:+0.000;-0.000} | Cumulative: {GetCumulativeReward():F3}";
+            GameManager.Instance.WriteRewardLog(message);
+        }
+        AddReward(reward);
+    }
+
+    private void LoggedSetReward(float reward, string reason)
+    {
+        if (GameManager.Instance.EnableRewardLogging)
+        {
+            string message = $"[Reward] Episode {episode} | {reason}: SET to {reward:F3}";
+            GameManager.Instance.WriteRewardLog(message);
+        }
+        SetReward(reward);
     }
 
     #endregion

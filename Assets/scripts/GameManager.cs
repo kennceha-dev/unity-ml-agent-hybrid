@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -69,6 +70,19 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float slipperyFloorRayLength = 5f;
     public float SlipperyFloorRayLength => slipperyFloorRayLength;
 
+    [Header("Debug")]
+    [SerializeField] private bool enableRewardLogging = false;
+    public bool EnableRewardLogging => enableRewardLogging;
+
+    [SerializeField] private bool logToFile = true;
+    [SerializeField] private bool logToConsole = false;
+    [SerializeField] private string logFileName = "reward_log.txt";
+    [SerializeField] private int phaseLogInterval = 10;
+
+    private StreamWriter logWriter;
+    private string logFilePath;
+    private int lastPhaseLogEpisode = 0;
+
     [Header("Tags")]
     [SerializeField] private string stickyTag = "Sticky";
     public string StickyTag => stickyTag;
@@ -119,6 +133,109 @@ public class GameManager : MonoBehaviour
 
         // Initialize seed
         currentSeed = initialSeed;
+
+        // Initialize log file
+        InitializeLogFile();
+    }
+
+    private void OnDestroy()
+    {
+        CloseLogFile();
+    }
+
+    private void OnApplicationQuit()
+    {
+        CloseLogFile();
+    }
+
+    private void InitializeLogFile()
+    {
+        if (!enableRewardLogging || !logToFile) return;
+
+        try
+        {
+            string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            string fileName = Path.GetFileNameWithoutExtension(logFileName);
+            string extension = Path.GetExtension(logFileName);
+            if (string.IsNullOrEmpty(extension)) extension = ".txt";
+
+            logFilePath = Path.Combine(Application.dataPath, "Logs", $"{fileName}_{timestamp}{extension}");
+
+            // Ensure directory exists
+            string directory = Path.GetDirectoryName(logFilePath);
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            logWriter = new StreamWriter(logFilePath, false) { AutoFlush = true };
+            logWriter.WriteLine($"=== Reward Log Started: {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
+            logWriter.WriteLine($"Training Phase: {trainingPhase}");
+            logWriter.WriteLine(new string('=', 60));
+
+            Debug.Log($"[GameManager] Reward logging to: {logFilePath}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[GameManager] Failed to initialize log file: {e.Message}");
+            logWriter = null;
+        }
+    }
+
+    private void CloseLogFile()
+    {
+        if (logWriter != null)
+        {
+            try
+            {
+                logWriter.WriteLine(new string('=', 60));
+                logWriter.WriteLine($"=== Reward Log Ended: {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
+                logWriter.Close();
+                logWriter.Dispose();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[GameManager] Failed to close log file: {e.Message}");
+            }
+            finally
+            {
+                logWriter = null;
+            }
+        }
+    }
+
+    public void WriteRewardLog(string message)
+    {
+        if (!enableRewardLogging) return;
+
+        if (logToConsole)
+            Debug.Log(message);
+
+        if (logToFile && logWriter != null)
+        {
+            try
+            {
+                logWriter.WriteLine(message);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[GameManager] Failed to write to log: {e.Message}");
+            }
+        }
+    }
+
+    private void WritePhaseDataLog(PhaseData data, int episodeNumber)
+    {
+        float beatRate = GetSuccessRate(data.BeatBaseResults);
+
+        string separator = new string('-', 60);
+        WriteRewardLog(separator);
+        WriteRewardLog($"[Phase Summary] Episode {episodeNumber} | Phase: {trainingPhase}");
+        WriteRewardLog($"  Seed: {currentSeed}");
+        WriteRewardLog($"  Total Successes: {data.HybridTotalSuccesses}");
+        WriteRewardLog($"  Beat Base Once: {data.HybridBeatBaseOnce}");
+        WriteRewardLog($"  Tracking Enabled: {data.TrackingEnabled}");
+        WriteRewardLog($"  Beat Base Rate ({data.BeatBaseResults.Count}): {beatRate:P1}");
+        WriteRewardLog($"  Promotion Threshold: {minSuccessRateForPromotion:P0}");
+        WriteRewardLog(separator);
     }
 
     /// <summary>
@@ -160,6 +277,13 @@ public class GameManager : MonoBehaviour
         {
             data.HybridBeatBaseOnce = true;
             EnableTracking(data);
+        }
+
+        // Log phase data periodically
+        if (enableRewardLogging && phaseLogInterval > 0 && episodeNumber - lastPhaseLogEpisode >= phaseLogInterval)
+        {
+            WritePhaseDataLog(data, episodeNumber);
+            lastPhaseLogEpisode = episodeNumber;
         }
 
         if (!data.TrackingEnabled) return;
