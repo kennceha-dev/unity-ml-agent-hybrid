@@ -122,7 +122,7 @@ GameObject:
   - component: {fileID: 2677176792485493137}
   m_Layer: 6
   m_Name: Mesh
-  m_TagString: Wall
+  m_TagString: Exit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

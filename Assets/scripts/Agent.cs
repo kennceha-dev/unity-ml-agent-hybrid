@@ -551,8 +551,11 @@ public class HybridAgent : Agent, ISpeedModifiable
     public float BestEpisodeReward => bestEpisodeReward;
     public float CurrentReward => GetCumulativeReward();
 
-    private Vector3 GetSteeringTarget() =>
-        navAgent != null && navAgent.hasPath ? navAgent.steeringTarget : target.position;
+    private Vector3 GetSteeringTarget() {
+        Vector3 steeringTarget = navAgent != null && navAgent.hasPath ? navAgent.steeringTarget : target.position;
+        Debug.Log("Steering target: " + steeringTarget);
+        return steeringTarget;
+    }
 
     private float GetRemainingDistance()
     {

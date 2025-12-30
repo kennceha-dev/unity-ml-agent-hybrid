@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f98db5ef1eca2f4c867af2ff7f36d84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trainingPhase: 0
+  trainingPhase: 4
   initialSeed: 12345
   timePenaltyPerStep: 0.001
   closeDistanceThreshold: 2
@@ -157,7 +157,7 @@ MonoBehaviour:
   wallRayLength: 2
   slipperyFloorRayLength: 5
   enableRewardLogging: 0
-  logToFile: 1
+  logToFile: 0
   logToConsole: 1
   logFileName: reward_log.txt
   phaseLogInterval: 10
@@ -389,6 +389,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 551007038}
     - target: {fileID: 1202467655473539675, guid: 7c11381b753a1424fa70b5dab7e73718, type: 3}
+      propertyPath: exitPrefab
+      value: 
+      objectReference: {fileID: 4875715511962008531, guid: c4160dc0886b65c4c84c82fad91d71f9, type: 3}
+    - target: {fileID: 1202467655473539675, guid: 7c11381b753a1424fa70b5dab7e73718, type: 3}
       propertyPath: hybridAgent
       value: 
       objectReference: {fileID: 1298789836}
@@ -617,6 +621,7 @@ GameObject:
   - component: {fileID: 1043899802}
   - component: {fileID: 1043899796}
   - component: {fileID: 1043899801}
+  - component: {fileID: 1043899803}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -756,6 +761,7 @@ MonoBehaviour:
   groundedGravity: -5
   terminalVelocity: -45
   lookPivot: {fileID: 0}
+  enableTrainingMode: 1
 --- !u!143 &1043899802
 CharacterController:
   m_ObjectHideFlags: 0
@@ -781,6 +787,28 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!195 &1043899803
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1043899795}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.75
+  m_Speed: 5
+  m_Acceleration: 50
+  avoidancePriority: 50
+  m_AngularSpeed: 900
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 1
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &1182804257
 GameObject:
   m_ObjectHideFlags: 0
@@ -971,7 +999,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 1298789835}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.5
+  m_Radius: 0.75
   m_Speed: 8
   m_Acceleration: 8
   avoidancePriority: 50
@@ -1222,7 +1250,7 @@ SceneRoots:
   - {fileID: 1182804259}
   - {fileID: 504556235}
   - {fileID: 551007038}
-  - {fileID: 1298789841}
   - {fileID: 1043899800}
+  - {fileID: 1298789841}
   - {fileID: 673871643}
   - {fileID: 442292573}
