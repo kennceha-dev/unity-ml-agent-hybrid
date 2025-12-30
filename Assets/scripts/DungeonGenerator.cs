@@ -113,6 +113,12 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] GameObject pillarPrefab; //We store this prefab to add the pillar to the southeast corner of rooms it is not automatically added to from a wall
     [SerializeField] GameObject archPrefab; //Add between cells of the same type where a wall was not added
 
+    [Header("Exit")]
+    [Tooltip("Exit prefab (similar to wall but with Exit layer). One exit is placed per dungeon.")]
+    [SerializeField] GameObject exitPrefab;
+    [Tooltip("Layer to assign to exit objects.")]
+    [SerializeField] string exitLayerName = "Exit";
+
     [Header("Hazards")]
     [Tooltip("Slime prefab (must include SlimeZone) spawned across floors.")]
     [SerializeField] GameObject slimeZonePrefab;
@@ -463,6 +469,9 @@ public class DungeonGenerator : MonoBehaviour
 
         //Place walls in between rooms and hallways (keeps hallways and rooms from having 
         PlaceWalls();
+
+        // Place exits in rooms
+        PlaceExits();
 
         PopulateSlimeZones();
 
@@ -1101,6 +1110,98 @@ public class DungeonGenerator : MonoBehaviour
     }
 
     /// <summary>
+    /// Place a single exit on a random room wall using PCG randomness.
+    /// The exit is placed on a wall that borders an empty cell (CellTypes.NONE).
+    /// </summary>
+    private void PlaceExits()
+    {
+        if (exitPrefab == null)
+        {
+            Debug.LogWarning("Exit prefab not assigned. Skipping exit placement.");
+            return;
+        }
+
+        if (rooms == null || rooms.Count == 0)
+        {
+            return;
+        }
+
+        int exitLayer = LayerMask.NameToLayer(exitLayerName);
+        if (exitLayer == -1)
+        {
+            Debug.LogWarning($"Exit layer '{exitLayerName}' not found. Please create it in Unity's Layer settings. Exits will use default layer.");
+        }
+
+        // Collect all eligible wall positions from all rooms
+        List<(Vector3Int cellIndex, Vector3Int adjacentIndex)> allEligiblePositions = new();
+        Vector3Int[] directions = { AStar.constNorth, AStar.constSouth, AStar.constEast, AStar.constWest };
+
+        foreach (Room room in rooms)
+        {
+            foreach (Cell cell in room.cells)
+            {
+                foreach (Vector3Int dir in directions)
+                {
+                    Vector3Int adjacentIndex = cell.index + dir;
+
+                    // Check if adjacent cell is empty (outside the dungeon or CellTypes.NONE)
+                    if (!grid.IsValidCell(adjacentIndex) || grid.IsCellEmpty(adjacentIndex))
+                    {
+                        allEligiblePositions.Add((cell.index, adjacentIndex));
+                    }
+                }
+            }
+        }
+
+        if (allEligiblePositions.Count == 0)
+        {
+            Debug.LogWarning("No eligible wall positions found for exit in any room.");
+            return;
+        }
+
+        // Shuffle and pick one random position for the single exit
+        ShuffleWallPositions(allEligiblePositions);
+        var (exitCellIndex, exitAdjacentIndex) = allEligiblePositions[0];
+        SpawnExit(exitCellIndex, exitAdjacentIndex, exitLayer);
+    }
+
+    /// <summary>
+    /// Spawn an exit at the specified wall position.
+    /// </summary>
+    /// <param name="cellIndex">Index of the room cell</param>
+    /// <param name="adjacentIndex">Index of the adjacent empty cell (determines wall direction)</param>
+    /// <param name="exitLayer">Layer to assign to the exit</param>
+    private void SpawnExit(Vector3Int cellIndex, Vector3Int adjacentIndex, int exitLayer)
+    {
+        Vector3 position = grid.GetCenterByIndices(cellIndex);
+        Quaternion rotation = GetWallRotation(cellIndex, adjacentIndex);
+
+        GameObject exitObj = Instantiate(exitPrefab, position, rotation, roomParent);
+        exitObj.transform.localScale = cellDimensions;
+
+        // Set the Exit layer on the exit object and all its children
+        if (exitLayer != -1)
+        {
+            SetLayerRecursively(exitObj, exitLayer);
+        }
+
+        // Tag as Exit for collision detection
+        exitObj.tag = GameManager.Instance?.ExitTag ?? "Exit";
+    }
+
+    /// <summary>
+    /// Shuffle the list of wall positions using PCG random (Fisher-Yates shuffle).
+    /// </summary>
+    private void ShuffleWallPositions(List<(Vector3Int, Vector3Int)> positions)
+    {
+        for (int i = positions.Count - 1; i > 0; i--)
+        {
+            int j = rng.Range(0, i + 1);
+            (positions[i], positions[j]) = (positions[j], positions[i]);
+        }
+    }
+
+    /// <summary>
     /// Check if pillars need to be placed at current index
     /// </summary>
     /// <param name="currentIndex">Index of cell in which to place pillars</param>
@@ -1625,9 +1726,10 @@ public class DungeonGenerator : MonoBehaviour
     {
         if (obj == null) return;
 
-        // Only set layer on objects named "Floor" or if it's a room/hallway/stair prefab root
+        // Only set layer on objects named "Floor" or if it's a room/hallway/stair/exit prefab root
         if (obj.name.Contains("Floor") || obj.name.Contains("Room") ||
-            obj.name.Contains("Hall") || obj.name.Contains("Stair"))
+            obj.name.Contains("Hall") || obj.name.Contains("Stair") ||
+            obj.name.Contains("Exit"))
         {
             obj.layer = layer;
         }
