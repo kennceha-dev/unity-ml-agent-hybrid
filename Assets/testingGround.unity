@@ -393,6 +393,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 4875715511962008531, guid: c4160dc0886b65c4c84c82fad91d71f9, type: 3}
     - target: {fileID: 1202467655473539675, guid: 7c11381b753a1424fa70b5dab7e73718, type: 3}
+      propertyPath: wallPrefab
+      value: 
+      objectReference: {fileID: 4875715511962008531, guid: eddc93b6a915d9e4da1d7c22add2b817, type: 3}
+    - target: {fileID: 1202467655473539675, guid: 7c11381b753a1424fa70b5dab7e73718, type: 3}
       propertyPath: hybridAgent
       value: 
       objectReference: {fileID: 1298789836}
