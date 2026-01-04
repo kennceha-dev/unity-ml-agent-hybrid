@@ -109,6 +109,8 @@ public class GameManager : MonoBehaviour
         public bool TrackingEnabled;
         public int HybridTotalSuccesses;
         public int LastHybridEpisodeReported = -1;
+        public int ConsecutiveSuccesses;
+        public int ConsecutiveFailures;
     }
 
     private readonly Dictionary<TrainingPhase, PhaseData> phaseData = new();
@@ -225,6 +227,7 @@ public class GameManager : MonoBehaviour
     private void WritePhaseDataLog(PhaseData data, int episodeNumber)
     {
         float beatRate = GetSuccessRate(data.BeatBaseResults);
+        float threshold = GetPromotionThreshold();
 
         string separator = new string('-', 60);
         WriteRewardLog(separator);
@@ -234,7 +237,7 @@ public class GameManager : MonoBehaviour
         WriteRewardLog($"  Beat Base Once: {data.HybridBeatBaseOnce}");
         WriteRewardLog($"  Tracking Enabled: {data.TrackingEnabled}");
         WriteRewardLog($"  Beat Base Rate ({data.BeatBaseResults.Count}): {beatRate:P1}");
-        WriteRewardLog($"  Promotion Threshold: {minSuccessRateForPromotion:P0}");
+        WriteRewardLog($"  Promotion Threshold: {threshold:P0}");
         WriteRewardLog(separator);
     }
 
@@ -271,7 +274,14 @@ public class GameManager : MonoBehaviour
         data.LastHybridEpisodeReported = episodeNumber;
 
         if (success)
+        {
             data.HybridTotalSuccesses++;
+            data.ConsecutiveSuccesses++;
+        }
+        else
+        {
+            data.ConsecutiveFailures++;
+        }
 
         if (beatBase && !data.HybridBeatBaseOnce)
         {
@@ -284,6 +294,25 @@ public class GameManager : MonoBehaviour
         {
             WritePhaseDataLog(data, episodeNumber);
             lastPhaseLogEpisode = episodeNumber;
+        }
+
+        // Special rule for ReachTarget: auto-advance on performanceWindow consecutive successes.
+        if (trainingPhase == TrainingPhase.ReachTarget)
+        {
+            int requiredStreak = Mathf.Max(1, performanceWindow);
+            int allowedFailures = Mathf.CeilToInt(requiredStreak * 0.1f); // allow up to 10% failures before reset
+
+            if (data.ConsecutiveFailures > allowedFailures)
+            {
+                data.ConsecutiveSuccesses = 0;
+                data.ConsecutiveFailures = 0;
+            }
+
+            if (data.ConsecutiveSuccesses >= requiredStreak)
+            {
+                if (TryAdvancePhase("success streak"))
+                    return;
+            }
         }
 
         if (!data.TrackingEnabled) return;
@@ -336,6 +365,14 @@ public class GameManager : MonoBehaviour
         return (float)successCount / queue.Count;
     }
 
+    private float GetPromotionThreshold()
+    {
+        // Phase 1 (ReachTarget) uses a softer threshold to promote to Phase 2.
+        return trainingPhase == TrainingPhase.ReachTarget
+            ? minSuccessRateForPromotion * 0.5f
+            : minSuccessRateForPromotion;
+    }
+
     private void CheckAutoProgression(PhaseData data)
     {
         if (!data.TrackingEnabled) return;
@@ -343,22 +380,31 @@ public class GameManager : MonoBehaviour
         if (data.BeatBaseResults.Count < minEpisodesForEvaluation) return;
 
         float beatRate = GetSuccessRate(data.BeatBaseResults);
+        float threshold = GetPromotionThreshold();
 
-        if (beatRate < minSuccessRateForPromotion) return;
+        if (beatRate < threshold) return;
 
+        TryAdvancePhase("beat-base threshold");
+    }
+
+    private bool TryAdvancePhase(string reason)
+    {
         var nextPhase = (TrainingPhase)Mathf.Min((int)trainingPhase + 1, (int)TrainingPhase.MovingTarget);
-        if (nextPhase != trainingPhase)
-        {
-            trainingPhase = nextPhase;
-            Debug.Log($"Auto-advanced to training phase: {trainingPhase}");
-            // Reset tracking flags for the new phase; data will be re-fetched per phase
-            PhaseData nextData = GetPhaseData(trainingPhase);
-            nextData.TrackingEnabled = false;
-            nextData.HybridBeatBaseOnce = false;
+        if (nextPhase == trainingPhase) return false;
 
-            // Notify listeners (e.g., DungeonRunner) to regenerate the map
-            OnTrainingPhaseChanged?.Invoke(trainingPhase);
-        }
+        trainingPhase = nextPhase;
+        Debug.Log($"Auto-advanced to training phase: {trainingPhase} ({reason})");
+
+        // Reset tracking flags and streaks for the new phase; data is per-phase.
+        PhaseData nextData = GetPhaseData(trainingPhase);
+        nextData.TrackingEnabled = false;
+        nextData.HybridBeatBaseOnce = false;
+        nextData.ConsecutiveSuccesses = 0;
+        nextData.ConsecutiveFailures = 0;
+
+        // Notify listeners (e.g., DungeonRunner) to regenerate the map
+        OnTrainingPhaseChanged?.Invoke(trainingPhase);
+        return true;
     }
 
     /// <summary>
@@ -399,13 +445,22 @@ public class GameManager : MonoBehaviour
         PhaseData data = GetPhaseData(trainingPhase);
 
         float beatRate = GetSuccessRate(data.BeatBaseResults);
+        float threshold = GetPromotionThreshold();
+        int requiredStreak = Mathf.Max(1, performanceWindow);
+        int allowedFailures = Mathf.CeilToInt(requiredStreak * 0.1f);
 
         string text =
             $"Phase: {trainingPhase}\n" +
             $"Hybrid beats base ({data.BeatBaseResults.Count}): {beatRate:P1}\n" +
-            $"Promote if win rate >= {minSuccessRateForPromotion:P0}\n" +
+            $"Promote if win rate >= {threshold:P0}\n" +
             $"Hybrid total successes: {data.HybridTotalSuccesses}\n" +
             $"Beat base once (this phase): {data.HybridBeatBaseOnce}";
+
+        if (trainingPhase == TrainingPhase.ReachTarget)
+        {
+            text += $"\nConsecutive successes: {data.ConsecutiveSuccesses}/{requiredStreak} (auto-promote)";
+            text += $"\nAllowed failures before reset: {data.ConsecutiveFailures}/{allowedFailures}";
+        }
 
         if (hudAgent != null)
         {

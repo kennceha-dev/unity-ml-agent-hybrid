@@ -223,68 +223,30 @@ public class DungeonGenerator : MonoBehaviour
         }
 
         /*
-         * If can not find parents, create new ones
+         * If parents are not assigned, create new ones as children of this generator.
+         * We no longer use GameObject.Find() to avoid conflicts with multiple DungeonGenerators.
          */
         if (dungeonParent == null)
         {
-            GameObject dObject = GameObject.Find("Dungeon");
-            if (dObject != null)
-            {
-                dungeonParent = dObject.transform;
-            }
-            else
-            {
-                dungeonParent = (new GameObject("Dungeon")).transform;
-            }
+            dungeonParent = new GameObject($"Dungeon_{gameObject.name}").transform;
+            dungeonParent.parent = transform;
         }
 
         if (roomParent == null)
         {
-            GameObject rObject = GameObject.Find("Rooms");
-            if (rObject != null)
-            {
-                roomParent = rObject.transform;
-            }
-            else
-            {
-                roomParent = (new GameObject("Rooms")).transform;
-                roomParent.parent = dungeonParent;
-            }
+            roomParent = new GameObject("Rooms").transform;
+            roomParent.parent = dungeonParent;
         }
 
         if (pathParent == null)
         {
-            GameObject pObject = GameObject.Find("Paths");
-            if (pObject != null)
-            {
-                pathParent = pObject.transform;
-            }
-            else
-            {
-                pathParent = (new GameObject("Paths")).transform;
-                pathParent.parent = dungeonParent;
-            }
-        }
-        else
-        {
+            pathParent = new GameObject("Paths").transform;
             pathParent.parent = dungeonParent;
         }
 
         if (slimeParent == null)
         {
-            GameObject sObject = GameObject.Find("Slimes");
-            if (sObject != null)
-            {
-                slimeParent = sObject.transform;
-            }
-            else
-            {
-                slimeParent = (new GameObject("Slimes")).transform;
-                slimeParent.parent = dungeonParent;
-            }
-        }
-        else
-        {
+            slimeParent = new GameObject("Slimes").transform;
             slimeParent.parent = dungeonParent;
         }
     }

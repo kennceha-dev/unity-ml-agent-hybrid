@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &263214206765965603
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7048066321565951085}
+  m_Layer: 0
+  m_Name: Slimes
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7048066321565951085
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 263214206765965603}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5192898737701749509}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3778776113222279052
 GameObject:
   m_ObjectHideFlags: 0
@@ -29,6 +60,40 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
+  m_Father: {fileID: 5192898737701749509}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7682541624232846097
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5192898737701749509}
+  m_Layer: 0
+  m_Name: Dungeon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5192898737701749509
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7682541624232846097}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7048066321565951085}
+  - {fileID: 5035794654872875820}
+  - {fileID: 5088355742228559930}
   m_Father: {fileID: 70412437446380874}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &9099076906417122435
@@ -64,8 +129,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5035794654872875820}
-  - {fileID: 5088355742228559930}
+  - {fileID: 5192898737701749509}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7789068759378307632
@@ -95,6 +159,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99eedcf8e5ae07c4dab9230191f7b89c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  basicAgent: {fileID: 0}
   agent: {fileID: 0}
   target: {fileID: 0}
 --- !u!114 &9065690440695344975
@@ -111,7 +176,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   useDeterministicSeed: 1
   dungeonSeed: 12345
-  dungeonParent: {fileID: 0}
+  dungeonParent: {fileID: 5192898737701749509}
   displayAlgorithmTime: 1
   debugMode: 0
   cellDimensions: {x: 4, y: 4, z: 4}
@@ -126,10 +191,22 @@ MonoBehaviour:
   hallPrefab: {fileID: 3015041062976946509, guid: 71c80cbf98dc35d48bd9441bd7a1dcef, type: 3}
   stairsPrefab: {fileID: 4511191661846442700, guid: a47d5c71bc0d5a148956db1cc6ffcdc6, type: 3}
   stairSpacePrefab: {fileID: 3015041062976946509, guid: 5ef3605bfb74d8b4d9eb32dd3096619c, type: 3}
-  wallPrefab: {fileID: 4875715511962008531, guid: afa55f8b9e7c75b4b962896efa9b23b2, type: 3}
+  wallPrefab: {fileID: 4875715511962008531, guid: eddc93b6a915d9e4da1d7c22add2b817, type: 3}
   doorwayPrefab: {fileID: 149328350824309938, guid: 6a727f37b1098974186143ee7996a136, type: 3}
   pillarPrefab: {fileID: 149328350824309938, guid: 6a727f37b1098974186143ee7996a136, type: 3}
   archPrefab: {fileID: 149328350824309938, guid: 6a727f37b1098974186143ee7996a136, type: 3}
+  exitPrefab: {fileID: 4875715511962008531, guid: c4160dc0886b65c4c84c82fad91d71f9, type: 3}
+  exitLayerName: Exit
+  slimeZonePrefab: {fileID: 4050262370831711420, guid: 427335df0dd858d4cb779f1654cb5195, type: 3}
+  slimeParent: {fileID: 7048066321565951085}
+  slimeMinCoverage: 0
+  slimeMaxCoverage: 0.25
+  slimeVerticalOffset: 0.5
+  scaleSlimeToCell: 1
+  slimeMinPatchesPerCell: 1
+  slimeMaxPatchesPerCell: 3
+  slimePatchMinScale: 0.35
+  slimePatchMaxScale: 0.8
   percentEnableLights: 0.1
   extraHallwaysFactor: 0.5
   onDungeonClear:
@@ -166,7 +243,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.16666667
+  m_VoxelSize: 0.11666667
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 0}
   m_BuildHeightMesh: 0
@@ -194,10 +271,10 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9117296096740876317}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 70412437446380874}
+  m_Father: {fileID: 5192898737701749509}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

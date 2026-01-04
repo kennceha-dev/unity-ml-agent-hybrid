@@ -57,10 +57,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3015041062976946509, guid: 71cf2f04bc53a754db0be21543e5b35b, type: 3}
     - target: {fileID: 9065690440695344975, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
-      propertyPath: wallPrefab
-      value: 
-      objectReference: {fileID: 4875715511962008531, guid: 670b394873959c142bb0ca4209105504, type: 3}
-    - target: {fileID: 9065690440695344975, guid: 07b358dbb944abd4f8086c85ae66a365, type: 3}
       propertyPath: stairsPrefab
       value: 
       objectReference: {fileID: 4511191661846442700, guid: eaa9a0690ec79674fbcf7b6ea22a1299, type: 3}

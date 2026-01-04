@@ -29,6 +29,13 @@ public class HybridAgent : Agent, ISpeedModifiable
     [SerializeField] private float regressionThreshold = 1f;
     [SerializeField] private float baseCatchTolerance = 5f;
     [SerializeField] private float wallContactTimeout = 5f;
+
+    [Header("Reward Timeout")]
+    [SerializeField] private float rewardTimeoutThreshold = -2f;
+
+    [Header("Action Filtering")]
+    [SerializeField, Range(0f, 1f)] private float actionSmoothing = 0.2f;
+    [SerializeField, Range(0f, 1f)] private float actionDeadZone = 0.1f;
     private enum ProgressState { Unknown, Progressing, NoProgress, Regressing }
     private CharacterController characterController;
     private NavMeshAgent navAgent;
@@ -59,6 +66,7 @@ public class HybridAgent : Agent, ISpeedModifiable
     private float previousSteeringDistance = -1f;
     private float lastEpisodeReward;
     private float bestEpisodeReward = float.MinValue;
+    private Vector2 smoothedMove;
 
     #region Unity Lifecycle
 
@@ -121,6 +129,13 @@ public class HybridAgent : Agent, ISpeedModifiable
             return;
         }
 
+        if (HasRewardDroppedBelowThreshold())
+        {
+            LoggedAddReward(-1f, "Reward timeout");
+            HandleEpisodeEnd(false, false, false);
+            return;
+        }
+
         ApplyMovement();
         SyncNavMeshAgent();
 
@@ -157,6 +172,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         baseCatchElapsed = 0f;
         previousPathRemainingDistance = -1f;
         previousSteeringDistance = -1f;
+        smoothedMove = Vector2.zero;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -200,8 +216,17 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void ProcessActions(ActionBuffers actions)
     {
-        cachedForwardInput = actions.ContinuousActions[0];  // -1 to 1: backward to forward
-        cachedStrafeInput = actions.ContinuousActions[1];   // -1 to 1: left to right
+        Vector2 raw = new Vector2(actions.ContinuousActions[1], actions.ContinuousActions[0]); // x = strafe, y = forward
+
+        if (raw.magnitude < actionDeadZone)
+            raw = Vector2.zero;
+
+        float smoothing = Mathf.Clamp01(actionSmoothing);
+        smoothedMove = Vector2.Lerp(smoothedMove, raw, smoothing);
+        smoothedMove = Vector2.ClampMagnitude(smoothedMove, 1f);
+
+        cachedStrafeInput = smoothedMove.x;
+        cachedForwardInput = smoothedMove.y;
         cachedJumpInput = (actions.DiscreteActions[0] == 1) && GameManager.Instance.CanJump;
     }
 
@@ -444,6 +469,11 @@ public class HybridAgent : Agent, ISpeedModifiable
         }
     }
 
+    private bool HasRewardDroppedBelowThreshold()
+    {
+        return GetCumulativeReward() <= rewardTimeoutThreshold;
+    }
+
     private ProgressState EvaluateProgressState(float remainingDistance, float steeringDistance)
     {
         if (previousPathRemainingDistance < 0f || previousSteeringDistance < 0f)
@@ -551,7 +581,8 @@ public class HybridAgent : Agent, ISpeedModifiable
     public float BestEpisodeReward => bestEpisodeReward;
     public float CurrentReward => GetCumulativeReward();
 
-    private Vector3 GetSteeringTarget() {
+    private Vector3 GetSteeringTarget()
+    {
         Vector3 steeringTarget = navAgent != null && navAgent.hasPath ? navAgent.steeringTarget : target.position;
         Debug.Log("Steering target: " + steeringTarget);
         return steeringTarget;
