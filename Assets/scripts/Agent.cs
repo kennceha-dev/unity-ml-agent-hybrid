@@ -93,14 +93,26 @@ public class HybridAgent : Agent, ISpeedModifiable
         }
 
         RecalculateJumpValues();
-        DungeonRunner.OnDungeonReady += () => isReady = true;
+        DungeonRunner.OnDungeonReady += OnDungeonReady;
+        DungeonRunner.OnDungeonRegenerating += OnDungeonRegenerating;
         GameManager.OnBasicAgentReachedTargetEvent += OnBasicAgentReachedTarget;
     }
 
     private void OnDestroy()
     {
-        DungeonRunner.OnDungeonReady -= () => isReady = true;
+        DungeonRunner.OnDungeonReady -= OnDungeonReady;
+        DungeonRunner.OnDungeonRegenerating -= OnDungeonRegenerating;
         GameManager.OnBasicAgentReachedTargetEvent -= OnBasicAgentReachedTarget;
+    }
+
+    private void OnDungeonReady()
+    {
+        isReady = true;
+    }
+
+    private void OnDungeonRegenerating()
+    {
+        isReady = false;
     }
 
     private void OnBasicAgentReachedTarget()
@@ -584,7 +596,7 @@ public class HybridAgent : Agent, ISpeedModifiable
     private Vector3 GetSteeringTarget()
     {
         Vector3 steeringTarget = navAgent != null && navAgent.hasPath ? navAgent.steeringTarget : target.position;
-        Debug.Log("Steering target: " + steeringTarget);
+        // Debug.Log("Steering target: " + steeringTarget);
         return steeringTarget;
     }
 

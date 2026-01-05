@@ -9,6 +9,7 @@ using UnityEngine.AI;
 public class DungeonRunner : MonoBehaviour
 {
     public static event Action OnDungeonReady;
+    public static event Action OnDungeonRegenerating;
 
     [SerializeField] private Transform basicAgent;
     [SerializeField] private Transform agent;
@@ -91,6 +92,12 @@ public class DungeonRunner : MonoBehaviour
         isResetting = true;
         lastResetFrame = Time.frameCount;
 
+        // Notify listeners that regeneration is starting (agents should pause)
+        OnDungeonRegenerating?.Invoke();
+
+        // Disable NavMeshAgents before regeneration to prevent "no valid NavMesh" warnings
+        DisableNavMeshAgents();
+
         generator.Generate();
 
         yield return null;
@@ -104,8 +111,27 @@ public class DungeonRunner : MonoBehaviour
             Debug.LogWarning("NavMeshSurface component not found. NavMesh will not be built.");
         }
 
+        // Wait a frame for NavMesh to fully initialize
+        yield return null;
+
         SpawnAgentAndTarget();
         isResetting = false;
+    }
+
+    /// <summary>
+    /// Disable all NavMeshAgents before NavMesh rebuild to prevent warnings.
+    /// </summary>
+    private void DisableNavMeshAgents()
+    {
+        if (basicAgent != null && basicAgent.TryGetComponent<NavMeshAgent>(out var basicNavAgent))
+        {
+            basicNavAgent.enabled = false;
+        }
+
+        if (agent != null && agent.TryGetComponent<NavMeshAgent>(out var agentNavAgent))
+        {
+            agentNavAgent.enabled = false;
+        }
     }
 
     void SpawnAgentAndTarget()
@@ -164,11 +190,39 @@ public class DungeonRunner : MonoBehaviour
                 agent.position = agentPosition;
             }
 
+            // Re-enable and warp the RL agent's NavMeshAgent
+            // Important: Move transform to valid NavMesh position BEFORE enabling agent
+            if (agent.TryGetComponent<NavMeshAgent>(out var agentNavAgent))
+            {
+                if (NavMesh.SamplePosition(agentPosition, out NavMeshHit hit, 2f, NavMesh.AllAreas))
+                {
+                    agent.position = hit.position;
+                    agentNavAgent.enabled = true;
+                    agentNavAgent.Warp(hit.position);
+                }
+                else
+                {
+                    // Fallback: enable anyway, may produce warning but won't crash
+                    agentNavAgent.enabled = true;
+                }
+            }
+
+            // Re-enable and warp the BasicAgent's NavMeshAgent
+            // Important: Move transform to valid NavMesh position BEFORE enabling agent
             if (basicAgent != null && basicAgent.TryGetComponent<NavMeshAgent>(out var basicNavAgent))
             {
-                basicNavAgent.Warp(agentPosition);
-                if (basicNavAgent.isOnNavMesh)
-                    basicNavAgent.ResetPath();
+                if (NavMesh.SamplePosition(agentPosition, out NavMeshHit hitBasic, 2f, NavMesh.AllAreas))
+                {
+                    basicAgent.position = hitBasic.position;
+                    basicNavAgent.enabled = true;
+                    basicNavAgent.Warp(hitBasic.position);
+                    if (basicNavAgent.isOnNavMesh)
+                        basicNavAgent.ResetPath();
+                }
+                else
+                {
+                    basicNavAgent.enabled = true;
+                }
             }
             else if (basicAgent != null)
             {
