@@ -22,7 +22,7 @@ public class DungeonRunner : MonoBehaviour
     /// </summary>
     private bool isResetting = false;
     private int lastResetFrame = 0;
-    private const int MIN_RESET_FRAME_INTERVAL = 5;
+    private const int MIN_RESET_FRAME_INTERVAL = 30;  // ~0.5 sec at 60fps to prevent rapid regenerations
 
     void Awake()
     {
