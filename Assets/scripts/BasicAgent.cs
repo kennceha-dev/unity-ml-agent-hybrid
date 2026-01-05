@@ -12,7 +12,7 @@ public class BasicAgent : MonoBehaviour, ISpeedModifiable
     private float baseMoveSpeed;
     private float currentSpeedMultiplier = 1f;
     private readonly Dictionary<Object, float> speedModifiers = new();
-    
+
     /// <summary>
     /// Prevents firing OnBasicAgentReachedTarget multiple times per episode.
     /// Reset when dungeon regenerates via OnDungeonReady event.
@@ -25,12 +25,12 @@ public class BasicAgent : MonoBehaviour, ISpeedModifiable
         baseMoveSpeed = agent.speed;
         DungeonRunner.OnDungeonReady += ResetReachedFlag;
     }
-    
+
     void OnDestroy()
     {
         DungeonRunner.OnDungeonReady -= ResetReachedFlag;
     }
-    
+
     private void ResetReachedFlag()
     {
         hasReachedTargetThisEpisode = false;

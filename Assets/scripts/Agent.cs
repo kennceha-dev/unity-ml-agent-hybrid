@@ -623,12 +623,13 @@ public class HybridAgent : Agent, ISpeedModifiable
         if (setNotReady)
             isReady = false;
 
+        // Use exact same pattern as 'G' key reset to avoid crashes
         GameManager.Instance.IncrementSeed();
 
         if (dungeonRunner != null)
         {
             dungeonRunner.SetSeed(GameManager.Instance.CurrentSeed);
-            dungeonRunner.Reset();
+            dungeonRunner.ForceRegenerate();
         }
     }
 
