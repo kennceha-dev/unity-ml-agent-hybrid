@@ -93,4 +93,21 @@ public class BasicAgent : MonoBehaviour, ISpeedModifiable
 
         agent.speed = baseMoveSpeed * currentSpeedMultiplier;
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        if (agent == null)
+            agent = GetComponent<NavMeshAgent>();
+
+        if (agent == null || !agent.enabled || !agent.isOnNavMesh)
+            return;
+
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawSphere(agent.destination, 0.2f);
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawSphere(agent.steeringTarget, 0.25f);
+    }
+#endif
 }

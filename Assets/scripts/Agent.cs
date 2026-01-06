@@ -207,9 +207,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         Vector3 steeringTarget = GetSteeringTarget();
         Vector3 dirToSteeringTarget = (steeringTarget - transform.position).normalized;
 
-        // sensor.AddObservation(transform.position);
-        // sensor.AddObservation(target.position);
-        // sensor.AddObservation(Vector3.Distance(transform.position, target.position));
+        sensor.AddObservation(transform.position);
         sensor.AddObservation(steeringTarget);
         sensor.AddObservation(dirToSteeringTarget);
         sensor.AddObservation(Vector3.Distance(transform.position, steeringTarget));
@@ -730,4 +728,21 @@ public class HybridAgent : Agent, ISpeedModifiable
     }
 
     #endregion
+
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        if (navAgent == null)
+            navAgent = GetComponent<NavMeshAgent>();
+
+        if (navAgent == null || !navAgent.enabled || !navAgent.isOnNavMesh)
+            return;
+
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawSphere(navAgent.destination, 0.2f);
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawSphere(navAgent.steeringTarget, 0.25f);
+    }
+#endif
 }

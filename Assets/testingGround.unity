@@ -150,7 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   trainingPhase: 0
   initialSeed: 12345
-  timePenaltyPerStep: 0.001
+  timePenaltyPerStep: 0.005
   closeDistanceThreshold: 2
   closeMoveAwayPenalty: -0.25
   closeMoveCloserReward: 0.05
@@ -455,7 +455,7 @@ NavMeshAgent:
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 1
-  m_WalkableMask: 4294967295
+  m_WalkableMask: 5
   m_ObstacleAvoidanceType: 4
 --- !u!114 &2898502977893679610
 MonoBehaviour:
@@ -485,7 +485,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 18
+    VectorObservationSize: 21
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2
@@ -580,10 +580,12 @@ MonoBehaviour:
     m_Bits: 64
   catchUpTimeout: 60
   progressThreshold: 0.1
-  regressionThreshold: 0.15
+  regressionThreshold: 1
   baseCatchTolerance: 5
   wallContactTimeout: 3
   rewardTimeoutThreshold: -10
+  steeringRegressionGracePeriod: 2
+  steeringReturnTolerance: 0.25
   actionSmoothing: 0.2
   actionDeadZone: 0.1
 --- !u!114 &3597370290653749400
