@@ -40,15 +40,17 @@ public class BasicAgent : MonoBehaviour, ISpeedModifiable
     {
         if (target != null && agent != null && agent.isOnNavMesh)
         {
-            agent.SetDestination(target.position);
-
-            // Check if we've reached the target (only fire once per episode)
+            // Only move if we haven't reached the target yet
             if (!hasReachedTargetThisEpisode)
             {
+                agent.SetDestination(target.position);
+
+                // Check if we've reached the target
                 float distanceToTarget = Vector3.Distance(transform.position, target.position);
                 if (distanceToTarget <= targetReachedThreshold)
                 {
                     hasReachedTargetThisEpisode = true;
+                    agent.ResetPath(); // Stop moving
                     GameManager.Instance.OnBasicAgentReachedTarget();
                 }
             }
