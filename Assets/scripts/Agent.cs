@@ -189,12 +189,27 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     public override void CollectObservations(VectorSensor sensor)
     {
+        // Pause observation gathering while the dungeon/map is resetting
+        if (!isReady)
+        {
+            sensor.AddObservation(Vector3.zero);
+            sensor.AddObservation(Vector3.zero);
+            sensor.AddObservation(0f);
+            sensor.AddObservation(false);
+            sensor.AddObservation(false);
+            sensor.AddObservation(false);
+
+            for (int i = 0; i < 4; i++) sensor.AddObservation(0f);
+            for (int i = 0; i < 4; i++) sensor.AddObservation(0f);
+            return;
+        }
+
         Vector3 steeringTarget = GetSteeringTarget();
         Vector3 dirToSteeringTarget = (steeringTarget - transform.position).normalized;
 
-        sensor.AddObservation(transform.position);
+        // sensor.AddObservation(transform.position);
         // sensor.AddObservation(target.position);
-        sensor.AddObservation(Vector3.Distance(transform.position, target.position));
+        // sensor.AddObservation(Vector3.Distance(transform.position, target.position));
         sensor.AddObservation(steeringTarget);
         sensor.AddObservation(dirToSteeringTarget);
         sensor.AddObservation(Vector3.Distance(transform.position, steeringTarget));
@@ -208,6 +223,10 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        // Ignore actions while the environment is not ready to avoid training on invalid states
+        if (!isReady)
+            return;
+
         ProcessActions(actions);
 
         Vector3 steeringTarget = GetSteeringTarget();

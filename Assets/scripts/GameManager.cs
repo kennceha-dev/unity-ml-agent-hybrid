@@ -300,7 +300,7 @@ public class GameManager : MonoBehaviour
         if (trainingPhase == TrainingPhase.ReachTarget)
         {
             int requiredStreak = Mathf.Max(1, performanceWindow);
-            int allowedFailures = Mathf.CeilToInt(requiredStreak * 0.1f); // allow up to 10% failures before reset
+            int allowedFailures = Mathf.CeilToInt(requiredStreak * 0.25f); // allow up to 25% failures before reset
 
             if (data.ConsecutiveFailures > allowedFailures)
             {
@@ -447,7 +447,7 @@ public class GameManager : MonoBehaviour
         float beatRate = GetSuccessRate(data.BeatBaseResults);
         float threshold = GetPromotionThreshold();
         int requiredStreak = Mathf.Max(1, performanceWindow);
-        int allowedFailures = Mathf.CeilToInt(requiredStreak * 0.1f);
+        int allowedFailures = Mathf.CeilToInt(requiredStreak * 0.25f);
 
         string text =
             $"Phase: {trainingPhase}\n" +
