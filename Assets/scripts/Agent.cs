@@ -327,19 +327,19 @@ public class HybridAgent : Agent, ISpeedModifiable
         }
 
         // Track wall contact time and end episode if too long
-        if (isTouchingWall)
-        {
-            wallContactTimer += Time.fixedDeltaTime;
-            if (wallContactTimer >= wallContactTimeout)
-            {
-                LoggedAddReward(-1f, "Wall contact timeout");
-                HandleEpisodeEnd(false, false, false);
-            }
-        }
-        else
-        {
-            wallContactTimer = 0f;
-        }
+        // if (isTouchingWall)
+        // {
+        //     wallContactTimer += Time.fixedDeltaTime;
+        //     if (wallContactTimer >= wallContactTimeout)
+        //     {
+        //         LoggedAddReward(-1f, "Wall contact timeout");
+        //         HandleEpisodeEnd(false, false, false);
+        //     }
+        // }
+        // else
+        // {
+        //     wallContactTimer = 0f;
+        // }
     }
 
     private void RewardTargetProgress()
@@ -498,12 +498,14 @@ public class HybridAgent : Agent, ISpeedModifiable
                 timeoutTimer -= Time.fixedDeltaTime;
                 if (timeoutTimer <= 0f)
                 {
+                    Debug.Log("[Timeout] ENDED: No progress timeout");
                     LoggedAddReward(-1f, "No progress timeout");
                     HandleEpisodeEnd(false, false, false);
                     return true;
                 }
                 return false;
             case ProgressState.Regressing:
+                Debug.Log($"[Timeout] ENDED: Regressing - pathDelta: {previousPathRemainingDistance - remainingDistance:F2}, steeringDelta: {previousSteeringDistance - steeringDistance:F2}");
                 LoggedAddReward(-1f, "Regressing");
                 HandleEpisodeEnd(false, false, false);
                 return true;
@@ -522,11 +524,12 @@ public class HybridAgent : Agent, ISpeedModifiable
         if (previousPathRemainingDistance < 0f || previousSteeringDistance < 0f)
             return ProgressState.Unknown;
 
+        // Skip evaluation if current distance is invalid (path calculation failed)
+        if (remainingDistance >= float.MaxValue)
+            return ProgressState.Unknown;
+
         float pathDelta = previousPathRemainingDistance - remainingDistance;
         float steeringDelta = previousSteeringDistance - steeringDistance;
-
-        if (pathDelta < -regressionThreshold || steeringDelta < -regressionThreshold)
-            return ProgressState.Regressing;
 
         bool closingTarget = pathDelta > progressThreshold;
         bool followingPath = steeringDelta > -progressThreshold;
