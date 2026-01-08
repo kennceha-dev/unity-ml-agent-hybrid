@@ -350,6 +350,8 @@ GameObject:
   - component: {fileID: 1909737349731103034}
   - component: {fileID: 2021513064498675739}
   - component: {fileID: 4593436413707288613}
+  - component: {fileID: 8902893915616849163}
+  - component: {fileID: 8902893915616849162}
   m_Layer: 0
   m_Name: BasicAgent
   m_TagString: Untagged
@@ -564,12 +566,6 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  moveSpeed: 10
-  jumpHeight: 1.2
-  jumpTimeToApex: 0.28
-  fallGravityMultiplier: 2.5
-  groundedGravity: -5
-  terminalVelocity: -45
   target: {fileID: 828169422602012748}
   dungeonRunner: {fileID: 1593571142}
   floorLayer:
@@ -677,13 +673,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf444dfc312d69f49a735c7fe084e64e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 10
   lookSpeed: 0.15
-  jumpHeight: 1.2
-  jumpTimeToApex: 0.28
-  fallGravityMultiplier: 2.5
-  groundedGravity: -5
-  terminalVelocity: -45
   lookPivot: {fileID: 0}
   enableTrainingMode: 1
 --- !u!33 &4518818917005211273
@@ -1030,6 +1020,7 @@ GameObject:
   - component: {fileID: 3597370290653749400}
   - component: {fileID: 4444379168134414964}
   - component: {fileID: 6699480063194975781}
+  - component: {fileID: 8468658692430486468}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1097,6 +1088,7 @@ GameObject:
   - component: {fileID: 8619925717541432168}
   - component: {fileID: 2420835683198538111}
   - component: {fileID: 8039209152888189389}
+  - component: {fileID: 8619925717541432169}
   m_Layer: 0
   m_Name: Agent
   m_TagString: Untagged
@@ -1127,6 +1119,26 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &8468658692430486468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7933223653938134332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0059af65f6cbef04fa536d8347c065b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 10
+  acceleration: 50
+  deceleration: 40
+  jumpHeight: 1.2
+  jumpTimeToApex: 0.28
+  fallGravityMultiplier: 2.5
+  groundedGravity: -5
+  terminalVelocity: -45
 --- !u!136 &8619925717541432168
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1150,6 +1162,26 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &8619925717541432169
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8450716439714328687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0059af65f6cbef04fa536d8347c065b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 10
+  acceleration: 50
+  deceleration: 40
+  jumpHeight: 1.2
+  jumpTimeToApex: 0.28
+  fallGravityMultiplier: 2.5
+  groundedGravity: -5
+  terminalVelocity: -45
 --- !u!23 &8902893915616849161
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1195,6 +1227,51 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!143 &8902893915616849162
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1603987325521207829}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &8902893915616849163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1603987325521207829}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0059af65f6cbef04fa536d8347c065b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 10
+  acceleration: 50
+  deceleration: 40
+  jumpHeight: 1.2
+  jumpTimeToApex: 0.28
+  fallGravityMultiplier: 2.5
+  groundedGravity: -5
+  terminalVelocity: -45
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
