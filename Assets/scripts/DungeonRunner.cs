@@ -179,19 +179,15 @@ public class DungeonRunner : MonoBehaviour
 
         if (agent != null)
         {
+            // Disable CharacterController before moving to prevent collision issues
             if (agent.TryGetComponent<CharacterController>(out var cc))
-            {
                 cc.enabled = false;
-                agent.position = agentPosition;
-                cc.enabled = true;
-            }
-            else
-            {
-                agent.position = agentPosition;
-            }
 
-            // Re-enable and warp the RL agent's NavMeshAgent
-            // Important: Move transform to valid NavMesh position BEFORE enabling agent
+            // Reset PhysicsMovement velocity
+            if (agent.TryGetComponent<PhysicsMovement>(out var pm))
+                pm.ResetVelocity();
+
+            // Find valid NavMesh position and move agent
             if (agent.TryGetComponent<NavMeshAgent>(out var agentNavAgent))
             {
                 if (NavMesh.SamplePosition(agentPosition, out NavMeshHit hit, 2f, NavMesh.AllAreas))
@@ -202,14 +198,33 @@ public class DungeonRunner : MonoBehaviour
                 }
                 else
                 {
-                    // Fallback: enable anyway, may produce warning but won't crash
+                    agent.position = agentPosition;
                     agentNavAgent.enabled = true;
                 }
             }
+            else
+            {
+                agent.position = agentPosition;
+            }
 
-            // Re-enable and warp the BasicAgent's NavMeshAgent
-            // Important: Move transform to valid NavMesh position BEFORE enabling agent
-            if (basicAgent != null && basicAgent.TryGetComponent<NavMeshAgent>(out var basicNavAgent))
+            // Re-enable CharacterController after positioning
+            if (cc != null)
+                cc.enabled = true;
+        }
+
+        // Spawn BasicAgent at same position as HybridAgent
+        if (basicAgent != null)
+        {
+            // Disable CharacterController before moving
+            if (basicAgent.TryGetComponent<CharacterController>(out var basicCC))
+                basicCC.enabled = false;
+
+            // Reset PhysicsMovement velocity
+            if (basicAgent.TryGetComponent<PhysicsMovement>(out var basicPM))
+                basicPM.ResetVelocity();
+
+            // Find valid NavMesh position and move agent
+            if (basicAgent.TryGetComponent<NavMeshAgent>(out var basicNavAgent))
             {
                 if (NavMesh.SamplePosition(agentPosition, out NavMeshHit hitBasic, 2f, NavMesh.AllAreas))
                 {
@@ -221,13 +236,18 @@ public class DungeonRunner : MonoBehaviour
                 }
                 else
                 {
+                    basicAgent.position = agentPosition;
                     basicNavAgent.enabled = true;
                 }
             }
-            else if (basicAgent != null)
+            else
             {
                 basicAgent.position = agentPosition;
             }
+
+            // Re-enable CharacterController after positioning
+            if (basicCC != null)
+                basicCC.enabled = true;
         }
 
         OnDungeonReady?.Invoke();
