@@ -5,18 +5,10 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(PhysicsMovement))]
 [RequireComponent(typeof(NavMeshAgent))]
 public class HybridAgent : Agent, ISpeedModifiable
 {
-    [Header("Movement")]
-    [SerializeField] private float moveSpeed = 10f;
-    [SerializeField] private float jumpHeight = 1.2f;
-    [SerializeField] private float jumpTimeToApex = 0.28f;
-    [SerializeField] private float fallGravityMultiplier = 2.5f;
-    [SerializeField] private float groundedGravity = -5f;
-    [SerializeField] private float terminalVelocity = -45f;
-
     [Header("References")]
     [SerializeField] private Transform target;
     [SerializeField] private DungeonRunner dungeonRunner;
@@ -37,7 +29,6 @@ public class HybridAgent : Agent, ISpeedModifiable
     [SerializeField, Range(0f, 1f)] private float actionSmoothing = 0.2f;
     [SerializeField, Range(0f, 1f)] private float actionDeadZone = 0.1f;
     private enum ProgressState { Unknown, Progressing, NoProgress, Regressing }
-    private CharacterController characterController;
     private NavMeshAgent navAgent;
     private bool isReady;
     private float baseMoveSpeed;
@@ -50,12 +41,10 @@ public class HybridAgent : Agent, ISpeedModifiable
     private int stuckCounter;
     private int episode;
 
+    private PhysicsMovement physicsMovement;
     private float cachedForwardInput;
     private float cachedStrafeInput;
     private bool cachedJumpInput;
-    private float verticalVelocity;
-    private float gravity;
-    private float initialJumpVelocity;
     private bool isOnSticky;
     private bool isOnWall;
     private float timeoutTimer;
@@ -75,6 +64,8 @@ public class HybridAgent : Agent, ISpeedModifiable
     {
         base.Awake();
 
+        physicsMovement = GetComponent<PhysicsMovement>();
+
         // Disable NavMeshAgent rotation as early as possible
         navAgent = GetComponent<NavMeshAgent>();
         if (navAgent != null)
@@ -86,14 +77,11 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void Start()
     {
-        characterController = GetComponent<CharacterController>();
-
         if (navAgent != null)
         {
             baseMoveSpeed = navAgent.speed;
         }
 
-        RecalculateJumpValues();
         DungeonRunner.OnDungeonReady += OnDungeonReady;
         DungeonRunner.OnDungeonRegenerating += OnDungeonRegenerating;
         GameManager.OnBasicAgentReachedTargetEvent += OnBasicAgentReachedTarget;
@@ -128,8 +116,6 @@ public class HybridAgent : Agent, ISpeedModifiable
             previousSteeringDistance = -1f;
         }
     }
-
-    private void OnValidate() => RecalculateJumpValues();
 
     private void FixedUpdate()
     {
@@ -213,7 +199,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         sensor.AddObservation(steeringTarget);
         sensor.AddObservation(dirToSteeringTarget);
         sensor.AddObservation(Vector3.Distance(transform.position, steeringTarget));
-        sensor.AddObservation(characterController.isGrounded);
+        sensor.AddObservation(physicsMovement != null && physicsMovement.IsGrounded);
         sensor.AddObservation(isOnSticky);
         sensor.AddObservation(isOnWall);
 
@@ -292,8 +278,10 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void RewardMovementAlignment(Vector3 desiredDir)
     {
+        if (physicsMovement == null) return;
+
         // Use actual velocity instead of input to avoid rewarding wall-ramming
-        Vector3 actualVelocity = characterController.velocity;
+        Vector3 actualVelocity = physicsMovement.Velocity;
         Vector3 horizontalVelocity = new Vector3(actualVelocity.x, 0f, actualVelocity.z);
 
         float speed = horizontalVelocity.magnitude;
@@ -306,7 +294,7 @@ public class HybridAgent : Agent, ISpeedModifiable
             LoggedAddReward(alignment * 0.05f, "Movement alignment");
 
             // Additional small reward for any forward movement to encourage exploration
-            float normalizedSpeed = Mathf.Clamp01(speed / moveSpeed);
+            float normalizedSpeed = Mathf.Clamp01(speed / physicsMovement.MoveSpeed);
             LoggedAddReward(normalizedSpeed * 0.005f, "Forward movement");
         }
     }
@@ -433,28 +421,21 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void ApplyMovement()
     {
-        // Calculate movement in world space (forward = +Z, right = +X)
-        Vector3 move = currentSpeedMultiplier * moveSpeed * new Vector3(cachedStrafeInput, 0f, cachedForwardInput);
+        if (physicsMovement == null) return;
 
-        if (characterController.isGrounded)
-        {
-            verticalVelocity = groundedGravity;
+        // Calculate input direction in world space (forward = +Z, right = +X)
+        Vector3 inputDirection = new Vector3(cachedStrafeInput, 0f, cachedForwardInput);
 
-            if (cachedJumpInput)
-            {
-                verticalVelocity = initialJumpVelocity;
-                cachedJumpInput = false;
-            }
-        }
-        else
+        // Handle jump request
+        if (cachedJumpInput)
         {
-            float appliedGravity = verticalVelocity < 0f ? gravity * fallGravityMultiplier : gravity;
-            verticalVelocity -= appliedGravity * Time.fixedDeltaTime;
-            verticalVelocity = Mathf.Max(verticalVelocity, terminalVelocity);
+            physicsMovement.Jump();
+            cachedJumpInput = false;
         }
 
-        move.y = verticalVelocity;
-        characterController.Move(move * Time.fixedDeltaTime);
+        // Apply speed multiplier and move
+        physicsMovement.SetSpeedMultiplier(currentSpeedMultiplier);
+        physicsMovement.Move(inputDirection, useFixedDelta: true);
     }
 
     private void SyncNavMeshAgent()
@@ -466,14 +447,6 @@ public class HybridAgent : Agent, ISpeedModifiable
         // Check again after Warp - agent may have been moved off NavMesh
         if (target != null && navAgent.isOnNavMesh)
             navAgent.SetDestination(target.position);
-    }
-
-    private void RecalculateJumpValues()
-    {
-        jumpHeight = Mathf.Max(0.1f, jumpHeight);
-        jumpTimeToApex = Mathf.Max(0.05f, jumpTimeToApex);
-        gravity = 2f * jumpHeight / (jumpTimeToApex * jumpTimeToApex);
-        initialJumpVelocity = gravity * jumpTimeToApex;
     }
 
     #endregion

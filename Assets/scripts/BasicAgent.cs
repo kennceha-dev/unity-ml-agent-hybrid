@@ -2,14 +2,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+[RequireComponent(typeof(PhysicsMovement))]
 [RequireComponent(typeof(NavMeshAgent))]
 public class BasicAgent : MonoBehaviour, ISpeedModifiable
 {
+    [Header("References")]
     [SerializeField] private Transform target;
     [SerializeField] private float targetReachedThreshold = 1.5f;
 
-    private NavMeshAgent agent;
-    private float baseMoveSpeed;
+    private PhysicsMovement physicsMovement;
+    private NavMeshAgent navAgent;
     private float currentSpeedMultiplier = 1f;
     private readonly Dictionary<Object, float> speedModifiers = new();
 
@@ -21,8 +23,16 @@ public class BasicAgent : MonoBehaviour, ISpeedModifiable
 
     void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
-        baseMoveSpeed = agent.speed;
+        physicsMovement = GetComponent<PhysicsMovement>();
+        navAgent = GetComponent<NavMeshAgent>();
+
+        // Configure NavMeshAgent for pathfinding only (not movement)
+        if (navAgent != null)
+        {
+            navAgent.updatePosition = false;
+            navAgent.updateRotation = false;
+        }
+
         DungeonRunner.OnDungeonReady += ResetReachedFlag;
     }
 
@@ -34,27 +44,74 @@ public class BasicAgent : MonoBehaviour, ISpeedModifiable
     private void ResetReachedFlag()
     {
         hasReachedTargetThisEpisode = false;
+        if (physicsMovement != null)
+            physicsMovement.ResetVelocity();
     }
 
-    void Update()
+    void FixedUpdate()
     {
-        if (target != null && agent != null && agent.isOnNavMesh)
-        {
-            // Only move if we haven't reached the target yet
-            if (!hasReachedTargetThisEpisode)
-            {
-                agent.SetDestination(target.position);
+        if (target == null || navAgent == null || !navAgent.isOnNavMesh)
+            return;
 
-                // Check if we've reached the target
-                float distanceToTarget = Vector3.Distance(transform.position, target.position);
-                if (distanceToTarget <= targetReachedThreshold)
-                {
-                    hasReachedTargetThisEpisode = true;
-                    agent.ResetPath(); // Stop moving
-                    GameManager.Instance.OnBasicAgentReachedTarget();
-                }
+        // Sync NavMeshAgent position
+        SyncNavMeshAgent();
+
+        // Update speed multiplier
+        if (physicsMovement != null)
+            physicsMovement.SetSpeedMultiplier(currentSpeedMultiplier);
+
+        // Only move if we haven't reached the target yet
+        if (!hasReachedTargetThisEpisode)
+        {
+            // Get movement direction from NavMesh pathfinding
+            Vector3 inputDirection = GetNavMeshDirection();
+
+            // Apply physics-based movement
+            if (physicsMovement != null)
+                physicsMovement.Move(inputDirection, useFixedDelta: true);
+
+            // Check if we've reached the target
+            float distanceToTarget = Vector3.Distance(transform.position, target.position);
+            if (distanceToTarget <= targetReachedThreshold)
+            {
+                hasReachedTargetThisEpisode = true;
+                navAgent.ResetPath();
+                GameManager.Instance.OnBasicAgentReachedTarget();
             }
         }
+        else
+        {
+            // Still apply physics when stopped (for deceleration and gravity)
+            if (physicsMovement != null)
+                physicsMovement.Move(Vector3.zero, useFixedDelta: true);
+        }
+    }
+
+    private Vector3 GetNavMeshDirection()
+    {
+        if (navAgent == null || !navAgent.isOnNavMesh || target == null)
+            return Vector3.zero;
+
+        navAgent.SetDestination(target.position);
+
+        if (!navAgent.hasPath || navAgent.pathPending)
+            return Vector3.zero;
+
+        // Get direction to steering target (next waypoint)
+        Vector3 steeringTarget = navAgent.steeringTarget;
+        Vector3 direction = steeringTarget - transform.position;
+        direction.y = 0f;
+
+        if (direction.magnitude < 0.1f)
+            return Vector3.zero;
+
+        return direction.normalized;
+    }
+
+    private void SyncNavMeshAgent()
+    {
+        if (navAgent == null || !navAgent.isOnNavMesh) return;
+        navAgent.nextPosition = transform.position;
     }
 
     public void ApplySpeedMultiplier(Object source, float multiplier)
@@ -86,28 +143,23 @@ public class BasicAgent : MonoBehaviour, ISpeedModifiable
 
     private void UpdateAgentSpeed()
     {
-        if (agent == null) return;
-
-        if (baseMoveSpeed <= 0f)
-            baseMoveSpeed = agent.speed;
-
-        agent.speed = baseMoveSpeed * currentSpeedMultiplier;
+        // Speed is now managed by PhysicsMovement component
     }
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        if (agent == null)
-            agent = GetComponent<NavMeshAgent>();
+        if (navAgent == null)
+            navAgent = GetComponent<NavMeshAgent>();
 
-        if (agent == null || !agent.enabled || !agent.isOnNavMesh)
+        if (navAgent == null || !navAgent.enabled || !navAgent.isOnNavMesh)
             return;
 
         Gizmos.color = Color.magenta;
-        Gizmos.DrawSphere(agent.destination, 0.2f);
+        Gizmos.DrawSphere(navAgent.destination, 0.2f);
 
         Gizmos.color = Color.cyan;
-        Gizmos.DrawSphere(agent.steeringTarget, 0.25f);
+        Gizmos.DrawSphere(navAgent.steeringTarget, 0.25f);
     }
 #endif
 }

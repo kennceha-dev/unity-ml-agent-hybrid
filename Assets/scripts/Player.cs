@@ -3,21 +3,15 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(PhysicsMovement))]
 [RequireComponent(typeof(NavMeshAgent))]
 public class Player : MonoBehaviour, ISpeedModifiable
 {
-    CharacterController characterController;
+    private PhysicsMovement physicsMovement;
     private bool isReady;
 
-    [SerializeField] private float moveSpeed = 10f;
+    [Header("Look")]
     [SerializeField] private float lookSpeed = 0.5f;
-    [SerializeField] private float jumpHeight = 1.2f;
-    [SerializeField] private float jumpTimeToApex = 0.28f;
-    [SerializeField] private float fallGravityMultiplier = 2.5f;
-    [SerializeField] private float groundedGravity = -5f;
-    [SerializeField] private float terminalVelocity = -45f;
-
     [SerializeField] private Transform lookPivot;
 
     [Header("NavMesh Settings")]
@@ -27,9 +21,6 @@ public class Player : MonoBehaviour, ISpeedModifiable
     private NavMeshAgent agent;
     private float rotationX = 0f;
     private float rotationY = 0f;
-    private float verticalVelocity = 0f;
-    private float gravity;
-    private float initialJumpVelocity;
     private float currentSpeedMultiplier = 1f;
     private readonly Dictionary<Object, float> speedModifiers = new Dictionary<Object, float>();
 
@@ -40,8 +31,7 @@ public class Player : MonoBehaviour, ISpeedModifiable
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        characterController = GetComponent<CharacterController>();
-        RecalculateJumpValues();
+        physicsMovement = GetComponent<PhysicsMovement>();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         DungeonRunner.OnDungeonReady += OnDungeonReady;
@@ -132,16 +122,15 @@ public class Player : MonoBehaviour, ISpeedModifiable
 
     private void SetMovementMode(bool useNavMesh)
     {
-        if (agent == null || characterController == null) return;
+        if (agent == null) return;
 
         if (useNavMesh)
         {
             // Enable NavMeshAgent for path calculation only
-            // CharacterController remains enabled for actual movement
+            // PhysicsMovement handles actual movement
             agent.enabled = true;
             agent.updateRotation = false;
             agent.updatePosition = false;
-            characterController.enabled = true;
             destinationSet = false; // Reset so path is calculated fresh
 
             // Sync NavMeshAgent position and set destination
@@ -157,9 +146,8 @@ public class Player : MonoBehaviour, ISpeedModifiable
         }
         else
         {
-            // Switch to manual CharacterController control
+            // Switch to manual control
             agent.enabled = false;
-            characterController.enabled = true;
             destinationSet = false;
         }
     }
@@ -198,11 +186,6 @@ public class Player : MonoBehaviour, ISpeedModifiable
         FindAndSetExitTarget();
     }
 
-    void OnValidate()
-    {
-        RecalculateJumpValues();
-    }
-
     void Update()
     {
         if (!isReady) return;
@@ -222,7 +205,7 @@ public class Player : MonoBehaviour, ISpeedModifiable
 
     private void HandleNavMeshMovement()
     {
-        if (agent == null || !agent.enabled || exitTarget == null) return;
+        if (agent == null || !agent.enabled || exitTarget == null || physicsMovement == null) return;
 
         // Ensure we're on the NavMesh and have a destination set
         if (!agent.isOnNavMesh)
@@ -263,32 +246,16 @@ public class Player : MonoBehaviour, ISpeedModifiable
 
         float distanceToSteeringTarget = directionToTarget.magnitude;
 
-        // Only move if we have somewhere to go
-        Vector3 move = Vector3.zero;
+        // Get input direction from NavMesh pathfinding
+        Vector3 inputDirection = Vector3.zero;
         if (distanceToSteeringTarget > 0.1f)
         {
-            directionToTarget.Normalize();
-            move = directionToTarget * moveSpeed * currentSpeedMultiplier;
+            inputDirection = directionToTarget.normalized;
         }
 
-        // Handle gravity
-        if (characterController.isGrounded)
-        {
-            verticalVelocity = groundedGravity;
-        }
-        else
-        {
-            float appliedGravity = gravity;
-            if (verticalVelocity < 0f)
-            {
-                appliedGravity *= fallGravityMultiplier;
-            }
-            verticalVelocity -= appliedGravity * Time.deltaTime;
-            verticalVelocity = Mathf.Max(verticalVelocity, terminalVelocity);
-        }
-
-        move.y = verticalVelocity;
-        characterController.Move(move * Time.deltaTime);
+        // Apply speed multiplier and move using PhysicsMovement
+        physicsMovement.SetSpeedMultiplier(currentSpeedMultiplier);
+        physicsMovement.Move(inputDirection, useFixedDelta: false);
 
         // Sync NavMeshAgent position AFTER moving (so path updates correctly)
         agent.nextPosition = transform.position;
@@ -348,6 +315,8 @@ public class Player : MonoBehaviour, ISpeedModifiable
 
     private void HandleManualMovement()
     {
+        if (physicsMovement == null) return;
+
         float mouseX = InputSystem.actions.FindAction("Look").ReadValue<Vector2>().x * lookSpeed;
         float mouseY = InputSystem.actions.FindAction("Look").ReadValue<Vector2>().y * lookSpeed;
 
@@ -365,41 +334,18 @@ public class Player : MonoBehaviour, ISpeedModifiable
         float moveX = InputSystem.actions.FindAction("Move").ReadValue<Vector2>().x;
         float moveZ = InputSystem.actions.FindAction("Move").ReadValue<Vector2>().y;
 
-        Vector3 move = transform.right * moveX + transform.forward * moveZ;
-        move *= moveSpeed * currentSpeedMultiplier;
+        // Calculate input direction in world space
+        Vector3 inputDirection = transform.right * moveX + transform.forward * moveZ;
 
-        if (characterController.isGrounded)
+        // Handle jump
+        if (InputSystem.actions.FindAction("Jump").WasPressedThisFrame())
         {
-            verticalVelocity = groundedGravity;
-
-            if (InputSystem.actions.FindAction("Jump").WasPressedThisFrame())
-            {
-                verticalVelocity = initialJumpVelocity;
-            }
-        }
-        else
-        {
-            float appliedGravity = gravity;
-
-            if (verticalVelocity < 0f)
-            {
-                appliedGravity *= fallGravityMultiplier;
-            }
-
-            verticalVelocity -= appliedGravity * Time.deltaTime;
-            verticalVelocity = Mathf.Max(verticalVelocity, terminalVelocity);
+            physicsMovement.Jump();
         }
 
-        move.y = verticalVelocity;
-        characterController.Move(move * Time.deltaTime);
-    }
-
-    private void RecalculateJumpValues()
-    {
-        jumpHeight = Mathf.Max(0.1f, jumpHeight);
-        jumpTimeToApex = Mathf.Max(0.05f, jumpTimeToApex);
-        gravity = 2f * jumpHeight / (jumpTimeToApex * jumpTimeToApex);
-        initialJumpVelocity = gravity * jumpTimeToApex;
+        // Apply speed multiplier and move using PhysicsMovement
+        physicsMovement.SetSpeedMultiplier(currentSpeedMultiplier);
+        physicsMovement.Move(inputDirection, useFixedDelta: false);
     }
 
     public void ApplySpeedMultiplier(Object source, float multiplier)
