@@ -11,6 +11,7 @@ public class HybridAgent : Agent, ISpeedModifiable
 {
     [Header("References")]
     [SerializeField] private Transform target;
+    [SerializeField] private Transform basicAgentTransform;
     [SerializeField] private DungeonRunner dungeonRunner;
     [SerializeField] private LayerMask floorLayer;
     [SerializeField] private LayerMask wallLayer;
@@ -57,6 +58,11 @@ public class HybridAgent : Agent, ISpeedModifiable
     private float bestEpisodeReward = float.MinValue;
     private Vector2 smoothedMove;
     private float minRemainingDistanceAchieved = float.MaxValue;
+
+    // Momentum-based learning variables
+    private float averageSpeedThisEpisode;
+    private int speedSampleCount;
+    private float previousSpeed;
 
     #region Unity Lifecycle
 
@@ -173,6 +179,15 @@ public class HybridAgent : Agent, ISpeedModifiable
         previousSteeringDistance = -1f;
         smoothedMove = Vector2.zero;
         minRemainingDistanceAchieved = float.MaxValue;
+
+        // Reset momentum tracking
+        averageSpeedThisEpisode = 0f;
+        speedSampleCount = 0;
+        previousSpeed = 0f;
+
+        // Reset physics velocity
+        if (physicsMovement != null)
+            physicsMovement.ResetVelocity();
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -180,21 +195,27 @@ public class HybridAgent : Agent, ISpeedModifiable
         // Pause observation gathering while the dungeon/map is resetting
         if (!isReady)
         {
-            sensor.AddObservation(Vector3.zero);
-            sensor.AddObservation(Vector3.zero);
-            sensor.AddObservation(0f);
-            sensor.AddObservation(false);
-            sensor.AddObservation(false);
-            sensor.AddObservation(false);
+            sensor.AddObservation(Vector3.zero); // position
+            sensor.AddObservation(Vector3.zero); // steering target
+            sensor.AddObservation(Vector3.zero); // direction to target
+            sensor.AddObservation(0f); // distance to steering
+            sensor.AddObservation(false); // grounded
+            sensor.AddObservation(false); // sticky
+            sensor.AddObservation(false); // wall
+            sensor.AddObservation(Vector3.zero); // velocity
+            sensor.AddObservation(0f); // speed ratio
+            sensor.AddObservation(0f); // distance advantage vs BasicAgent
+            sensor.AddObservation(Vector3.zero); // direction to next corner (for corner cutting)
 
-            for (int i = 0; i < 4; i++) sensor.AddObservation(0f);
-            for (int i = 0; i < 4; i++) sensor.AddObservation(0f);
+            for (int i = 0; i < 4; i++) sensor.AddObservation(0f); // wall rays
+            for (int i = 0; i < 4; i++) sensor.AddObservation(0f); // floor rays
             return;
         }
 
         Vector3 steeringTarget = GetSteeringTarget();
         Vector3 dirToSteeringTarget = (steeringTarget - transform.position).normalized;
 
+        // Basic observations
         sensor.AddObservation(transform.position);
         sensor.AddObservation(steeringTarget);
         sensor.AddObservation(dirToSteeringTarget);
@@ -202,6 +223,24 @@ public class HybridAgent : Agent, ISpeedModifiable
         sensor.AddObservation(physicsMovement != null && physicsMovement.IsGrounded);
         sensor.AddObservation(isOnSticky);
         sensor.AddObservation(isOnWall);
+
+        // Velocity observations - critical for learning momentum management
+        Vector3 velocity = physicsMovement != null ? physicsMovement.Velocity : Vector3.zero;
+        Vector3 horizontalVelocity = new Vector3(velocity.x, 0f, velocity.z);
+        sensor.AddObservation(horizontalVelocity);
+
+        // Speed as ratio of max speed (0-1) - helps agent understand acceleration state
+        float maxSpeed = physicsMovement != null ? physicsMovement.MoveSpeed : 10f;
+        float speedRatio = horizontalVelocity.magnitude / maxSpeed;
+        sensor.AddObservation(speedRatio);
+
+        // Distance advantage vs BasicAgent (positive = we're ahead)
+        float distanceAdvantage = GetDistanceAdvantageVsBasicAgent();
+        sensor.AddObservation(distanceAdvantage);
+
+        // Look-ahead: direction to next corner after steering target (for corner cutting)
+        Vector3 nextCornerDir = GetNextCornerDirection(steeringTarget);
+        sensor.AddObservation(nextCornerDir);
 
         CollectWallObservations(sensor);
         CollectFloorObservations(sensor);
@@ -220,6 +259,8 @@ public class HybridAgent : Agent, ISpeedModifiable
 
         RewardSteeringProgress(steeringTarget);
         RewardMovementAlignment(desiredDir);
+        RewardMomentumEfficiency(); // New: reward for maintaining speed
+        RewardBeatingBasicAgent();  // New: reward for being ahead of BasicAgent
         PenalizeWallProximity();
         RewardTargetProgress();
         PenalizeStuck();
@@ -297,6 +338,120 @@ public class HybridAgent : Agent, ISpeedModifiable
             float normalizedSpeed = Mathf.Clamp01(speed / physicsMovement.MoveSpeed);
             LoggedAddReward(normalizedSpeed * 0.005f, "Forward movement");
         }
+    }
+
+    /// <summary>
+    /// Reward maintaining high speed - encourages learning to cut corners and manage momentum.
+    /// The NavMesh agent loses time at every corner due to acceleration. 
+    /// A smart agent can maintain speed by anticipating turns.
+    /// </summary>
+    private void RewardMomentumEfficiency()
+    {
+        if (physicsMovement == null) return;
+
+        Vector3 velocity = physicsMovement.Velocity;
+        Vector3 horizontalVelocity = new Vector3(velocity.x, 0f, velocity.z);
+        float currentSpeed = horizontalVelocity.magnitude;
+        float maxSpeed = physicsMovement.MoveSpeed * currentSpeedMultiplier;
+
+        // Track average speed
+        speedSampleCount++;
+        averageSpeedThisEpisode = ((averageSpeedThisEpisode * (speedSampleCount - 1)) + currentSpeed) / speedSampleCount;
+
+        // Reward for maintaining high speed (above 80% of max)
+        float speedRatio = currentSpeed / maxSpeed;
+        if (speedRatio > 0.8f)
+        {
+            LoggedAddReward(0.01f * (speedRatio - 0.8f) * 5f, "High speed bonus");
+        }
+
+        // Reward for smooth speed changes (not jerky movement)
+        // Penalize sudden speed drops that aren't due to walls
+        if (!isOnWall && previousSpeed > 0.1f)
+        {
+            float speedChange = currentSpeed - previousSpeed;
+            // Penalize sudden deceleration (indicates poor corner management)
+            if (speedChange < -2f)
+            {
+                LoggedAddReward(speedChange * 0.005f, "Sudden deceleration");
+            }
+        }
+
+        previousSpeed = currentSpeed;
+    }
+
+    /// <summary>
+    /// Reward being ahead of the BasicAgent (NavMesh baseline).
+    /// This teaches the agent that its goal is to beat the NavMesh path.
+    /// </summary>
+    private void RewardBeatingBasicAgent()
+    {
+        float advantage = GetDistanceAdvantageVsBasicAgent();
+
+        // Reward for being ahead (closer to target than BasicAgent)
+        if (advantage > 0.5f)
+        {
+            // Scale reward by how much we're ahead
+            float scaledAdvantage = Mathf.Min(advantage, 5f); // Cap at 5 units
+            LoggedAddReward(scaledAdvantage * 0.02f, "Ahead of BasicAgent");
+        }
+        // Small penalty for falling behind
+        else if (advantage < -1f)
+        {
+            LoggedAddReward(advantage * 0.01f, "Behind BasicAgent");
+        }
+    }
+
+    /// <summary>
+    /// Get how much closer we are to target compared to BasicAgent.
+    /// Positive = we're ahead, Negative = we're behind.
+    /// </summary>
+    private float GetDistanceAdvantageVsBasicAgent()
+    {
+        if (basicAgentTransform == null || target == null) return 0f;
+
+        float ourDistance = Vector3.Distance(transform.position, target.position);
+        float theirDistance = Vector3.Distance(basicAgentTransform.position, target.position);
+
+        return theirDistance - ourDistance; // Positive = we're closer
+    }
+
+    /// <summary>
+    /// Get direction to the corner after the current steering target.
+    /// This helps the agent anticipate turns for corner cutting.
+    /// </summary>
+    private Vector3 GetNextCornerDirection(Vector3 currentSteeringTarget)
+    {
+        if (navAgent == null || !navAgent.isOnNavMesh || target == null)
+            return Vector3.zero;
+
+        NavMeshPath path = new NavMeshPath();
+        if (navAgent.CalculatePath(target.position, path) && path.status == NavMeshPathStatus.PathComplete)
+        {
+            Vector3[] corners = path.corners;
+
+            // Find current steering target in corners
+            for (int i = 0; i < corners.Length - 1; i++)
+            {
+                if (Vector3.Distance(corners[i], currentSteeringTarget) < 1f)
+                {
+                    // Return direction to the next corner
+                    if (i + 1 < corners.Length)
+                    {
+                        Vector3 nextCorner = corners[i + 1];
+                        return (nextCorner - currentSteeringTarget).normalized;
+                    }
+                }
+            }
+
+            // If we have at least 2 corners, return direction of first segment
+            if (corners.Length >= 2)
+            {
+                return (corners[1] - corners[0]).normalized;
+            }
+        }
+
+        return Vector3.zero;
     }
 
     private void PenalizeWallProximity()
