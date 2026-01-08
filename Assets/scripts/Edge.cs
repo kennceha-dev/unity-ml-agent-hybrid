@@ -106,6 +106,11 @@ public class Edge : IEquatable<Edge>, IComparable<Edge>
         return this == e;
     }
 
+    public override bool Equals(object obj)
+    {
+        return obj is Edge other && this == other;
+    }
+
     public override int GetHashCode()
     {
         return pointA.GetHashCode() ^ pointB.GetHashCode();

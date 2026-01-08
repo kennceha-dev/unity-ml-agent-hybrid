@@ -66,7 +66,7 @@ public static class AStar
     const int stairCost = 5;    //Cost for A* to create stairs, disuades algorithm from needlessly creating stairs
     static PriorityQueue<AStarNode> open;   //Open nodes, not fully explored
     static PriorityQueue<AStarNode> closed; //Closed nodes, fully explored
-    
+
     /// <summary>
     /// Main function that runs A* algorithm
     /// </summary>
@@ -83,7 +83,7 @@ public static class AStar
         {
             throw new Exception("goalIndex is an invalid cell");
         }
-         
+
         open = new();
         closed = new();
 
@@ -98,10 +98,10 @@ public static class AStar
             open.Pop();
 
             Vector3Int lastDirection = constUndefined;  //Initialize
-            
+
             //Need last direction to make sure algorithm does not try and check backwards
             //Fun fact, without this, the stairs start spawning on top of eachother making impossible hallways to traverse
-            if(current.parent != null)
+            if (current.parent != null)
             {
                 lastDirection = DirectionCameFrom(current.parent.indices, current.indices);
             }
@@ -115,7 +115,7 @@ public static class AStar
                 Stack<AStarNode> result;
 
                 //Make sure last direction wasn't North so we don't go backwards
-                if(lastDirection != constNorth)
+                if (lastDirection != constNorth)
                 {
                     //Get index of cell to the north of the current cell
                     Vector3Int north = new Vector3Int(current.indices.x, current.indices.y + y, current.indices.z + 1);
@@ -128,7 +128,7 @@ public static class AStar
                 }
 
                 //Subsequent if statements follow same format as above for constNorth
-                if(lastDirection != constSouth)
+                if (lastDirection != constSouth)
                 {
                     Vector3Int south = new Vector3Int(current.indices.x, current.indices.y + y, current.indices.z - 1);
                     result = CheckCell(current, south, goalIndex, goalRoom, grid);
@@ -211,8 +211,8 @@ public static class AStar
                 return TraceBackPath(current);
             }
 
-            //Check that the candidate cell is empty and not already part of our path (don't want to write over previous hallways/stairs
-            if (grid.IsCellEmpty(nextIndex) && !IndexInPath(nextIndex, current))
+            //Check that the candidate cell is traversable (empty or hallway) and not already part of our path
+            if (IsTraversable(nextIndex, grid, allowStairSpace: false) && !IndexInPath(nextIndex, current))
             {
 
                 //if nextIndex is adjacent to one of the cells in the room and the next node is not a staircase
@@ -228,7 +228,7 @@ public static class AStar
                 if ((openNode == null || openNode?.f > nextNode.f) && (closeNode == null || closeNode?.f > nextNode.f))
                 {
                     //If this index isn't the same y as the last, that means we're adding stairs so we need to update the cost
-                    if(current.indices.y != nextIndex.y)
+                    if (current.indices.y != nextIndex.y)
                     {
                         nextNode.g += stairCost - 1; //Subtracting one since g was already incremented once for a normal hallway
 
@@ -236,8 +236,8 @@ public static class AStar
                         nextNode.extraStairIndex = (nextIndex.y < current.indices.y ? nextIndex + Vector3Int.up : nextIndex - Vector3Int.up);
                         nextNode.nodeType = CellTypes.STAIRS;
 
-                        //If cell for staircase isn't empty or in our path, then staircase is invalid
-                        if(!grid.IsCellEmpty(nextNode.extraStairIndex) || IndexInPath(nextNode.extraStairIndex, current))
+                        //If cell for staircase isn't traversable (allowing stair space) or in our path, then staircase is invalid
+                        if (!IsTraversable(nextNode.extraStairIndex, grid, allowStairSpace: true) || IndexInPath(nextNode.extraStairIndex, current))
                         {
                             return null;
                         }
@@ -254,7 +254,7 @@ public static class AStar
                         Stack<AStarNode> path = CheckCell(nextNode, afterIndex, goalIndex, goalRoom, grid);
 
                         //If CheckCell returns a path, that means it finished the path, just like normal
-                        if(path != null)
+                        if (path != null)
                         {
                             return path;
                         }
@@ -291,7 +291,7 @@ public static class AStar
         AStarNode current = adjecentEnd;
 
         //While current parent node is not the first node, loop back through chain of nodes, ignore last node since it is the start node
-        while(current.parent != null)
+        while (current.parent != null)
         {
             path.Push(current);
             current = current.parent;
@@ -310,9 +310,9 @@ public static class AStar
     {
         AStarNode current = currentNode;
 
-        while(current != null)
+        while (current != null)
         {
-            if(current.indices == index ||  //Check not equal to node index
+            if (current.indices == index ||  //Check not equal to node index
                 (current.nodeType == CellTypes.STAIRS && current.extraStairIndex == index)) //and not equal to extra stair cell if the node is a staircase
             {
                 return true;
@@ -334,7 +334,7 @@ public static class AStar
     /// <returns></returns>
     static Vector3Int DirectionCameFrom(Vector3Int parentIndices, Vector3Int currentIndices)
     {
-        if(parentIndices == null || currentIndices == null) //Sanity Check
+        if (parentIndices == null || currentIndices == null) //Sanity Check
         {
             Debug.LogError("Passes indices are null");
             return constUndefined;
@@ -367,5 +367,25 @@ public static class AStar
         //Only other way to get here is if one passed Vector3Int is null
         //Should only happen for the first node
         return constUndefined;
+    }
+
+    /// <summary>
+    /// Determines whether a grid cell can be traversed without additional carving.
+    /// Allows re-use of existing hallways and stairs; stairspaces are only allowed when explicitly requested (vertical support).
+    /// </summary>
+    static bool IsTraversable(Vector3Int index, Grid grid, bool allowStairSpace)
+    {
+        CellTypes type = grid.GetCell(index).cellType;
+        if (type == CellTypes.NONE || type == CellTypes.HALLWAY || type == CellTypes.STAIRS)
+        {
+            return true;
+        }
+
+        if (allowStairSpace && type == CellTypes.STAIRSPACE)
+        {
+            return true;
+        }
+
+        return false;
     }
 }

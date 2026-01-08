@@ -147,6 +147,11 @@ public class Triangle : IEquatable<Triangle>
         return this == t;
     }
 
+    public override bool Equals(object obj)
+    {
+        return obj is Triangle other && this == other;
+    }
+
     public override int GetHashCode()
     {
         return pointA.GetHashCode() ^ pointB.GetHashCode() ^ pointC.GetHashCode();

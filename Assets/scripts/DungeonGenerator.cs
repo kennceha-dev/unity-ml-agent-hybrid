@@ -1314,51 +1314,15 @@ public class DungeonGenerator : MonoBehaviour
 
             GameObject spawnObject = null;
 
-            //Determine type of prefab to place based on adjacent cell type
+            // Only block against empty space; all occupied neighbors stay open with an arch.
             switch (adjacentCell.cellType)
             {
-                //Wall
                 case CellTypes.NONE:
                     spawnObject = wallPrefab;
                     break;
 
-                //Room
-                case CellTypes.ROOM:
-                    spawnObject = doorwayPrefab;
-                    break;
-
-                //Stairs and stairspace
-                case CellTypes.STAIRS:
-                    if (adjacentCell.faceDirection != Cell.DirectionCameFrom(adjacentIndex, currentIndex))
-                    {
-                        spawnObject = wallPrefab;
-                    }
-                    else
-                    {
-                        spawnObject = archPrefab;
-                    }
-                    break;
-
-                case CellTypes.STAIRSPACE:
-                    //Check the stairs below the stair space for direction, the stairs must be facing away  (therefore leading up the the hallway)
-                    if (adjacentCell.faceDirection != Cell.DirectionCameFrom(adjacentIndex, currentIndex))
-                    {
-                        spawnObject = wallPrefab;
-                    }
-                    else
-                    {
-                        spawnObject = archPrefab;
-                    }
-                    break;
-
-                //Just add an arch
-                case CellTypes.HALLWAY:
-                    spawnObject = archPrefab;
-                    break;
-
-                //Do nothing
                 default:
-
+                    spawnObject = archPrefab;
                     break;
             }
 
@@ -1506,16 +1470,9 @@ public class DungeonGenerator : MonoBehaviour
                     }
                     break;
 
-                //Put wall up if not facing the hallway
+                // Hallways should always be open next to stairs to prevent blocking the descent/ascent.
                 case CellTypes.HALLWAY:
-                    if (grid.GetCell(currentIndex).faceDirection != Cell.DirectionCameFrom(currentIndex, adjacentIndex))
-                    {
-                        spawnObject = wallPrefab;
-                    }
-                    else
-                    {
-                        spawnObject = archPrefab;
-                    }
+                    spawnObject = archPrefab;
                     break;
 
                 //If moving in different directions, plug the wall
@@ -1530,9 +1487,9 @@ public class DungeonGenerator : MonoBehaviour
                     }
                     break;
 
-                //Should never need to be open next to a stair space (not accounting for straight staircases since this algorithm puts landings between all stairs)
+                // Keep landing connection open; stairspace is the cell above/below stairs.
                 case CellTypes.STAIRSPACE:
-                    spawnObject = wallPrefab;
+                    spawnObject = archPrefab;
                     break;
 
                 //Do nothing

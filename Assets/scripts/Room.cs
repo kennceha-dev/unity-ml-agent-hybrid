@@ -198,6 +198,16 @@ public class Room : IEquatable<Room>
     public static bool operator !=(Room lhs, Room rhs)
         => !(lhs == rhs);
 
+    public override bool Equals(object obj)
+    {
+        return obj is Room other && this == other;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(center, cells?.Count ?? 0);
+    }
+
     //public static bool operator ==(Room lhs, Edge rhs)
     //    => ((lhs.center == rhs.pointA) || (lhs.center == rhs.pointB));
 
