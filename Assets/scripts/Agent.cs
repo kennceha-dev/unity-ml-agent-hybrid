@@ -67,6 +67,7 @@ public class HybridAgent : Agent, ISpeedModifiable
     private float lastEpisodeReward;
     private float bestEpisodeReward = float.MinValue;
     private Vector2 smoothedMove;
+    private float minRemainingDistanceAchieved = float.MaxValue;
 
     #region Unity Lifecycle
 
@@ -185,6 +186,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         previousPathRemainingDistance = -1f;
         previousSteeringDistance = -1f;
         smoothedMove = Vector2.zero;
+        minRemainingDistanceAchieved = float.MaxValue;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -265,15 +267,27 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void RewardSteeringProgress(Vector3 steeringTarget)
     {
-        float distToSteering = Vector3.Distance(transform.position, steeringTarget);
+        // Use total path remaining distance instead of steering target distance
+        // This prevents reward hacking by oscillating near corners
+        float remainingDist = GetRemainingDistance();
 
-        if (previousDistanceToSteeringTarget > 0f)
+        // One-way gate: only reward when achieving new minimum distance
+        // This ensures the agent can't farm rewards by going back and forth
+        if (remainingDist < minRemainingDistanceAchieved)
         {
-            float delta = previousDistanceToSteeringTarget - distToSteering;
-            LoggedAddReward(delta * 0.1f, "Steering progress");
+            float progressMade = minRemainingDistanceAchieved - remainingDist;
+
+            // Cap the reward for the first step (when minRemainingDistanceAchieved is MaxValue)
+            if (minRemainingDistanceAchieved < float.MaxValue)
+            {
+                LoggedAddReward(progressMade * 0.1f, "Path progress");
+            }
+
+            minRemainingDistanceAchieved = remainingDist;
         }
 
-        previousDistanceToSteeringTarget = distToSteering;
+        // Update for other systems that may use this
+        previousDistanceToSteeringTarget = Vector3.Distance(transform.position, steeringTarget);
     }
 
     private void RewardMovementAlignment(Vector3 desiredDir)
