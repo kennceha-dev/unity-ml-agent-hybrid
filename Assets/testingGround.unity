@@ -485,7 +485,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 21
+    VectorObservationSize: 18
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2
@@ -584,8 +584,6 @@ MonoBehaviour:
   baseCatchTolerance: 5
   wallContactTimeout: 3
   rewardTimeoutThreshold: -10
-  steeringRegressionGracePeriod: 2
-  steeringReturnTolerance: 0.25
   actionSmoothing: 0.2
   actionDeadZone: 0.1
 --- !u!114 &3597370290653749400

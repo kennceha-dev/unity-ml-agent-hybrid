@@ -626,17 +626,48 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private Vector3 GetSteeringTarget()
     {
-        Vector3 steeringTarget = navAgent != null && navAgent.hasPath ? navAgent.steeringTarget : target.position;
-        // Debug.Log("Steering target: " + steeringTarget);
-        return steeringTarget;
+        if (navAgent == null || !navAgent.isOnNavMesh || target == null)
+            return transform.position;
+
+        // Calculate path manually to avoid Warp() clearing hasPath
+        NavMeshPath path = new NavMeshPath();
+        if (navAgent.CalculatePath(target.position, path) && path.status == NavMeshPathStatus.PathComplete)
+        {
+            // Return first corner (next waypoint) if available
+            if (path.corners.Length > 1)
+                return path.corners[1];
+            else if (path.corners.Length == 1)
+                return path.corners[0];
+        }
+
+        return transform.position;
     }
 
     private float GetRemainingDistance()
     {
-        if (navAgent != null && navAgent.isOnNavMesh && navAgent.hasPath)
-            return navAgent.remainingDistance;
+        if (navAgent == null || !navAgent.isOnNavMesh || target == null)
+            return float.MaxValue;
 
-        return Vector3.Distance(transform.position, target.position);
+        // Calculate path manually to avoid Warp() clearing hasPath
+        NavMeshPath path = new NavMeshPath();
+        if (navAgent.CalculatePath(target.position, path) && path.status == NavMeshPathStatus.PathComplete)
+        {
+            // Sum up corner-to-corner distances for actual path length
+            float distance = 0f;
+            Vector3[] corners = path.corners;
+
+            if (corners.Length > 0)
+            {
+                distance = Vector3.Distance(transform.position, corners[0]);
+                for (int i = 0; i < corners.Length - 1; i++)
+                {
+                    distance += Vector3.Distance(corners[i], corners[i + 1]);
+                }
+                return distance;
+            }
+        }
+
+        return float.MaxValue;
     }
 
     private float GetMinWallDistance()
