@@ -427,22 +427,7 @@ public class DungeonGenerator : MonoBehaviour
 
         //Create hallways between rooms using A*
         //This is the heaviest function computationally.  If you experience performance issues, this is likely the culprit.
-        bool carvedHallways = CarveHallways(ref roomMap);
-
-        if (!carvedHallways)
-        {
-            Debug.LogWarning("A* pathing failed during hallway carving. Regenerating dungeon.");
-
-            // Clear current dungeon state and retry with a fresh seed so we don't loop on the same failure case
-            Clear();
-
-            // Mirror DungeonRunner: increment seed to keep deterministic progression while changing layout
-            dungeonSeed++;
-            InitRng();
-
-            StartCoroutine(GenerateDungeon());
-            yield break;
-        }
+        CarveHallways(ref roomMap);
 
         //Place walls in between rooms and hallways (keeps hallways and rooms from having 
         PlaceWalls();
@@ -856,7 +841,7 @@ public class DungeonGenerator : MonoBehaviour
     /// Creates hallways and staircases between rooms, spawns in objects.
     /// TODO: Optimize this
     /// </summary>
-    bool CarveHallways(ref Dictionary<Room, List<Room>> adjacencyList)
+    void CarveHallways(ref Dictionary<Room, List<Room>> adjacencyList)
     {
         hallwaySections.Clear();
 
@@ -887,19 +872,12 @@ public class DungeonGenerator : MonoBehaviour
                 if (path == null)
                 {
                     Debug.LogError("A-Star Path Failed");
-
-                    if (currentPathParent != null)
-                    {
-                        AlwaysDestroy(currentPathParent.gameObject);
-                    }
-
                     //Log the time this step took
                     if (displayAlgorithmTime)
                     {
                         Debug.Log("Path Time: " + (Time.realtimeSinceStartup - realtime));
                     }
-
-                    return false;
+                    continue;
                 }
 
                 //Store the last Y value so we know when we've added a stairwell
@@ -1001,8 +979,6 @@ public class DungeonGenerator : MonoBehaviour
                 }
             }
         }
-
-        return true;
     }
 
     /// <summary>
@@ -1338,15 +1314,51 @@ public class DungeonGenerator : MonoBehaviour
 
             GameObject spawnObject = null;
 
-            // Only block against empty space; all occupied neighbors stay open with an arch.
+            //Determine type of prefab to place based on adjacent cell type
             switch (adjacentCell.cellType)
             {
+                //Wall
                 case CellTypes.NONE:
                     spawnObject = wallPrefab;
                     break;
 
-                default:
+                //Room
+                case CellTypes.ROOM:
+                    spawnObject = doorwayPrefab;
+                    break;
+
+                //Stairs and stairspace
+                case CellTypes.STAIRS:
+                    if (adjacentCell.faceDirection != Cell.DirectionCameFrom(adjacentIndex, currentIndex))
+                    {
+                        spawnObject = wallPrefab;
+                    }
+                    else
+                    {
+                        spawnObject = archPrefab;
+                    }
+                    break;
+
+                case CellTypes.STAIRSPACE:
+                    //Check the stairs below the stair space for direction, the stairs must be facing away  (therefore leading up the the hallway)
+                    if (adjacentCell.faceDirection != Cell.DirectionCameFrom(adjacentIndex, currentIndex))
+                    {
+                        spawnObject = wallPrefab;
+                    }
+                    else
+                    {
+                        spawnObject = archPrefab;
+                    }
+                    break;
+
+                //Just add an arch
+                case CellTypes.HALLWAY:
                     spawnObject = archPrefab;
+                    break;
+
+                //Do nothing
+                default:
+
                     break;
             }
 
@@ -1494,9 +1506,16 @@ public class DungeonGenerator : MonoBehaviour
                     }
                     break;
 
-                // Hallways should always be open next to stairs to prevent blocking the descent/ascent.
+                //Put wall up if not facing the hallway
                 case CellTypes.HALLWAY:
-                    spawnObject = archPrefab;
+                    if (grid.GetCell(currentIndex).faceDirection != Cell.DirectionCameFrom(currentIndex, adjacentIndex))
+                    {
+                        spawnObject = wallPrefab;
+                    }
+                    else
+                    {
+                        spawnObject = archPrefab;
+                    }
                     break;
 
                 //If moving in different directions, plug the wall
@@ -1511,9 +1530,9 @@ public class DungeonGenerator : MonoBehaviour
                     }
                     break;
 
-                // Keep landing connection open; stairspace is the cell above/below stairs.
+                //Should never need to be open next to a stair space (not accounting for straight staircases since this algorithm puts landings between all stairs)
                 case CellTypes.STAIRSPACE:
-                    spawnObject = archPrefab;
+                    spawnObject = wallPrefab;
                     break;
 
                 //Do nothing

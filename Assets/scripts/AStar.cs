@@ -211,8 +211,8 @@ public static class AStar
                 return TraceBackPath(current);
             }
 
-            //Check that the candidate cell is traversable (empty or hallway) and not already part of our path
-            if (IsTraversable(nextIndex, grid, allowStairSpace: false) && !IndexInPath(nextIndex, current))
+            //Check that the candidate cell is empty and not already part of our path (don't want to write over previous hallways/stairs
+            if (grid.IsCellEmpty(nextIndex) && !IndexInPath(nextIndex, current))
             {
 
                 //if nextIndex is adjacent to one of the cells in the room and the next node is not a staircase
@@ -236,8 +236,8 @@ public static class AStar
                         nextNode.extraStairIndex = (nextIndex.y < current.indices.y ? nextIndex + Vector3Int.up : nextIndex - Vector3Int.up);
                         nextNode.nodeType = CellTypes.STAIRS;
 
-                        //If cell for staircase isn't traversable (allowing stair space) or in our path, then staircase is invalid
-                        if (!IsTraversable(nextNode.extraStairIndex, grid, allowStairSpace: true) || IndexInPath(nextNode.extraStairIndex, current))
+                        //If cell for staircase isn't empty or in our path, then staircase is invalid
+                        if (!grid.IsCellEmpty(nextNode.extraStairIndex) || IndexInPath(nextNode.extraStairIndex, current))
                         {
                             return null;
                         }
@@ -367,25 +367,5 @@ public static class AStar
         //Only other way to get here is if one passed Vector3Int is null
         //Should only happen for the first node
         return constUndefined;
-    }
-
-    /// <summary>
-    /// Determines whether a grid cell can be traversed without additional carving.
-    /// Allows re-use of existing hallways and stairs; stairspaces are only allowed when explicitly requested (vertical support).
-    /// </summary>
-    static bool IsTraversable(Vector3Int index, Grid grid, bool allowStairSpace)
-    {
-        CellTypes type = grid.GetCell(index).cellType;
-        if (type == CellTypes.NONE || type == CellTypes.HALLWAY || type == CellTypes.STAIRS)
-        {
-            return true;
-        }
-
-        if (allowStairSpace && type == CellTypes.STAIRSPACE)
-        {
-            return true;
-        }
-
-        return false;
     }
 }
