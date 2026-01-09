@@ -116,11 +116,6 @@ public class Edge : IEquatable<Edge>, IComparable<Edge>
         return pointA.GetHashCode() ^ pointB.GetHashCode();
     }
 
-    bool IEquatable<Edge>.Equals(Edge b)
-    {
-        return this == b;
-    }
-
     public int CompareTo(Edge other)
     {
         if (other == null)

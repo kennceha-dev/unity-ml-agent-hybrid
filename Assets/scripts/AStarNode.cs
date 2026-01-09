@@ -108,14 +108,4 @@ public class AStarNode : IComparable<AStarNode>
     {
         return this == other ? 0 : (this < other ? -1 : 1);
     }
-
-    public override bool Equals(object obj)
-    {
-        return obj is AStarNode other && this == other;
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(f, indices);
-    }
 }

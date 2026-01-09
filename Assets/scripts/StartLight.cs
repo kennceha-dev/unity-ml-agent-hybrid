@@ -39,7 +39,7 @@ using UnityEngine;
 
 public class StartLight : MonoBehaviour
 {
-    [SerializeField] private new GameObject light;
+    [SerializeField] GameObject light;
 
     public GameObject GetLight() { return light; }
 
