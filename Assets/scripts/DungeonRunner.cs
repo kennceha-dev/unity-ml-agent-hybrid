@@ -148,7 +148,9 @@ public class DungeonRunner : MonoBehaviour
         Vector3 targetPosition = Vector3.zero;
 
         // Minimum distance to prevent spawning on top of each other
-        const float minDistance = 2.0f;
+        // Use smaller distance if forced into same room (only 1 room exists)
+        bool sameRoom = (targetRoom == agentRoom);
+        float minDistance = sameRoom ? 0.5f : 2.0f;
         const int maxAttempts = 20;
 
         if (agent != null)
@@ -166,12 +168,13 @@ public class DungeonRunner : MonoBehaviour
                 if (distance >= minDistance)
                     break;
 
-                // If same room and still too close, try a different position
+                // If still too close after all attempts, offset the target position
                 if (i == maxAttempts - 1 && distance < minDistance)
                 {
-                    Debug.LogWarning($"Could not find spawn positions with minimum distance after {maxAttempts} attempts. Forcing dungeon regeneration.");
-                    StartCoroutine(GenerateAndSpawn());
-                    return;
+                    // Apply a small offset instead of regenerating the dungeon
+                    Vector3 offset = new Vector3(1.5f, 0f, 1.5f);
+                    targetPosition = agentPosition + offset;
+                    Debug.Log($"Spawning target with offset due to small room (distance: {distance:F2})");
                 }
             }
             target.position = targetPosition;
