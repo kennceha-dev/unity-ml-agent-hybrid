@@ -427,7 +427,22 @@ public class DungeonGenerator : MonoBehaviour
 
         //Create hallways between rooms using A*
         //This is the heaviest function computationally.  If you experience performance issues, this is likely the culprit.
-        CarveHallways(ref roomMap);
+        bool carvedHallways = CarveHallways(ref roomMap);
+
+        if (!carvedHallways)
+        {
+            Debug.LogWarning("A* pathing failed during hallway carving. Regenerating dungeon.");
+
+            // Clear current dungeon state and retry with a fresh seed so we don't loop on the same failure case
+            Clear();
+
+            // Mirror DungeonRunner: increment seed to keep deterministic progression while changing layout
+            dungeonSeed++;
+            InitRng();
+
+            StartCoroutine(GenerateDungeon());
+            yield break;
+        }
 
         //Place walls in between rooms and hallways (keeps hallways and rooms from having 
         PlaceWalls();
@@ -841,7 +856,7 @@ public class DungeonGenerator : MonoBehaviour
     /// Creates hallways and staircases between rooms, spawns in objects.
     /// TODO: Optimize this
     /// </summary>
-    void CarveHallways(ref Dictionary<Room, List<Room>> adjacencyList)
+    bool CarveHallways(ref Dictionary<Room, List<Room>> adjacencyList)
     {
         hallwaySections.Clear();
 
@@ -872,12 +887,19 @@ public class DungeonGenerator : MonoBehaviour
                 if (path == null)
                 {
                     Debug.LogError("A-Star Path Failed");
+
+                    if (currentPathParent != null)
+                    {
+                        AlwaysDestroy(currentPathParent.gameObject);
+                    }
+
                     //Log the time this step took
                     if (displayAlgorithmTime)
                     {
                         Debug.Log("Path Time: " + (Time.realtimeSinceStartup - realtime));
                     }
-                    continue;
+
+                    return false;
                 }
 
                 //Store the last Y value so we know when we've added a stairwell
@@ -979,6 +1001,8 @@ public class DungeonGenerator : MonoBehaviour
                 }
             }
         }
+
+        return true;
     }
 
     /// <summary>
