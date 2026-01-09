@@ -1,0 +1,173 @@
+{
+    "hybrid": {
+        "checkpoints": [
+            {
+                "steps": 157380,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-157380.onnx",
+                "reward": 24.288583201390725,
+                "creation_time": 1767864443.943553,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-157380.pt"
+                ]
+            },
+            {
+                "steps": 274016,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-274016.onnx",
+                "reward": 25.554802829443023,
+                "creation_time": 1767866218.3275676,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-274016.pt"
+                ]
+            },
+            {
+                "steps": 377020,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-377020.onnx",
+                "reward": 22.01701807975769,
+                "creation_time": 1767867712.7388375,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-377020.pt"
+                ]
+            },
+            {
+                "steps": 377729,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-377729.onnx",
+                "reward": 18.03358592589696,
+                "creation_time": 1767868311.060961,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-377729.pt"
+                ]
+            },
+            {
+                "steps": 379277,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-379277.onnx",
+                "reward": 12.228687504927317,
+                "creation_time": 1767868725.4254313,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-379277.pt"
+                ]
+            },
+            {
+                "steps": 392261,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-392261.onnx",
+                "reward": 22.456279529766604,
+                "creation_time": 1767871405.3450887,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-392261.pt"
+                ]
+            },
+            {
+                "steps": 394357,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-394357.onnx",
+                "reward": 19.320310190320015,
+                "creation_time": 1767948778.3203194,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-394357.pt"
+                ]
+            },
+            {
+                "steps": 395967,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-395967.onnx",
+                "reward": 16.35372215906779,
+                "creation_time": 1767948956.389738,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-395967.pt"
+                ]
+            },
+            {
+                "steps": 396500,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-396500.onnx",
+                "reward": 14.31227371096611,
+                "creation_time": 1767949096.975899,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-396500.pt"
+                ]
+            },
+            {
+                "steps": 397022,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-397022.onnx",
+                "reward": 15.045333663622538,
+                "creation_time": 1767949222.4571621,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-397022.pt"
+                ]
+            },
+            {
+                "steps": 397634,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-397634.onnx",
+                "reward": 12.818654457728067,
+                "creation_time": 1767949350.445063,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-397634.pt"
+                ]
+            },
+            {
+                "steps": 398111,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-398111.onnx",
+                "reward": 14.636122167110443,
+                "creation_time": 1767949571.3908255,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-398111.pt"
+                ]
+            },
+            {
+                "steps": 398651,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-398651.onnx",
+                "reward": 13.65504769484202,
+                "creation_time": 1767949774.1758175,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-398651.pt"
+                ]
+            },
+            {
+                "steps": 399134,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-399134.onnx",
+                "reward": 17.811216354370117,
+                "creation_time": 1767949874.941435,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-399134.pt"
+                ]
+            },
+            {
+                "steps": 417052,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-417052.onnx",
+                "reward": 14.404597820253933,
+                "creation_time": 1767950604.624289,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-417052.pt"
+                ]
+            },
+            {
+                "steps": 499879,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-499879.onnx",
+                "reward": 18.081326127052307,
+                "creation_time": 1767967767.8670948,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-499879.pt"
+                ]
+            },
+            {
+                "steps": 602733,
+                "file_path": "results\\optimal_copy\\hybrid\\hybrid-602733.onnx",
+                "reward": 14.975585222244263,
+                "creation_time": 1767969572.0752692,
+                "auxillary_file_paths": [
+                    "results\\optimal_copy\\hybrid\\hybrid-602733.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 602733,
+            "file_path": "results\\optimal_copy\\hybrid.onnx",
+            "reward": 14.975585222244263,
+            "creation_time": 1767969572.0752692,
+            "auxillary_file_paths": [
+                "results\\optimal_copy\\hybrid\\hybrid-602733.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.2.2+cu121"
+    }
+}
