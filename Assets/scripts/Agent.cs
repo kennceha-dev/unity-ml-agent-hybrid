@@ -58,6 +58,15 @@ public class HybridAgent : Agent, ISpeedModifiable
     private Vector2 smoothedMove;
     private float minRemainingDistanceAchieved = float.MaxValue;
 
+    // Eval mode tracking
+    private float evalStartTime;
+    private bool hasFinishedEval;
+
+    /// <summary>
+    /// Check if this agent is enabled in GameManager.
+    /// </summary>
+    private bool IsAgentEnabled => GameManager.Instance == null || GameManager.Instance.EnableRLAgent;
+
     #region Unity Lifecycle
 
     protected override void Awake()
@@ -97,6 +106,13 @@ public class HybridAgent : Agent, ISpeedModifiable
     private void OnDungeonReady()
     {
         isReady = true;
+
+        // Reset eval tracking when dungeon is ready
+        if (!GameManager.Instance.IsTraining)
+        {
+            evalStartTime = Time.time;
+            hasFinishedEval = false;
+        }
     }
 
     private void OnDungeonRegenerating()
@@ -106,6 +122,9 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void OnBasicAgentReachedTarget()
     {
+        // Only start timeout in training mode
+        if (!GameManager.Instance.IsTraining) return;
+
         // BasicAgent reached target - start timeout for RL agent to catch up
         if (!isInTimeout)
         {
@@ -121,13 +140,33 @@ public class HybridAgent : Agent, ISpeedModifiable
     {
         if (!isReady) return;
 
-        if (navAgent != null && !navAgent.isOnNavMesh)
+        // Skip if agent is disabled in GameManager
+        if (!IsAgentEnabled)
         {
-            LoggedAddReward(-0.5f, "Off NavMesh");
-            HandleEpisodeEnd(false, false, false);
+            if (physicsMovement != null)
+                physicsMovement.Move(Vector3.zero, useFixedDelta: true);
             return;
         }
 
+        if (navAgent != null && !navAgent.isOnNavMesh)
+        {
+            if (GameManager.Instance.IsTraining)
+            {
+                LoggedAddReward(-0.5f, "Off NavMesh");
+                HandleEpisodeEnd(false, false, false);
+            }
+            return;
+        }
+
+        // In eval mode, just apply movement and check for target reached
+        if (!GameManager.Instance.IsTraining)
+        {
+            ApplyMovement();
+            SyncNavMeshAgent();
+            return;
+        }
+
+        // Training mode - full reward and timeout logic
         if (HasRewardDroppedBelowThreshold())
         {
             LoggedAddReward(-1f, "Reward timeout");
@@ -215,6 +254,10 @@ public class HybridAgent : Agent, ISpeedModifiable
 
         ProcessActions(actions);
 
+        // Skip reward calculations in eval mode
+        if (!GameManager.Instance.IsTraining)
+            return;
+
         Vector3 steeringTarget = GetSteeringTarget();
         Vector3 desiredDir = (steeringTarget - transform.position).normalized;
 
@@ -244,6 +287,7 @@ public class HybridAgent : Agent, ISpeedModifiable
 
         cachedStrafeInput = smoothedMove.x;
         cachedForwardInput = smoothedMove.y;
+
         cachedJumpInput = (actions.DiscreteActions[0] == 1) && GameManager.Instance.CanJump;
     }
 
@@ -520,6 +564,27 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     #region Collision
 
+    void OnControllerColliderHit(ControllerColliderHit other)
+    {
+        if (other.gameObject.CompareTag(GameManager.Instance.WallTag))
+        {
+            HandleWallEnter();
+        }
+        else if (other.gameObject.CompareTag(GameManager.Instance.StickyTag))
+        {
+            HandleStickyEnter();
+        }
+        else if (other.gameObject.CompareTag(GameManager.Instance.PlayerTag))
+        {
+            HandlePlayerCaught();
+        }
+        else if (other.gameObject.CompareTag(GameManager.Instance.ExitTag))
+        {
+            LoggedAddReward(-0.1f, "Exit collision");
+            HandleEpisodeEnd(false, false, false);
+        }
+    }
+
     private void OnCollisionEnter(Collision other)
     {
         if (other.gameObject.CompareTag(GameManager.Instance.WallTag))
@@ -586,6 +651,18 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void HandlePlayerCaught()
     {
+        // In eval mode, just notify GameManager and wait for next map
+        if (!GameManager.Instance.IsTraining)
+        {
+            if (!hasFinishedEval)
+            {
+                hasFinishedEval = true;
+                GameManager.Instance.OnHybridAgentFinishedEval();
+            }
+            return;
+        }
+
+        // Training mode - give reward and end episode
         LoggedSetReward(1f, "Player caught");
         bool beatBase = !isInTimeout || baseCatchElapsed <= baseCatchTolerance;
         HandleEpisodeEnd(true, true, beatBase);

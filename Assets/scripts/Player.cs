@@ -14,10 +14,6 @@ public class Player : MonoBehaviour, ISpeedModifiable
     [SerializeField] private float lookSpeed = 0.5f;
     [SerializeField] private Transform lookPivot;
 
-    [Header("NavMesh Settings")]
-    [Tooltip("Enable NavMesh-based movement in MovingTarget training phase")]
-    [SerializeField] private bool enableTrainingMode = true;
-
     private NavMeshAgent agent;
     private float rotationX = 0f;
     private float rotationY = 0f;
@@ -71,8 +67,8 @@ public class Player : MonoBehaviour, ISpeedModifiable
         agent.enabled = false;
         destinationSet = false;
 
-        // Re-enable if we're in NavMesh movement mode
-        if (enableTrainingMode && GameManager.Instance != null &&
+        // Re-enable if we're in NavMesh movement mode (training mode + MovingTarget phase)
+        if (GameManager.Instance != null &&
             GameManager.Instance.CurrentTrainingPhase == TrainingPhase.MovingTarget)
         {
             agent.enabled = true;
@@ -110,8 +106,8 @@ public class Player : MonoBehaviour, ISpeedModifiable
             return;
         }
 
-        bool shouldUseNavMesh = enableTrainingMode &&
-                                GameManager.Instance.CurrentTrainingPhase == TrainingPhase.MovingTarget;
+        // Use NavMesh movement in MovingTarget phase when in training mode
+        bool shouldUseNavMesh = GameManager.Instance.CurrentTrainingPhase == TrainingPhase.MovingTarget;
 
         if (useNavMeshMovement != shouldUseNavMesh)
         {

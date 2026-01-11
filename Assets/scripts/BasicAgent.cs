@@ -21,6 +21,15 @@ public class BasicAgent : MonoBehaviour, ISpeedModifiable
     /// </summary>
     private bool hasReachedTargetThisEpisode = false;
 
+    // Eval mode tracking
+    private float evalStartTime;
+    private bool hasFinishedEval = false;
+
+    /// <summary>
+    /// Check if this agent is enabled in GameManager.
+    /// </summary>
+    private bool IsAgentEnabled => GameManager.Instance == null || GameManager.Instance.EnableBaseAgent;
+
     void Start()
     {
         physicsMovement = GetComponent<PhysicsMovement>();
@@ -44,6 +53,14 @@ public class BasicAgent : MonoBehaviour, ISpeedModifiable
     private void ResetReachedFlag()
     {
         hasReachedTargetThisEpisode = false;
+        hasFinishedEval = false;
+
+        // Reset eval start time when dungeon is ready
+        if (GameManager.Instance != null && !GameManager.Instance.IsTraining)
+        {
+            evalStartTime = Time.time;
+        }
+
         if (physicsMovement != null)
             physicsMovement.ResetVelocity();
     }
@@ -52,6 +69,14 @@ public class BasicAgent : MonoBehaviour, ISpeedModifiable
     {
         if (target == null || navAgent == null || !navAgent.isOnNavMesh)
             return;
+
+        // Skip if agent is disabled in GameManager
+        if (!IsAgentEnabled)
+        {
+            if (physicsMovement != null)
+                physicsMovement.Move(Vector3.zero, useFixedDelta: true);
+            return;
+        }
 
         // Sync NavMeshAgent position
         SyncNavMeshAgent();
@@ -76,12 +101,26 @@ public class BasicAgent : MonoBehaviour, ISpeedModifiable
             {
                 hasReachedTargetThisEpisode = true;
                 navAgent.ResetPath();
-                GameManager.Instance.OnBasicAgentReachedTarget();
+
+                // Handle differently based on training vs eval mode
+                if (GameManager.Instance.IsTraining)
+                {
+                    GameManager.Instance.OnBasicAgentReachedTarget();
+                }
+                else
+                {
+                    // Eval mode - log and notify
+                    if (!hasFinishedEval)
+                    {
+                        hasFinishedEval = true;
+                        GameManager.Instance.OnBasicAgentFinishedEval();
+                    }
+                }
             }
         }
         else
         {
-            // Still apply physics when stopped (for deceleration and gravity)
+            // Stop moving - apply zero input for deceleration and gravity
             if (physicsMovement != null)
                 physicsMovement.Move(Vector3.zero, useFixedDelta: true);
         }

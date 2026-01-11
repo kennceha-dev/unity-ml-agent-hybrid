@@ -50,11 +50,13 @@ public class DungeonRunner : MonoBehaviour
     {
         StartCoroutine(GenerateAndSpawn());
         GameManager.OnTrainingPhaseChanged += OnPhaseChanged;
+        GameManager.OnEvalRoundComplete += OnEvalRoundComplete;
     }
 
     void OnDestroy()
     {
         GameManager.OnTrainingPhaseChanged -= OnPhaseChanged;
+        GameManager.OnEvalRoundComplete -= OnEvalRoundComplete;
     }
 
     private void OnPhaseChanged(TrainingPhase newPhase)
@@ -65,10 +67,19 @@ public class DungeonRunner : MonoBehaviour
         ForceRegenerate();
     }
 
+    private void OnEvalRoundComplete()
+    {
+        Debug.Log("[Eval] All agents finished, generating next map...");
+        GameManager.Instance.IncrementSeed();
+        SetSeed(GameManager.Instance.CurrentSeed);
+        ForceRegenerate();
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.G))
         {
+            Debug.Log("Manual dungeon regeneration triggered.");
             GameManager.Instance.IncrementSeed();
             SetSeed(GameManager.Instance.CurrentSeed);
             ForceRegenerate();
@@ -254,6 +265,12 @@ public class DungeonRunner : MonoBehaviour
         }
 
         OnDungeonReady?.Invoke();
+
+        // Start eval round tracking if in eval mode
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.StartEvalRound();
+        }
     }
 
     /// <summary>

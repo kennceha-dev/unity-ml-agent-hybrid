@@ -37,7 +37,23 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public static event Action<TrainingPhase> OnTrainingPhaseChanged;
 
+    /// <summary>
+    /// Event fired when both agents finish in eval mode. DungeonRunner subscribes to generate next map.
+    /// </summary>
+    public static event Action OnEvalRoundComplete;
+
     [Header("Training Settings")]
+    [SerializeField] private bool isTraining = true;
+    public bool IsTraining => isTraining;
+
+    [Tooltip("Enable/disable the RL HybridAgent")]
+    [SerializeField] private bool enableRLAgent = true;
+    public bool EnableRLAgent => enableRLAgent;
+
+    [Tooltip("Enable/disable the BasicAgent (NavMesh baseline)")]
+    [SerializeField] private bool enableBaseAgent = true;
+    public bool EnableBaseAgent => enableBaseAgent;
+
     [SerializeField] private TrainingPhase trainingPhase = TrainingPhase.BasePathfinding;
     public TrainingPhase CurrentTrainingPhase => trainingPhase;
 
@@ -115,6 +131,14 @@ public class GameManager : MonoBehaviour
 
     private readonly Dictionary<TrainingPhase, PhaseData> phaseData = new();
 
+    // Eval mode tracking
+    private float evalStartTime;
+    private int evalMapIndex;
+    private bool evalHybridFinished;
+    private bool evalBasicFinished;
+    private float evalHybridTime;
+    private float evalBasicTime;
+
 #if UNITY_EDITOR
     [Header("Scene HUD")]
     [SerializeField] private bool showTrainingHud = true;
@@ -135,6 +159,9 @@ public class GameManager : MonoBehaviour
 
         // Initialize seed
         currentSeed = initialSeed;
+
+        // Initialize eval mode tracking
+        ResetEvalTracking();
 
         // Initialize log file
         InitializeLogFile();
@@ -415,17 +442,17 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Check if wall penalties should be active based on training phase.
     /// </summary>
-    public bool ShouldPenalizeWalls => trainingPhase >= TrainingPhase.ReachTarget;
+    public bool ShouldPenalizeWalls => trainingPhase >= TrainingPhase.ReachTarget && isTraining;
 
     /// <summary>
     /// Check if slime penalties should be active based on training phase.
     /// </summary>
-    public bool ShouldPenalizeSlime => trainingPhase >= TrainingPhase.AvoidSlime;
+    public bool ShouldPenalizeSlime => trainingPhase >= TrainingPhase.AvoidSlime && isTraining;
 
     /// <summary>
     /// Check if jumping should be allowed based on training phase.
     /// </summary>
-    public bool CanJump => trainingPhase >= TrainingPhase.AvoidSlime;
+    public bool CanJump => trainingPhase >= TrainingPhase.AvoidSlime || !isTraining;
 
     /// <summary>
     /// Called by BasicAgent when it reaches the target.
@@ -436,6 +463,94 @@ public class GameManager : MonoBehaviour
         ReportBasicEpisodeResult(true);
         OnBasicAgentReachedTargetEvent?.Invoke();
     }
+
+    #region Eval Mode
+
+    /// <summary>
+    /// Reset eval tracking for a new map/round.
+    /// </summary>
+    public void ResetEvalTracking()
+    {
+        evalStartTime = Time.time;
+        evalHybridFinished = false;
+        evalBasicFinished = false;
+        evalHybridTime = 0f;
+        evalBasicTime = 0f;
+    }
+
+    /// <summary>
+    /// Start a new eval round (called when dungeon is ready).
+    /// </summary>
+    public void StartEvalRound()
+    {
+        if (isTraining) return;
+
+        evalMapIndex++;
+        ResetEvalTracking();
+        Debug.Log($"[Eval] Starting map {evalMapIndex} at {DateTime.Now:HH:mm:ss.fff} on seed {currentSeed}");
+    }
+
+    /// <summary>
+    /// Called by HybridAgent when it reaches the target in eval mode.
+    /// </summary>
+    public void OnHybridAgentFinishedEval()
+    {
+        if (isTraining || evalHybridFinished) return;
+
+        evalHybridFinished = true;
+        evalHybridTime = Time.time - evalStartTime;
+        Debug.Log($"[Eval] HybridAgent finished map {evalMapIndex} | Time: {evalHybridTime:F3}s | Timestamp: {DateTime.Now:HH:mm:ss.fff}");
+
+        CheckEvalRoundComplete();
+    }
+
+    /// <summary>
+    /// Called by BasicAgent when it reaches the target in eval mode.
+    /// </summary>
+    public void OnBasicAgentFinishedEval()
+    {
+        if (isTraining || evalBasicFinished) return;
+
+        evalBasicFinished = true;
+        evalBasicTime = Time.time - evalStartTime;
+        Debug.Log($"[Eval] BasicAgent finished map {evalMapIndex} | Time: {evalBasicTime:F3}s | Timestamp: {DateTime.Now:HH:mm:ss.fff}");
+
+        CheckEvalRoundComplete();
+    }
+
+    private void CheckEvalRoundComplete()
+    {
+        // Check if all enabled agents have finished
+        bool hybridDone = !enableRLAgent || evalHybridFinished;
+        bool basicDone = !enableBaseAgent || evalBasicFinished;
+
+        if (!hybridDone || !basicDone) return;
+
+        // Determine winner only if both agents were enabled
+        if (enableRLAgent && enableBaseAgent)
+        {
+            string winner = evalHybridTime < evalBasicTime ? "HybridAgent" : "BasicAgent";
+            float timeDiff = Mathf.Abs(evalHybridTime - evalBasicTime);
+            Debug.Log($"[Eval] Map {evalMapIndex} complete | Winner: {winner} by {timeDiff:F3}s | Hybrid: {evalHybridTime:F3}s | Basic: {evalBasicTime:F3}s");
+
+            if (timeDiff < 0.05f)
+            {
+                Debug.Log($"[Eval] Good seed: {currentSeed}");
+            }
+        }
+        else if (enableRLAgent)
+        {
+            Debug.Log($"[Eval] Map {evalMapIndex} complete | HybridAgent: {evalHybridTime:F3}s");
+        }
+        else if (enableBaseAgent)
+        {
+            Debug.Log($"[Eval] Map {evalMapIndex} complete | BasicAgent: {evalBasicTime:F3}s");
+        }
+
+        OnEvalRoundComplete?.Invoke();
+    }
+
+    #endregion
 
 #if UNITY_EDITOR
     private void OnDrawGizmos()
