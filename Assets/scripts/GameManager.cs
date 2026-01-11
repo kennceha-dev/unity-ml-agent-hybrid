@@ -54,6 +54,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private bool enableBaseAgent = true;
     public bool EnableBaseAgent => enableBaseAgent;
 
+    [Tooltip("Allow the Player to auto-navigate to exit regardless of training phase")]
+    [SerializeField] private bool enablePlayerNavMesh = false;
+    public bool EnablePlayerNavMesh => enablePlayerNavMesh;
+
+    [Tooltip("Timeout in seconds for eval mode - skip to next map if exceeded")]
+    [SerializeField] private float evalTimeout = 30f;
+
     [SerializeField] private TrainingPhase trainingPhase = TrainingPhase.BasePathfinding;
     public TrainingPhase CurrentTrainingPhase => trainingPhase;
 
@@ -165,6 +172,19 @@ public class GameManager : MonoBehaviour
 
         // Initialize log file
         InitializeLogFile();
+    }
+
+    private void Update()
+    {
+        // Check for eval timeout
+        if (!isTraining && evalStartTime > 0f)
+        {
+            float elapsed = Time.time - evalStartTime;
+            if (elapsed >= evalTimeout)
+            {
+                HandleEvalTimeout();
+            }
+        }
     }
 
     private void OnDestroy()
@@ -533,10 +553,10 @@ public class GameManager : MonoBehaviour
             float timeDiff = Mathf.Abs(evalHybridTime - evalBasicTime);
             Debug.Log($"[Eval] Map {evalMapIndex} complete | Winner: {winner} by {timeDiff:F3}s | Hybrid: {evalHybridTime:F3}s | Basic: {evalBasicTime:F3}s");
 
-            if (timeDiff < 0.05f)
-            {
-                Debug.Log($"[Eval] Good seed: {currentSeed}");
-            }
+            // if (timeDiff < 0.25f)
+            // {
+            //     Debug.Log($"[Eval] Good seed: {currentSeed}");
+            // }
         }
         else if (enableRLAgent)
         {
@@ -546,6 +566,34 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log($"[Eval] Map {evalMapIndex} complete | BasicAgent: {evalBasicTime:F3}s");
         }
+
+        OnEvalRoundComplete?.Invoke();
+    }
+
+    /// <summary>
+    /// Called when eval timeout is exceeded - skip to next map.
+    /// </summary>
+    private void HandleEvalTimeout()
+    {
+        string hybridStatus = evalHybridFinished ? $"{evalHybridTime:F3}s" : "DNF";
+        string basicStatus = evalBasicFinished ? $"{evalBasicTime:F3}s" : "DNF";
+
+        Debug.Log($"[Eval] Map {evalMapIndex} TIMEOUT ({evalTimeout}s) | Hybrid: {hybridStatus} | Basic: {basicStatus}");
+
+        // Mark unfinished agents as timed out
+        if (!evalHybridFinished && enableRLAgent)
+        {
+            evalHybridFinished = true;
+            evalHybridTime = evalTimeout;
+        }
+        if (!evalBasicFinished && enableBaseAgent)
+        {
+            evalBasicFinished = true;
+            evalBasicTime = evalTimeout;
+        }
+
+        // Reset start time to prevent multiple timeout triggers
+        evalStartTime = -1f;
 
         OnEvalRoundComplete?.Invoke();
     }

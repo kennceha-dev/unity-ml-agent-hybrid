@@ -69,7 +69,8 @@ public class Player : MonoBehaviour, ISpeedModifiable
 
         // Re-enable if we're in NavMesh movement mode (training mode + MovingTarget phase)
         if (GameManager.Instance != null &&
-            GameManager.Instance.CurrentTrainingPhase == TrainingPhase.MovingTarget)
+            (GameManager.Instance.CurrentTrainingPhase == TrainingPhase.MovingTarget ||
+             GameManager.Instance.EnablePlayerNavMesh))
         {
             agent.enabled = true;
 
@@ -106,14 +107,18 @@ public class Player : MonoBehaviour, ISpeedModifiable
             return;
         }
 
-        // Use NavMesh movement in MovingTarget phase when in training mode
-        bool shouldUseNavMesh = GameManager.Instance.CurrentTrainingPhase == TrainingPhase.MovingTarget;
+        // Use NavMesh movement if explicitly enabled or in MovingTarget phase
+        bool shouldUseNavMesh = GameManager.Instance.EnablePlayerNavMesh ||
+                                GameManager.Instance.CurrentTrainingPhase == TrainingPhase.MovingTarget;
 
         if (useNavMeshMovement != shouldUseNavMesh)
         {
             useNavMeshMovement = shouldUseNavMesh;
             SetMovementMode(useNavMeshMovement);
         }
+
+        speedModifiers.Clear();
+        RecalculateSpeedMultiplier();
     }
 
     private void SetMovementMode(bool useNavMesh)

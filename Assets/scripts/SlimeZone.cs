@@ -35,6 +35,8 @@ public class SlimeZone : MonoBehaviour
             return;
         }
 
+        Debug.Log("SlimeZone: Enter for " + other.name);
+
         slowedTargets.Add(target);
         target.ApplySpeedMultiplier(this, slowMultiplier);
     }
@@ -46,6 +48,8 @@ public class SlimeZone : MonoBehaviour
         {
             return;
         }
+
+        Debug.Log("SlimeZone: Exit for " + other.name);
 
         if (slowedTargets.Remove(target))
         {

@@ -116,6 +116,9 @@ public class BasicAgent : MonoBehaviour, ISpeedModifiable
                         GameManager.Instance.OnBasicAgentFinishedEval();
                     }
                 }
+
+                speedModifiers.Clear();
+                RecalculateSpeedMultiplier();
             }
         }
         else

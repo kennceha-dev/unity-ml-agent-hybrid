@@ -659,6 +659,8 @@ public class HybridAgent : Agent, ISpeedModifiable
                 hasFinishedEval = true;
                 GameManager.Instance.OnHybridAgentFinishedEval();
             }
+            speedModifiers.Clear();
+            RecalculateSpeedMultiplier();
             return;
         }
 
@@ -747,6 +749,9 @@ public class HybridAgent : Agent, ISpeedModifiable
         GameManager.Instance.ReportHybridEpisodeResult(isSuccess, beatBase, episode);
         EndEpisode();
 
+        speedModifiers.Clear();
+        RecalculateSpeedMultiplier();
+
         if (setNotReady)
             isReady = false;
 
@@ -793,12 +798,12 @@ public class HybridAgent : Agent, ISpeedModifiable
 
     private void UpdateAgentSpeed()
     {
-        if (navAgent == null) return;
+        // if (navAgent == null) return;
 
-        if (baseMoveSpeed <= 0f)
-            baseMoveSpeed = navAgent.speed;
+        // if (baseMoveSpeed <= 0f)
+        //     baseMoveSpeed = navAgent.speed;
 
-        navAgent.speed = baseMoveSpeed * currentSpeedMultiplier;
+        // navAgent.speed = baseMoveSpeed * currentSpeedMultiplier;
     }
 
     #endregion
