@@ -580,6 +580,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         }
         else if (other.gameObject.CompareTag(GameManager.Instance.ExitTag))
         {
+            if (!GameManager.Instance.IsTraining) return;
             LoggedAddReward(-0.1f, "Exit collision");
             HandleEpisodeEnd(false, false, false);
         }
@@ -601,6 +602,7 @@ public class HybridAgent : Agent, ISpeedModifiable
         }
         else if (other.gameObject.CompareTag(GameManager.Instance.ExitTag))
         {
+            if (!GameManager.Instance.IsTraining) return;
             LoggedAddReward(-0.1f, "Exit collision");
             HandleEpisodeEnd(false, false, false);
         }
