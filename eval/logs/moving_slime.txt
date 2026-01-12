@@ -1,0 +1,829 @@
+[Adaptive Performance] No Active Loader was found. Make sure to select your loader in the Adaptive Performance Settings for this platform.
+[Eval] Starting map 1 at 09:00:33.941 on seed 23456
+[Eval] HybridAgent finished map 1 | Time: 3.977s | Timestamp: 09:00:37.912
+[Eval] BasicAgent finished map 1 | Time: 4.277s | Timestamp: 09:00:38.216
+[Eval] Map 1 complete | Winner: HybridAgent by 0.300s | Hybrid: 3.977s | Basic: 4.277s
+[Eval] All agents finished, generating next map...
+[Eval] Starting map 2 at 09:00:39.371 on seed 23457
+[Player] Reached exit target via NavMesh
+[Eval] HybridAgent finished map 2 | Time: 8.883s | Timestamp: 09:00:48.253
+[Eval] BasicAgent finished map 2 | Time: 10.463s | Timestamp: 09:00:49.833
+[Eval] Map 2 complete | Winner: HybridAgent by 1.580s | Hybrid: 8.883s | Basic: 10.463s
+[Eval] Starting map 3 at 09:00:50.998 on seed 23458
+[Eval] Starting map 4 at 09:00:58.150 on seed 23459
+[Eval] BasicAgent finished map 4 | Time: 6.021s | Timestamp: 09:01:04.173
+[Eval] HybridAgent finished map 4 | Time: 11.501s | Timestamp: 09:01:09.683
+[Eval] Map 4 complete | Winner: BasicAgent by 5.480s | Hybrid: 11.501s | Basic: 6.021s
+[Eval] All agents finished, generating next map...
+[Eval] Starting map 5 at 09:01:10.008 on seed 23460
+[Eval] BasicAgent finished map 5 | Time: 9.163s | Timestamp: 09:01:19.173
+[Eval] Map 5 TIMEOUT (20s) | Hybrid: DNF | Basic: 9.163s
+[Eval] All agents finished, generating next map...
+[Eval] Starting map 6 at 09:01:32.010 on seed 23461
+[Eval] BasicAgent finished map 6 | Time: 1.324s | Timestamp: 09:01:33.338
+[Eval] HybridAgent finished map 6 | Time: 1.524s | Timestamp: 09:01:33.540
+[Eval] Map 6 complete | Winner: BasicAgent by 0.200s | Hybrid: 1.524s | Basic: 1.324s
+[Eval] Starting map 7 at 09:01:33.836 on seed 23462
+[Eval] HybridAgent finished map 7 | Time: 5.437s | Timestamp: 09:01:39.302
+[Eval] BasicAgent finished map 7 | Time: 5.817s | Timestamp: 09:01:39.655
+[Eval] Map 7 complete | Winner: HybridAgent by 0.380s | Hybrid: 5.437s | Basic: 5.817s
+[Eval] Starting map 8 at 09:01:39.995 on seed 23463
+[Eval] Map 8 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 9 at 09:02:00.262 on seed 23464
+[Eval] BasicAgent finished map 9 | Time: 5.690s | Timestamp: 09:02:05.954
+[Eval] HybridAgent finished map 9 | Time: 5.750s | Timestamp: 09:02:06.035
+[Eval] Map 9 complete | Winner: BasicAgent by 0.060s | Hybrid: 5.750s | Basic: 5.690s
+[Eval] Starting map 10 at 09:02:06.259 on seed 23465
+[Eval] Map 10 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 11 at 09:02:26.418 on seed 23466
+[Eval] Starting map 12 at 09:02:40.772 on seed 23467
+[Eval] HybridAgent finished map 12 | Time: 10.901s | Timestamp: 09:02:51.678
+[Eval] BasicAgent finished map 12 | Time: 14.321s | Timestamp: 09:02:55.113
+[Eval] Map 12 complete | Winner: HybridAgent by 3.420s | Hybrid: 10.901s | Basic: 14.321s
+[Eval] Starting map 13 at 09:02:55.401 on seed 23468
+[Eval] HybridAgent finished map 13 | Time: 4.492s | Timestamp: 09:02:59.899
+[Eval] Starting map 14 at 09:03:03.927 on seed 23469
+[Eval] HybridAgent finished map 14 | Time: 5.506s | Timestamp: 09:03:09.456
+[Eval] Map 14 TIMEOUT (20s) | Hybrid: 5.506s | Basic: DNF
+[Eval] Starting map 15 at 09:03:24.213 on seed 23470
+[Eval] Starting map 16 at 09:03:39.393 on seed 23471
+[Eval] HybridAgent finished map 16 | Time: 4.161s | Timestamp: 09:03:43.558
+[Eval] BasicAgent finished map 16 | Time: 5.741s | Timestamp: 09:03:45.135
+[Eval] Map 16 complete | Winner: HybridAgent by 1.580s | Hybrid: 4.161s | Basic: 5.741s
+[Eval] Starting map 17 at 09:03:45.528 on seed 23472
+[Eval] HybridAgent finished map 17 | Time: 11.045s | Timestamp: 09:03:56.574
+[Eval] Starting map 18 at 09:03:57.891 on seed 23473
+[Eval] HybridAgent finished map 18 | Time: 9.882s | Timestamp: 09:04:07.803
+[Eval] Map 18 TIMEOUT (20s) | Hybrid: 9.882s | Basic: DNF
+[Eval] Starting map 19 at 09:04:18.273 on seed 23474
+[Eval] HybridAgent finished map 19 | Time: 4.080s | Timestamp: 09:04:22.352
+[Eval] BasicAgent finished map 19 | Time: 4.500s | Timestamp: 09:04:22.777
+[Eval] Map 19 complete | Winner: HybridAgent by 0.420s | Hybrid: 4.080s | Basic: 4.500s
+[Eval] Starting map 20 at 09:04:23.079 on seed 23475
+[Eval] BasicAgent finished map 20 | Time: 2.874s | Timestamp: 09:04:25.957
+[Eval] HybridAgent finished map 20 | Time: 3.594s | Timestamp: 09:04:26.672
+[Eval] Map 20 complete | Winner: BasicAgent by 0.720s | Hybrid: 3.594s | Basic: 2.874s
+[Eval] Starting map 21 at 09:04:26.932 on seed 23476
+[Eval] HybridAgent finished map 21 | Time: 7.141s | Timestamp: 09:04:34.109
+[Eval] Starting map 22 at 09:04:34.485 on seed 23477
+[Eval] BasicAgent finished map 22 | Time: 8.728s | Timestamp: 09:04:43.251
+[Eval] Map 22 TIMEOUT (20s) | Hybrid: DNF | Basic: 8.728s
+[Eval] Starting map 23 at 09:04:54.737 on seed 23478
+[Eval] HybridAgent finished map 23 | Time: 6.757s | Timestamp: 09:05:01.498
+[Eval] Starting map 24 at 09:05:01.974 on seed 23479
+[Eval] HybridAgent finished map 24 | Time: 7.840s | Timestamp: 09:05:09.814
+[Eval] BasicAgent finished map 24 | Time: 9.220s | Timestamp: 09:05:11.195
+[Eval] Map 24 complete | Winner: HybridAgent by 1.380s | Hybrid: 7.840s | Basic: 9.220s
+[Eval] Starting map 25 at 09:05:11.518 on seed 23480
+[Eval] Starting map 26 at 09:05:20.275 on seed 23481
+[Eval] Starting map 27 at 09:05:21.802 on seed 23482
+[Eval] Starting map 28 at 09:05:33.128 on seed 23483
+[Eval] HybridAgent finished map 28 | Time: 10.274s | Timestamp: 09:05:43.410
+[Eval] Starting map 29 at 09:05:44.092 on seed 23484
+[Eval] Starting map 30 at 09:05:54.227 on seed 23485
+[Eval] HybridAgent finished map 30 | Time: 6.755s | Timestamp: 09:06:01.024
+[Eval] Starting map 31 at 09:06:02.745 on seed 23486
+[Eval] Starting map 32 at 09:06:10.453 on seed 23487
+[Eval] HybridAgent finished map 32 | Time: 3.348s | Timestamp: 09:06:13.846
+[Eval] BasicAgent finished map 32 | Time: 4.468s | Timestamp: 09:06:14.940
+[Eval] Map 32 complete | Winner: HybridAgent by 1.120s | Hybrid: 3.348s | Basic: 4.468s
+[Eval] Starting map 33 at 09:06:15.288 on seed 23488
+[Eval] HybridAgent finished map 33 | Time: 9.193s | Timestamp: 09:06:24.496
+[Eval] Starting map 34 at 09:06:25.697 on seed 23489
+[Eval] HybridAgent finished map 34 | Time: 7.515s | Timestamp: 09:06:33.213
+[Eval] Starting map 35 at 09:06:34.076 on seed 23490
+[Eval] BasicAgent finished map 35 | Time: 9.635s | Timestamp: 09:06:43.717
+[Eval] Starting map 36 at 09:06:45.853 on seed 23491
+[Eval] BasicAgent finished map 36 | Time: 8.318s | Timestamp: 09:06:54.213
+[Eval] Starting map 37 at 09:07:01.669 on seed 23492
+[Eval] Starting map 38 at 09:07:11.620 on seed 23493
+[Eval] Map 38 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 39 at 09:07:32.898 on seed 23494
+[Eval] Starting map 40 at 09:07:36.233 on seed 23495
+[Eval] BasicAgent finished map 40 | Time: 9.963s | Timestamp: 09:07:46.197
+[Eval] Map 40 TIMEOUT (20s) | Hybrid: DNF | Basic: 9.963s
+[Eval] Starting map 41 at 09:07:56.761 on seed 23496
+[Eval] HybridAgent finished map 41 | Time: 4.120s | Timestamp: 09:08:00.891
+[Eval] Starting map 42 at 09:08:06.123 on seed 23497
+[Eval] Starting map 43 at 09:08:08.796 on seed 23498
+[Eval] Starting map 44 at 09:08:11.345 on seed 23499
+[Eval] Starting map 45 at 09:08:13.551 on seed 23500
+[Eval] Map 45 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 46 at 09:08:33.738 on seed 23501
+[Eval] HybridAgent finished map 46 | Time: 7.587s | Timestamp: 09:08:41.325
+[Eval] Starting map 47 at 09:08:42.239 on seed 23502
+[Eval] HybridAgent finished map 47 | Time: 3.887s | Timestamp: 09:08:46.175
+[Eval] Starting map 48 at 09:08:46.666 on seed 23503
+[Eval] HybridAgent finished map 48 | Time: 2.480s | Timestamp: 09:08:49.145
+[Eval] BasicAgent finished map 48 | Time: 2.560s | Timestamp: 09:08:49.246
+[Eval] Map 48 complete | Winner: HybridAgent by 0.080s | Hybrid: 2.480s | Basic: 2.560s
+[Eval] Starting map 49 at 09:08:49.398 on seed 23504
+[Eval] BasicAgent finished map 49 | Time: 4.586s | Timestamp: 09:08:53.989
+[Eval] HybridAgent finished map 49 | Time: 4.726s | Timestamp: 09:08:54.129
+[Eval] Map 49 complete | Winner: BasicAgent by 0.140s | Hybrid: 4.726s | Basic: 4.586s
+[Eval] Starting map 50 at 09:08:54.362 on seed 23505
+[Eval] HybridAgent finished map 50 | Time: 9.202s | Timestamp: 09:09:03.576
+[Eval] Starting map 51 at 09:09:05.739 on seed 23506
+[Eval] BasicAgent finished map 51 | Time: 5.176s | Timestamp: 09:09:10.950
+[Eval] HybridAgent finished map 51 | Time: 5.276s | Timestamp: 09:09:11.023
+[Eval] Map 51 complete | Winner: BasicAgent by 0.100s | Hybrid: 5.276s | Basic: 5.176s
+[Eval] Starting map 52 at 09:09:11.259 on seed 23507
+[Eval] Map 52 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 53 at 09:09:31.586 on seed 23508
+[Eval] HybridAgent finished map 53 | Time: 6.009s | Timestamp: 09:09:37.637
+[Eval] Starting map 54 at 09:09:38.091 on seed 23509
+[Eval] HybridAgent finished map 54 | Time: 8.163s | Timestamp: 09:09:46.260
+[Eval] Starting map 55 at 09:09:46.746 on seed 23510
+[Eval] HybridAgent finished map 55 | Time: 7.048s | Timestamp: 09:09:53.801
+[Eval] Starting map 56 at 09:09:54.203 on seed 23511
+[Eval] HybridAgent finished map 56 | Time: 6.272s | Timestamp: 09:10:00.482
+[Eval] Starting map 57 at 09:10:01.091 on seed 23512
+[Eval] HybridAgent finished map 57 | Time: 4.723s | Timestamp: 09:10:05.823
+[Eval] Starting map 58 at 09:10:06.284 on seed 23513
+[Eval] BasicAgent finished map 58 | Time: 9.311s | Timestamp: 09:10:15.659
+[Eval] HybridAgent finished map 58 | Time: 9.711s | Timestamp: 09:10:16.008
+[Eval] Map 58 complete | Winner: BasicAgent by 0.400s | Hybrid: 9.711s | Basic: 9.311s
+[Eval] Starting map 59 at 09:10:17.072 on seed 23514
+[Eval] HybridAgent finished map 59 | Time: 5.355s | Timestamp: 09:10:22.430
+[Eval] Starting map 60 at 09:10:22.843 on seed 23515
+[Eval] HybridAgent finished map 60 | Time: 12.083s | Timestamp: 09:10:34.933
+[Eval] Starting map 61 at 09:10:36.122 on seed 23516
+[Eval] Map 61 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 62 at 09:10:56.405 on seed 23517
+[Eval] Map 62 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 63 at 09:11:16.657 on seed 23518
+[Eval] BasicAgent finished map 63 | Time: 9.003s | Timestamp: 09:11:25.660
+[Eval] HybridAgent finished map 63 | Time: 15.123s | Timestamp: 09:11:31.816
+[Eval] Map 63 complete | Winner: BasicAgent by 6.120s | Hybrid: 15.123s | Basic: 9.003s
+[Eval] Starting map 64 at 09:11:32.011 on seed 23519
+[Eval] HybridAgent finished map 64 | Time: 6.388s | Timestamp: 09:11:38.433
+[Eval] Starting map 65 at 09:11:43.364 on seed 23520
+[Eval] Starting map 66 at 09:11:47.455 on seed 23521
+[Eval] Starting map 67 at 09:11:56.875 on seed 23522
+[Eval] Starting map 68 at 09:11:57.704 on seed 23523
+[Eval] HybridAgent finished map 68 | Time: 4.747s | Timestamp: 09:12:02.451
+[Eval] BasicAgent finished map 68 | Time: 6.947s | Timestamp: 09:12:04.655
+[Eval] Map 68 complete | Winner: HybridAgent by 2.200s | Hybrid: 4.747s | Basic: 6.947s
+[Eval] Starting map 69 at 09:12:04.940 on seed 23524
+[Eval] HybridAgent finished map 69 | Time: 8.191s | Timestamp: 09:12:13.138
+[Eval] Starting map 70 at 09:12:13.699 on seed 23525
+[Eval] HybridAgent finished map 70 | Time: 1.413s | Timestamp: 09:12:15.117
+[Eval] BasicAgent finished map 70 | Time: 2.173s | Timestamp: 09:12:15.877
+[Eval] Map 70 complete | Winner: HybridAgent by 0.760s | Hybrid: 1.413s | Basic: 2.173s
+[Eval] Starting map 71 at 09:12:16.172 on seed 23526
+[Eval] Map 71 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 72 at 09:12:36.537 on seed 23527
+[Eval] HybridAgent finished map 72 | Time: 7.134s | Timestamp: 09:12:43.688
+[Eval] Starting map 73 at 09:12:44.364 on seed 23528
+[Eval] BasicAgent finished map 73 | Time: 4.327s | Timestamp: 09:12:48.690
+[Eval] HybridAgent finished map 73 | Time: 5.907s | Timestamp: 09:12:50.275
+[Eval] Map 73 complete | Winner: BasicAgent by 1.580s | Hybrid: 5.907s | Basic: 4.327s
+[Eval] Starting map 74 at 09:12:51.374 on seed 23529
+[Eval] HybridAgent finished map 74 | Time: 2.809s | Timestamp: 09:12:54.186
+[Eval] BasicAgent finished map 74 | Time: 3.909s | Timestamp: 09:12:55.291
+[Eval] Map 74 complete | Winner: HybridAgent by 1.100s | Hybrid: 2.809s | Basic: 3.909s
+[Eval] Starting map 75 at 09:12:55.511 on seed 23530
+[Eval] HybridAgent finished map 75 | Time: 1.931s | Timestamp: 09:12:57.446
+[Eval] Starting map 76 at 09:12:57.892 on seed 23531
+[Eval] HybridAgent finished map 76 | Time: 1.651s | Timestamp: 09:12:59.559
+[Eval] BasicAgent finished map 76 | Time: 1.891s | Timestamp: 09:12:59.783
+[Eval] Map 76 complete | Winner: HybridAgent by 0.240s | Hybrid: 1.651s | Basic: 1.891s
+[Eval] Starting map 77 at 09:13:00.030 on seed 23532
+[Eval] BasicAgent finished map 77 | Time: 6.972s | Timestamp: 09:13:07.016
+[Eval] Starting map 78 at 09:13:16.716 on seed 23533
+[Eval] HybridAgent finished map 78 | Time: 6.567s | Timestamp: 09:13:23.292
+[Eval] Starting map 79 at 09:13:23.682 on seed 23534
+[Eval] HybridAgent finished map 79 | Time: 7.000s | Timestamp: 09:13:30.687
+[Eval] BasicAgent finished map 79 | Time: 7.100s | Timestamp: 09:13:30.782
+[Eval] Map 79 complete | Winner: HybridAgent by 0.100s | Hybrid: 7.000s | Basic: 7.100s
+[Eval] Starting map 80 at 09:13:31.046 on seed 23535
+[Eval] BasicAgent finished map 80 | Time: 3.636s | Timestamp: 09:13:34.705
+[Eval] HybridAgent finished map 80 | Time: 3.836s | Timestamp: 09:13:34.882
+[Eval] Map 80 complete | Winner: BasicAgent by 0.200s | Hybrid: 3.836s | Basic: 3.636s
+[Eval] Starting map 81 at 09:13:35.148 on seed 23536
+[Eval] BasicAgent finished map 81 | Time: 9.154s | Timestamp: 09:13:44.302
+[Eval] Map 81 TIMEOUT (20s) | Hybrid: DNF | Basic: 9.154s
+[Eval] Starting map 82 at 09:13:55.461 on seed 23537
+[Eval] HybridAgent finished map 82 | Time: 8.601s | Timestamp: 09:14:04.072
+[Eval] BasicAgent finished map 82 | Time: 8.741s | Timestamp: 09:14:04.213
+[Eval] Map 82 complete | Winner: HybridAgent by 0.140s | Hybrid: 8.601s | Basic: 8.741s
+[Eval] Starting map 83 at 09:14:04.421 on seed 23538
+[Eval] Map 83 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 84 at 09:14:25.531 on seed 23539
+[Eval] Starting map 85 at 09:14:45.660 on seed 23540
+[Eval] BasicAgent finished map 85 | Time: 12.561s | Timestamp: 09:14:58.225
+[Eval] Starting map 86 at 09:15:00.349 on seed 23541
+[Eval] BasicAgent finished map 86 | Time: 1.051s | Timestamp: 09:15:01.405
+[Eval] HybridAgent finished map 86 | Time: 1.151s | Timestamp: 09:15:01.525
+[Eval] Map 86 complete | Winner: BasicAgent by 0.100s | Hybrid: 1.151s | Basic: 1.051s
+[Eval] Starting map 87 at 09:15:01.839 on seed 23542
+[Eval] HybridAgent finished map 87 | Time: 2.242s | Timestamp: 09:15:04.121
+[Eval] BasicAgent finished map 87 | Time: 2.542s | Timestamp: 09:15:04.387
+[Eval] Map 87 complete | Winner: HybridAgent by 0.300s | Hybrid: 2.242s | Basic: 2.542s
+[Eval] Starting map 88 at 09:15:04.717 on seed 23543
+[Eval] Starting map 89 at 09:15:16.746 on seed 23544
+[Eval] Starting map 90 at 09:15:21.896 on seed 23545
+[Eval] BasicAgent finished map 90 | Time: 7.143s | Timestamp: 09:15:29.044
+[Eval] Starting map 91 at 09:15:36.356 on seed 23546
+[Eval] HybridAgent finished map 91 | Time: 6.104s | Timestamp: 09:15:42.498
+[Eval] BasicAgent finished map 91 | Time: 6.324s | Timestamp: 09:15:42.695
+[Eval] Map 91 complete | Winner: HybridAgent by 0.220s | Hybrid: 6.104s | Basic: 6.324s
+[Eval] Starting map 92 at 09:15:43.025 on seed 23547
+[Eval] Starting map 93 at 09:15:55.101 on seed 23548
+[Eval] HybridAgent finished map 93 | Time: 10.286s | Timestamp: 09:16:05.399
+[Eval] BasicAgent finished map 93 | Time: 10.566s | Timestamp: 09:16:05.697
+[Eval] Map 93 complete | Winner: HybridAgent by 0.280s | Hybrid: 10.286s | Basic: 10.566s
+[Eval] Starting map 94 at 09:16:05.905 on seed 23549
+[Eval] HybridAgent finished map 94 | Time: 11.563s | Timestamp: 09:16:17.468
+[Eval] BasicAgent finished map 94 | Time: 11.783s | Timestamp: 09:16:17.693
+[Eval] Map 94 complete | Winner: HybridAgent by 0.220s | Hybrid: 11.563s | Basic: 11.783s
+[Eval] Starting map 95 at 09:16:18.116 on seed 23550
+[Eval] HybridAgent finished map 95 | Time: 14.693s | Timestamp: 09:16:32.807
+[Eval] BasicAgent finished map 95 | Time: 19.293s | Timestamp: 09:16:37.412
+[Eval] Map 95 complete | Winner: HybridAgent by 4.600s | Hybrid: 14.693s | Basic: 19.293s
+[Eval] Starting map 96 at 09:16:37.614 on seed 23551
+[Eval] BasicAgent finished map 96 | Time: 5.855s | Timestamp: 09:16:43.484
+[Eval] HybridAgent finished map 96 | Time: 7.475s | Timestamp: 09:16:45.087
+[Eval] Map 96 complete | Winner: BasicAgent by 1.620s | Hybrid: 7.475s | Basic: 5.855s
+[Eval] Starting map 97 at 09:16:45.331 on seed 23552
+[Eval] Map 97 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 98 at 09:17:05.601 on seed 23553
+[Eval] BasicAgent finished map 98 | Time: 14.308s | Timestamp: 09:17:19.917
+[Eval] HybridAgent finished map 98 | Time: 14.348s | Timestamp: 09:17:19.975
+[Eval] Map 98 complete | Winner: BasicAgent by 0.040s | Hybrid: 14.348s | Basic: 14.308s
+[Eval] Starting map 99 at 09:17:20.277 on seed 23554
+[Eval] BasicAgent finished map 99 | Time: 9.651s | Timestamp: 09:17:29.971
+[Eval] Starting map 100 at 09:17:36.006 on seed 23555
+[Eval] BasicAgent finished map 100 | Time: 2.343s | Timestamp: 09:17:38.351
+[Eval] Starting map 101 at 09:17:41.344 on seed 23556
+[Eval] BasicAgent finished map 101 | Time: 3.545s | Timestamp: 09:17:44.893
+[Eval] HybridAgent finished map 101 | Time: 3.905s | Timestamp: 09:17:45.259
+[Eval] Map 101 complete | Winner: BasicAgent by 0.360s | Hybrid: 3.905s | Basic: 3.545s
+[Eval] Starting map 102 at 09:17:45.668 on seed 23557
+[Eval] BasicAgent finished map 102 | Time: 13.720s | Timestamp: 09:17:59.395
+[Eval] Starting map 103 at 09:18:01.806 on seed 23558
+[Eval] HybridAgent finished map 103 | Time: 3.683s | Timestamp: 09:18:05.495
+[Eval] Starting map 104 at 09:18:06.078 on seed 23559
+[Eval] BasicAgent finished map 104 | Time: 4.271s | Timestamp: 09:18:10.353
+[Eval] Starting map 105 at 09:18:18.282 on seed 23560
+[Eval] HybridAgent finished map 105 | Time: 11.206s | Timestamp: 09:18:29.499
+[Eval] BasicAgent finished map 105 | Time: 11.746s | Timestamp: 09:18:30.036
+[Eval] Map 105 complete | Winner: HybridAgent by 0.540s | Hybrid: 11.206s | Basic: 11.746s
+[Eval] Starting map 106 at 09:18:30.325 on seed 23561
+[Eval] HybridAgent finished map 106 | Time: 10.044s | Timestamp: 09:18:40.412
+[Eval] Starting map 107 at 09:18:40.675 on seed 23562
+[Eval] BasicAgent finished map 107 | Time: 5.773s | Timestamp: 09:18:46.449
+[Eval] HybridAgent finished map 107 | Time: 5.913s | Timestamp: 09:18:46.589
+[Eval] Map 107 complete | Winner: BasicAgent by 0.140s | Hybrid: 5.913s | Basic: 5.773s
+[Eval] Starting map 108 at 09:18:46.872 on seed 23563
+[Eval] HybridAgent finished map 108 | Time: 2.957s | Timestamp: 09:18:49.838
+[Eval] BasicAgent finished map 108 | Time: 3.137s | Timestamp: 09:18:50.009
+[Eval] Map 108 complete | Winner: HybridAgent by 0.180s | Hybrid: 2.957s | Basic: 3.137s
+[Eval] Starting map 109 at 09:18:50.375 on seed 23564
+[Eval] HybridAgent finished map 109 | Time: 8.573s | Timestamp: 09:18:58.959
+[Eval] Starting map 110 at 09:18:59.361 on seed 23565
+[Eval] BasicAgent finished map 110 | Time: 15.548s | Timestamp: 09:19:14.911
+[Eval] Map 110 TIMEOUT (20s) | Hybrid: DNF | Basic: 15.548s
+[Eval] Starting map 111 at 09:19:20.315 on seed 23566
+[Eval] Starting map 112 at 09:19:28.299 on seed 23567
+[Eval] Starting map 113 at 09:19:30.798 on seed 23568
+[Eval] BasicAgent finished map 113 | Time: 4.687s | Timestamp: 09:19:35.493
+[Eval] HybridAgent finished map 113 | Time: 5.047s | Timestamp: 09:19:35.877
+[Eval] Map 113 complete | Winner: BasicAgent by 0.360s | Hybrid: 5.047s | Basic: 4.687s
+[Eval] Starting map 114 at 09:19:36.176 on seed 23569
+[Eval] HybridAgent finished map 114 | Time: 4.569s | Timestamp: 09:19:40.745
+[Eval] BasicAgent finished map 114 | Time: 5.729s | Timestamp: 09:19:41.913
+[Eval] Map 114 complete | Winner: HybridAgent by 1.160s | Hybrid: 4.569s | Basic: 5.729s
+[Eval] Starting map 115 at 09:19:42.322 on seed 23570
+[Eval] HybridAgent finished map 115 | Time: 4.984s | Timestamp: 09:19:47.307
+[Eval] BasicAgent finished map 115 | Time: 6.604s | Timestamp: 09:19:48.928
+[Eval] Map 115 complete | Winner: HybridAgent by 1.620s | Hybrid: 4.984s | Basic: 6.604s
+[Eval] Starting map 116 at 09:19:49.155 on seed 23571
+[Eval] BasicAgent finished map 116 | Time: 10.270s | Timestamp: 09:19:59.425
+[Eval] Starting map 117 at 09:20:05.754 on seed 23572
+[Eval] HybridAgent finished map 117 | Time: 1.990s | Timestamp: 09:20:07.747
+[Eval] BasicAgent finished map 117 | Time: 2.710s | Timestamp: 09:20:08.465
+[Eval] Map 117 complete | Winner: HybridAgent by 0.720s | Hybrid: 1.990s | Basic: 2.710s
+[Eval] Starting map 118 at 09:20:08.655 on seed 23573
+[Eval] Starting map 119 at 09:20:18.375 on seed 23574
+[Eval] BasicAgent finished map 119 | Time: 3.054s | Timestamp: 09:20:21.427
+[Eval] HybridAgent finished map 119 | Time: 3.694s | Timestamp: 09:20:22.073
+[Eval] Map 119 complete | Winner: BasicAgent by 0.640s | Hybrid: 3.694s | Basic: 3.054s
+[Eval] Starting map 120 at 09:20:22.340 on seed 23575
+[Eval] BasicAgent finished map 120 | Time: 8.649s | Timestamp: 09:20:31.006
+[Eval] Map 120 TIMEOUT (20s) | Hybrid: DNF | Basic: 8.649s
+[Eval] Starting map 121 at 09:20:42.826 on seed 23576
+[Eval] BasicAgent finished map 121 | Time: 2.877s | Timestamp: 09:20:45.705
+[Eval] HybridAgent finished map 121 | Time: 7.377s | Timestamp: 09:20:50.202
+[Eval] Map 121 complete | Winner: BasicAgent by 4.500s | Hybrid: 7.377s | Basic: 2.877s
+[Eval] Starting map 122 at 09:20:50.375 on seed 23577
+[Eval] BasicAgent finished map 122 | Time: 11.647s | Timestamp: 09:21:02.023
+[Eval] Starting map 123 at 09:21:05.522 on seed 23578
+[Eval] HybridAgent finished map 123 | Time: 2.741s | Timestamp: 09:21:08.292
+[Eval] BasicAgent finished map 123 | Time: 2.881s | Timestamp: 09:21:08.443
+[Eval] Map 123 complete | Winner: HybridAgent by 0.140s | Hybrid: 2.741s | Basic: 2.881s
+[Eval] Starting map 124 at 09:21:08.748 on seed 23579
+[Eval] BasicAgent finished map 124 | Time: 10.794s | Timestamp: 09:21:19.551
+[Eval] HybridAgent finished map 124 | Time: 13.454s | Timestamp: 09:21:22.211
+[Eval] Map 124 complete | Winner: BasicAgent by 2.660s | Hybrid: 13.454s | Basic: 10.794s
+[Eval] Starting map 125 at 09:21:23.679 on seed 23580
+[Eval] BasicAgent finished map 125 | Time: 5.444s | Timestamp: 09:21:29.130
+[Eval] HybridAgent finished map 125 | Time: 6.264s | Timestamp: 09:21:29.983
+[Eval] Map 125 complete | Winner: BasicAgent by 0.820s | Hybrid: 6.264s | Basic: 5.444s
+[Eval] Starting map 126 at 09:21:30.353 on seed 23581
+[Eval] HybridAgent finished map 126 | Time: 3.970s | Timestamp: 09:21:34.322
+[Eval] Map 126 TIMEOUT (20s) | Hybrid: 3.970s | Basic: DNF
+[Eval] Starting map 127 at 09:21:50.692 on seed 23582
+[Eval] BasicAgent finished map 127 | Time: 8.091s | Timestamp: 09:21:58.781
+[Eval] HybridAgent finished map 127 | Time: 9.371s | Timestamp: 09:22:00.069
+[Eval] Map 127 complete | Winner: BasicAgent by 1.280s | Hybrid: 9.371s | Basic: 8.091s
+[Eval] Starting map 128 at 09:22:00.330 on seed 23583
+[Eval] HybridAgent finished map 128 | Time: 6.073s | Timestamp: 09:22:06.421
+[Eval] BasicAgent finished map 128 | Time: 8.173s | Timestamp: 09:22:08.501
+[Eval] Map 128 complete | Winner: HybridAgent by 2.100s | Hybrid: 6.073s | Basic: 8.173s
+[Eval] Starting map 129 at 09:22:08.762 on seed 23584
+[Eval] BasicAgent finished map 129 | Time: 1.240s | Timestamp: 09:22:10.007
+[Eval] HybridAgent finished map 129 | Time: 1.300s | Timestamp: 09:22:10.069
+[Eval] Map 129 complete | Winner: BasicAgent by 0.060s | Hybrid: 1.300s | Basic: 1.240s
+[Eval] Starting map 130 at 09:22:10.313 on seed 23585
+[Eval] BasicAgent finished map 130 | Time: 2.210s | Timestamp: 09:22:12.530
+[Eval] HybridAgent finished map 130 | Time: 2.390s | Timestamp: 09:22:12.735
+[Eval] Map 130 complete | Winner: BasicAgent by 0.180s | Hybrid: 2.390s | Basic: 2.210s
+[Eval] Starting map 131 at 09:22:13.180 on seed 23586
+[Eval] HybridAgent finished map 131 | Time: 11.793s | Timestamp: 09:22:24.976
+[Eval] BasicAgent finished map 131 | Time: 13.653s | Timestamp: 09:22:26.845
+[Eval] Map 131 complete | Winner: HybridAgent by 1.860s | Hybrid: 11.793s | Basic: 13.653s
+[Eval] Starting map 132 at 09:22:27.064 on seed 23587
+[Eval] HybridAgent finished map 132 | Time: 2.789s | Timestamp: 09:22:29.898
+[Eval] BasicAgent finished map 132 | Time: 3.289s | Timestamp: 09:22:30.361
+[Eval] Map 132 complete | Winner: HybridAgent by 0.500s | Hybrid: 2.789s | Basic: 3.289s
+[Eval] Starting map 133 at 09:22:30.585 on seed 23588
+[Eval] HybridAgent finished map 133 | Time: 1.328s | Timestamp: 09:22:31.950
+[Eval] BasicAgent finished map 133 | Time: 1.508s | Timestamp: 09:22:32.110
+[Eval] Map 133 complete | Winner: HybridAgent by 0.180s | Hybrid: 1.328s | Basic: 1.508s
+[Eval] Starting map 134 at 09:22:32.367 on seed 23589
+[Eval] HybridAgent finished map 134 | Time: 6.226s | Timestamp: 09:22:38.652
+[Eval] Starting map 135 at 09:22:39.052 on seed 23590
+[Eval] HybridAgent finished map 135 | Time: 1.881s | Timestamp: 09:22:40.940
+[Eval] BasicAgent finished map 135 | Time: 2.061s | Timestamp: 09:22:41.121
+[Eval] Map 135 complete | Winner: HybridAgent by 0.180s | Hybrid: 1.881s | Basic: 2.061s
+[Eval] Starting map 136 at 09:22:41.461 on seed 23591
+[Eval] HybridAgent finished map 136 | Time: 4.392s | Timestamp: 09:22:45.852
+[Eval] Starting map 137 at 09:22:47.056 on seed 23592
+[Eval] HybridAgent finished map 137 | Time: 2.763s | Timestamp: 09:22:49.831
+[Eval] BasicAgent finished map 137 | Time: 2.923s | Timestamp: 09:22:49.989
+[Eval] Map 137 complete | Winner: HybridAgent by 0.160s | Hybrid: 2.763s | Basic: 2.923s
+[Eval] Starting map 138 at 09:22:50.223 on seed 23593
+[Eval] Starting map 139 at 09:22:52.636 on seed 23594
+[Eval] BasicAgent finished map 139 | Time: 13.405s | Timestamp: 09:23:06.089
+[Eval] Starting map 140 at 09:23:10.333 on seed 23595
+[Eval] BasicAgent finished map 140 | Time: 5.007s | Timestamp: 09:23:15.343
+[Eval] Map 140 TIMEOUT (20s) | Hybrid: DNF | Basic: 5.007s
+[Eval] Starting map 141 at 09:23:30.684 on seed 23596
+[Eval] Starting map 142 at 09:23:35.178 on seed 23597
+[Eval] HybridAgent finished map 142 | Time: 10.123s | Timestamp: 09:23:45.303
+[Eval] BasicAgent finished map 142 | Time: 10.363s | Timestamp: 09:23:45.540
+[Eval] Map 142 complete | Winner: HybridAgent by 0.240s | Hybrid: 10.123s | Basic: 10.363s
+[Eval] Starting map 143 at 09:23:45.815 on seed 23598
+[Eval] BasicAgent finished map 143 | Time: 4.426s | Timestamp: 09:23:50.242
+[Eval] Starting map 144 at 09:23:51.427 on seed 23599
+[Eval] BasicAgent finished map 144 | Time: 7.781s | Timestamp: 09:23:59.219
+[Eval] Starting map 145 at 09:24:03.856 on seed 23600
+[Eval] BasicAgent finished map 145 | Time: 4.673s | Timestamp: 09:24:08.569
+[Eval] HybridAgent finished map 145 | Time: 4.853s | Timestamp: 09:24:08.721
+[Eval] Map 145 complete | Winner: BasicAgent by 0.180s | Hybrid: 4.853s | Basic: 4.673s
+[Eval] Starting map 146 at 09:24:08.949 on seed 23601
+[Eval] HybridAgent finished map 146 | Time: 7.099s | Timestamp: 09:24:16.053
+[Eval] Starting map 147 at 09:24:17.611 on seed 23602
+[Eval] BasicAgent finished map 147 | Time: 4.702s | Timestamp: 09:24:22.312
+[Eval] HybridAgent finished map 147 | Time: 5.881s | Timestamp: 09:24:23.532
+[Eval] Map 147 complete | Winner: BasicAgent by 1.180s | Hybrid: 5.881s | Basic: 4.702s
+[Eval] Starting map 148 at 09:24:23.867 on seed 23603
+[Eval] HybridAgent finished map 148 | Time: 12.725s | Timestamp: 09:24:36.593
+[Eval] Starting map 149 at 09:24:37.336 on seed 23604
+[Eval] HybridAgent finished map 149 | Time: 2.778s | Timestamp: 09:24:40.113
+[Eval] Map 149 TIMEOUT (20s) | Hybrid: 2.778s | Basic: DNF
+[Eval] Starting map 150 at 09:24:57.631 on seed 23605
+[Eval] BasicAgent finished map 150 | Time: 4.401s | Timestamp: 09:25:02.067
+[Eval] HybridAgent finished map 150 | Time: 5.121s | Timestamp: 09:25:02.757
+[Eval] Map 150 complete | Winner: BasicAgent by 0.720s | Hybrid: 5.121s | Basic: 4.401s
+[Eval] Starting map 151 at 09:25:03.134 on seed 23606
+[Eval] BasicAgent finished map 151 | Time: 1.878s | Timestamp: 09:25:05.045
+[Eval] HybridAgent finished map 151 | Time: 1.938s | Timestamp: 09:25:05.077
+[Eval] Map 151 complete | Winner: BasicAgent by 0.060s | Hybrid: 1.938s | Basic: 1.878s
+[Eval] Starting map 152 at 09:25:05.278 on seed 23607
+[Eval] Starting map 153 at 09:25:10.463 on seed 23608
+[Eval] Starting map 154 at 09:25:27.676 on seed 23609
+[Eval] BasicAgent finished map 154 | Time: 6.636s | Timestamp: 09:25:34.314
+[Eval] HybridAgent finished map 154 | Time: 8.196s | Timestamp: 09:25:35.876
+[Eval] Map 154 complete | Winner: BasicAgent by 1.560s | Hybrid: 8.196s | Basic: 6.636s
+[Eval] Starting map 155 at 09:25:36.120 on seed 23610
+[Eval] HybridAgent finished map 155 | Time: 15.312s | Timestamp: 09:25:51.437
+[Eval] Starting map 156 at 09:25:52.744 on seed 23611
+[Eval] HybridAgent finished map 156 | Time: 3.190s | Timestamp: 09:25:55.934
+[Eval] BasicAgent finished map 156 | Time: 3.750s | Timestamp: 09:25:56.499
+[Eval] Map 156 complete | Winner: HybridAgent by 0.560s | Hybrid: 3.190s | Basic: 3.750s
+[Eval] Starting map 157 at 09:25:56.790 on seed 23612
+[Eval] HybridAgent finished map 157 | Time: 2.783s | Timestamp: 09:25:59.582
+[Eval] Starting map 158 at 09:26:06.966 on seed 23613
+[Eval] HybridAgent finished map 158 | Time: 7.127s | Timestamp: 09:26:14.109
+[Eval] Starting map 159 at 09:26:20.784 on seed 23614
+[Eval] BasicAgent finished map 159 | Time: 3.290s | Timestamp: 09:26:24.078
+[Eval] HybridAgent finished map 159 | Time: 4.930s | Timestamp: 09:26:25.758
+[Eval] Map 159 complete | Winner: BasicAgent by 1.640s | Hybrid: 4.930s | Basic: 3.290s
+[Eval] Starting map 160 at 09:26:25.997 on seed 23615
+[Eval] HybridAgent finished map 160 | Time: 9.595s | Timestamp: 09:26:35.596
+[Eval] BasicAgent finished map 160 | Time: 9.955s | Timestamp: 09:26:35.962
+[Eval] Map 160 complete | Winner: HybridAgent by 0.360s | Hybrid: 9.595s | Basic: 9.955s
+[Eval] Starting map 161 at 09:26:36.343 on seed 23616
+[Eval] HybridAgent finished map 161 | Time: 14.872s | Timestamp: 09:26:51.212
+[Eval] Starting map 162 at 09:26:52.501 on seed 23617
+[Eval] HybridAgent finished map 162 | Time: 4.145s | Timestamp: 09:26:56.673
+[Eval] BasicAgent finished map 162 | Time: 4.525s | Timestamp: 09:26:57.036
+[Eval] Map 162 complete | Winner: HybridAgent by 0.380s | Hybrid: 4.145s | Basic: 4.525s
+[Eval] Starting map 163 at 09:26:57.335 on seed 23618
+[Eval] HybridAgent finished map 163 | Time: 10.873s | Timestamp: 09:27:08.238
+[Eval] Starting map 164 at 09:27:08.754 on seed 23619
+[Eval] BasicAgent finished map 164 | Time: 4.552s | Timestamp: 09:27:13.306
+[Eval] HybridAgent finished map 164 | Time: 5.012s | Timestamp: 09:27:13.769
+[Eval] Map 164 complete | Winner: BasicAgent by 0.460s | Hybrid: 5.012s | Basic: 4.552s
+[Eval] Starting map 165 at 09:27:13.958 on seed 23620
+[Eval] Starting map 166 at 09:27:18.934 on seed 23621
+[Eval] HybridAgent finished map 166 | Time: 4.012s | Timestamp: 09:27:22.955
+[Eval] BasicAgent finished map 166 | Time: 6.512s | Timestamp: 09:27:25.445
+[Eval] Map 166 complete | Winner: HybridAgent by 2.500s | Hybrid: 4.012s | Basic: 6.512s
+[Eval] Starting map 167 at 09:27:25.927 on seed 23622
+[Eval] HybridAgent finished map 167 | Time: 8.490s | Timestamp: 09:27:34.417
+[Eval] BasicAgent finished map 167 | Time: 9.190s | Timestamp: 09:27:35.124
+[Eval] Map 167 complete | Winner: HybridAgent by 0.700s | Hybrid: 8.490s | Basic: 9.190s
+[Eval] Starting map 168 at 09:27:35.562 on seed 23623
+[Eval] BasicAgent finished map 168 | Time: 12.071s | Timestamp: 09:27:47.669
+[Eval] HybridAgent finished map 168 | Time: 12.531s | Timestamp: 09:27:48.128
+[Eval] Map 168 complete | Winner: BasicAgent by 0.460s | Hybrid: 12.531s | Basic: 12.071s
+[Eval] Starting map 169 at 09:27:48.414 on seed 23624
+[Eval] Map 169 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 170 at 09:28:09.716 on seed 23625
+[Eval] HybridAgent finished map 170 | Time: 2.038s | Timestamp: 09:28:11.756
+[Eval] BasicAgent finished map 170 | Time: 2.538s | Timestamp: 09:28:12.251
+[Eval] Map 170 complete | Winner: HybridAgent by 0.500s | Hybrid: 2.038s | Basic: 2.538s
+[Eval] Starting map 171 at 09:28:12.717 on seed 23626
+[Eval] HybridAgent finished map 171 | Time: 1.789s | Timestamp: 09:28:14.534
+[Eval] BasicAgent finished map 171 | Time: 2.489s | Timestamp: 09:28:15.207
+[Eval] Map 171 complete | Winner: HybridAgent by 0.700s | Hybrid: 1.789s | Basic: 2.489s
+[Eval] Starting map 172 at 09:28:15.536 on seed 23627
+[Eval] BasicAgent finished map 172 | Time: 9.531s | Timestamp: 09:28:25.096
+[Eval] HybridAgent finished map 172 | Time: 10.070s | Timestamp: 09:28:25.606
+[Eval] Map 172 complete | Winner: BasicAgent by 0.540s | Hybrid: 10.070s | Basic: 9.531s
+[Eval] Starting map 173 at 09:28:25.959 on seed 23628
+[Eval] HybridAgent finished map 173 | Time: 1.647s | Timestamp: 09:28:27.634
+[Eval] BasicAgent finished map 173 | Time: 1.687s | Timestamp: 09:28:27.648
+[Eval] Map 173 complete | Winner: HybridAgent by 0.040s | Hybrid: 1.647s | Basic: 1.687s
+[Eval] Starting map 174 at 09:28:28.022 on seed 23629
+[Eval] HybridAgent finished map 174 | Time: 6.585s | Timestamp: 09:28:34.632
+[Eval] Starting map 175 at 09:28:35.603 on seed 23630
+[Eval] HybridAgent finished map 175 | Time: 12.003s | Timestamp: 09:28:47.630
+[Eval] Starting map 176 at 09:28:48.133 on seed 23631
+[Eval] HybridAgent finished map 176 | Time: 3.352s | Timestamp: 09:28:51.498
+[Eval] BasicAgent finished map 176 | Time: 3.492s | Timestamp: 09:28:51.645
+[Eval] Map 176 complete | Winner: HybridAgent by 0.140s | Hybrid: 3.352s | Basic: 3.492s
+[Eval] Starting map 177 at 09:28:52.655 on seed 23632
+[Eval] Map 177 TIMEOUT (0s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 178 at 09:28:54.327 on seed 23633
+[Eval] HybridAgent finished map 178 | Time: 3.683s | Timestamp: 09:28:58.019
+[Eval] BasicAgent finished map 178 | Time: 6.083s | Timestamp: 09:29:00.418
+[Eval] Map 178 complete | Winner: HybridAgent by 2.400s | Hybrid: 3.683s | Basic: 6.083s
+[Eval] Starting map 179 at 09:29:00.740 on seed 23634
+[Eval] BasicAgent finished map 179 | Time: 11.850s | Timestamp: 09:29:12.600
+[Eval] Map 179 TIMEOUT (30s) | Hybrid: DNF | Basic: 11.850s
+[Eval] Starting map 180 at 09:29:31.005 on seed 23635
+[Eval] HybridAgent finished map 180 | Time: 7.526s | Timestamp: 09:29:38.535
+[Eval] BasicAgent finished map 180 | Time: 10.266s | Timestamp: 09:29:41.278
+[Eval] Map 180 complete | Winner: HybridAgent by 2.740s | Hybrid: 7.526s | Basic: 10.266s
+[Eval] Starting map 181 at 09:29:41.572 on seed 23636
+[Eval] Starting map 182 at 09:29:50.560 on seed 23637
+[Eval] HybridAgent finished map 182 | Time: 18.790s | Timestamp: 09:30:09.349
+[Eval] Starting map 183 at 09:30:09.902 on seed 23638
+[Eval] BasicAgent finished map 183 | Time: 9.829s | Timestamp: 09:30:19.737
+[Eval] Starting map 184 at 09:30:21.579 on seed 23639
+[Eval] HybridAgent finished map 184 | Time: 6.712s | Timestamp: 09:30:28.290
+[Eval] BasicAgent finished map 184 | Time: 7.372s | Timestamp: 09:30:28.978
+[Eval] Map 184 complete | Winner: HybridAgent by 0.660s | Hybrid: 6.712s | Basic: 7.372s
+[Eval] Starting map 185 at 09:30:29.278 on seed 23640
+[Eval] Starting map 186 at 09:30:38.159 on seed 23641
+[Eval] HybridAgent finished map 186 | Time: 6.031s | Timestamp: 09:30:44.221
+[Eval] BasicAgent finished map 186 | Time: 6.171s | Timestamp: 09:30:44.376
+[Eval] Map 186 complete | Winner: HybridAgent by 0.140s | Hybrid: 6.031s | Basic: 6.171s
+[Eval] Starting map 187 at 09:30:44.792 on seed 23642
+[Eval] Starting map 188 at 09:31:01.740 on seed 23643
+[Eval] HybridAgent finished map 188 | Time: 10.770s | Timestamp: 09:31:12.517
+[Eval] Starting map 189 at 09:31:13.037 on seed 23644
+[Eval] Map 189 TIMEOUT (30s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 190 at 09:31:43.368 on seed 23645
+[Eval] BasicAgent finished map 190 | Time: 6.102s | Timestamp: 09:31:49.471
+[Eval] HybridAgent finished map 190 | Time: 6.342s | Timestamp: 09:31:49.746
+[Eval] Map 190 complete | Winner: BasicAgent by 0.240s | Hybrid: 6.342s | Basic: 6.102s
+[Eval] Starting map 191 at 09:31:50.060 on seed 23646
+[Eval] HybridAgent finished map 191 | Time: 7.551s | Timestamp: 09:31:57.613
+[Eval] Starting map 192 at 09:31:58.297 on seed 23647
+[Eval] HybridAgent finished map 192 | Time: 14.193s | Timestamp: 09:32:12.727
+[Eval] Starting map 193 at 09:32:12.921 on seed 23648
+[Eval] HybridAgent finished map 193 | Time: 12.371s | Timestamp: 09:32:25.291
+[Eval] BasicAgent finished map 193 | Time: 14.211s | Timestamp: 09:32:27.140
+[Eval] Map 193 complete | Winner: HybridAgent by 1.840s | Hybrid: 12.371s | Basic: 14.211s
+[Eval] Starting map 194 at 09:32:28.172 on seed 23649
+[Eval] HybridAgent finished map 194 | Time: 10.793s | Timestamp: 09:32:38.980
+[Eval] Starting map 195 at 09:32:39.635 on seed 23650
+[Eval] HybridAgent finished map 195 | Time: 4.429s | Timestamp: 09:32:44.073
+[Eval] Starting map 196 at 09:32:46.463 on seed 23651
+[Eval] Starting map 197 at 09:33:03.592 on seed 23652
+[Eval] BasicAgent finished map 197 | Time: 2.715s | Timestamp: 09:33:06.308
+[Eval] HybridAgent finished map 197 | Time: 5.135s | Timestamp: 09:33:08.733
+[Eval] Map 197 complete | Winner: BasicAgent by 2.420s | Hybrid: 5.135s | Basic: 2.715s
+[Eval] Starting map 198 at 09:33:09.107 on seed 23653
+[Eval] Starting map 199 at 09:33:14.216 on seed 23654
+[Eval] HybridAgent finished map 199 | Time: 7.030s | Timestamp: 09:33:21.250
+[Eval] Starting map 200 at 09:33:22.332 on seed 23655
+[Eval] BasicAgent finished map 200 | Time: 5.715s | Timestamp: 09:33:28.052
+[Eval] Starting map 201 at 09:33:28.872 on seed 23656
+[Eval] HybridAgent finished map 201 | Time: 1.233s | Timestamp: 09:33:30.116
+[Eval] BasicAgent finished map 201 | Time: 1.313s | Timestamp: 09:33:30.190
+[Eval] Map 201 complete | Winner: HybridAgent by 0.080s | Hybrid: 1.233s | Basic: 1.313s
+[Eval] Starting map 202 at 09:33:30.429 on seed 23657
+[Eval] BasicAgent finished map 202 | Time: 18.738s | Timestamp: 09:33:49.170
+[Eval] HybridAgent finished map 202 | Time: 19.638s | Timestamp: 09:33:50.068
+[Eval] Map 202 complete | Winner: BasicAgent by 0.900s | Hybrid: 19.638s | Basic: 18.738s
+[Eval] Starting map 203 at 09:33:50.366 on seed 23658
+[Eval] HybridAgent finished map 203 | Time: 8.260s | Timestamp: 09:33:58.650
+[Eval] BasicAgent finished map 203 | Time: 9.220s | Timestamp: 09:33:59.599
+[Eval] Map 203 complete | Winner: HybridAgent by 0.960s | Hybrid: 8.260s | Basic: 9.220s
+[Eval] Starting map 204 at 09:33:59.823 on seed 23659
+[Eval] HybridAgent finished map 204 | Time: 7.083s | Timestamp: 09:34:06.907
+[Eval] Starting map 205 at 09:34:07.901 on seed 23660
+[Eval] HybridAgent finished map 205 | Time: 9.925s | Timestamp: 09:34:17.835
+[Eval] Starting map 206 at 09:34:18.337 on seed 23661
+[Eval] HybridAgent finished map 206 | Time: 8.229s | Timestamp: 09:34:26.574
+[Eval] Starting map 207 at 09:34:34.190 on seed 23662
+[Eval] HybridAgent finished map 207 | Time: 6.176s | Timestamp: 09:34:40.365
+[Eval] BasicAgent finished map 207 | Time: 7.456s | Timestamp: 09:34:41.647
+[Eval] Map 207 complete | Winner: HybridAgent by 1.280s | Hybrid: 6.176s | Basic: 7.456s
+[Eval] Starting map 208 at 09:34:42.014 on seed 23663
+[Eval] BasicAgent finished map 208 | Time: 5.693s | Timestamp: 09:34:47.706
+[Eval] HybridAgent finished map 208 | Time: 5.734s | Timestamp: 09:34:47.791
+[Eval] Map 208 complete | Winner: BasicAgent by 0.040s | Hybrid: 5.734s | Basic: 5.693s
+[Eval] Starting map 209 at 09:34:48.155 on seed 23664
+[Eval] HybridAgent finished map 209 | Time: 5.071s | Timestamp: 09:34:53.227
+[Eval] Starting map 210 at 09:34:53.743 on seed 23665
+[Eval] HybridAgent finished map 210 | Time: 1.083s | Timestamp: 09:34:54.830
+[Eval] BasicAgent finished map 210 | Time: 1.123s | Timestamp: 09:34:54.872
+[Eval] Map 210 complete | Winner: HybridAgent by 0.040s | Hybrid: 1.083s | Basic: 1.123s
+[Eval] Starting map 211 at 09:34:56.344 on seed 23666
+[Eval] Map 211 TIMEOUT (30s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 212 at 09:35:26.692 on seed 23667
+[Eval] HybridAgent finished map 212 | Time: 7.352s | Timestamp: 09:35:34.076
+[Eval] BasicAgent finished map 212 | Time: 8.432s | Timestamp: 09:35:35.128
+[Eval] Map 212 complete | Winner: HybridAgent by 1.080s | Hybrid: 7.352s | Basic: 8.432s
+[Eval] Starting map 213 at 09:35:35.425 on seed 23668
+[Eval] Starting map 214 at 09:35:37.366 on seed 23669
+[Eval] BasicAgent finished map 214 | Time: 1.978s | Timestamp: 09:35:39.349
+[Eval] HybridAgent finished map 214 | Time: 2.378s | Timestamp: 09:35:39.745
+[Eval] Map 214 complete | Winner: BasicAgent by 0.400s | Hybrid: 2.378s | Basic: 1.978s
+[Eval] Starting map 215 at 09:35:40.019 on seed 23670
+[Eval] HybridAgent finished map 215 | Time: 2.904s | Timestamp: 09:35:42.921
+[Eval] BasicAgent finished map 215 | Time: 3.044s | Timestamp: 09:35:43.067
+[Eval] Map 215 complete | Winner: HybridAgent by 0.140s | Hybrid: 2.904s | Basic: 3.044s
+[Eval] Starting map 216 at 09:35:43.344 on seed 23671
+[Eval] BasicAgent finished map 216 | Time: 6.319s | Timestamp: 09:35:49.664
+[Eval] Map 216 TIMEOUT (30s) | Hybrid: DNF | Basic: 6.319s
+[Eval] Starting map 217 at 09:36:14.844 on seed 23672
+[Eval] BasicAgent finished map 217 | Time: 14.273s | Timestamp: 09:36:29.115
+[Eval] Map 217 TIMEOUT (30s) | Hybrid: DNF | Basic: 14.273s
+[Eval] Starting map 218 at 09:36:45.099 on seed 23673
+[Eval] BasicAgent finished map 218 | Time: 2.298s | Timestamp: 09:36:47.398
+[Eval] HybridAgent finished map 218 | Time: 3.178s | Timestamp: 09:36:48.285
+[Eval] Map 218 complete | Winner: BasicAgent by 0.880s | Hybrid: 3.178s | Basic: 2.298s
+[Eval] Starting map 219 at 09:36:48.515 on seed 23674
+[Eval] HybridAgent finished map 219 | Time: 1.182s | Timestamp: 09:36:49.697
+[Eval] BasicAgent finished map 219 | Time: 1.522s | Timestamp: 09:36:50.039
+[Eval] Map 219 complete | Winner: HybridAgent by 0.340s | Hybrid: 1.182s | Basic: 1.522s
+[Eval] Starting map 220 at 09:36:50.311 on seed 23675
+[Eval] HybridAgent finished map 220 | Time: 2.946s | Timestamp: 09:36:53.256
+[Eval] BasicAgent finished map 220 | Time: 3.926s | Timestamp: 09:36:54.251
+[Eval] Map 220 complete | Winner: HybridAgent by 0.980s | Hybrid: 2.946s | Basic: 3.926s
+[Eval] Starting map 221 at 09:36:54.497 on seed 23676
+[Eval] Map 221 TIMEOUT (30s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 222 at 09:37:24.800 on seed 23677
+[Eval] BasicAgent finished map 222 | Time: 15.297s | Timestamp: 09:37:40.095
+[Eval] HybridAgent finished map 222 | Time: 15.377s | Timestamp: 09:37:40.179
+[Eval] Map 222 complete | Winner: BasicAgent by 0.080s | Hybrid: 15.377s | Basic: 15.297s
+[Eval] Starting map 223 at 09:37:40.497 on seed 23678
+[Eval] Starting map 224 at 09:37:46.003 on seed 23679
+[Eval] Starting map 225 at 09:37:48.450 on seed 23680
+[Eval] BasicAgent finished map 225 | Time: 5.707s | Timestamp: 09:37:54.161
+[Eval] Starting map 226 at 09:37:59.484 on seed 23681
+[Eval] HybridAgent finished map 226 | Time: 8.993s | Timestamp: 09:38:08.482
+[Eval] Starting map 227 at 09:38:08.859 on seed 23682
+[Eval] Starting map 228 at 09:38:14.194 on seed 23683
+[Eval] HybridAgent finished map 228 | Time: 9.023s | Timestamp: 09:38:23.216
+[Eval] BasicAgent finished map 228 | Time: 9.243s | Timestamp: 09:38:23.444
+[Eval] Map 228 complete | Winner: HybridAgent by 0.220s | Hybrid: 9.023s | Basic: 9.243s
+[Eval] Starting map 229 at 09:38:23.881 on seed 23684
+[Eval] HybridAgent finished map 229 | Time: 5.856s | Timestamp: 09:38:29.754
+[Eval] Starting map 230 at 09:38:30.109 on seed 23685
+[Eval] HybridAgent finished map 230 | Time: 4.308s | Timestamp: 09:38:34.415
+[Eval] BasicAgent finished map 230 | Time: 5.068s | Timestamp: 09:38:35.185
+[Eval] Map 230 complete | Winner: HybridAgent by 0.760s | Hybrid: 4.308s | Basic: 5.068s
+[Eval] Starting map 231 at 09:38:35.371 on seed 23686
+[Eval] HybridAgent finished map 231 | Time: 3.845s | Timestamp: 09:38:39.220
+[Eval] BasicAgent finished map 231 | Time: 4.065s | Timestamp: 09:38:39.437
+[Eval] Map 231 complete | Winner: HybridAgent by 0.220s | Hybrid: 3.845s | Basic: 4.065s
+[Eval] Starting map 232 at 09:38:39.668 on seed 23687
+[Eval] BasicAgent finished map 232 | Time: 9.629s | Timestamp: 09:38:49.299
+[Eval] HybridAgent finished map 232 | Time: 10.189s | Timestamp: 09:38:49.878
+[Eval] Map 232 complete | Winner: BasicAgent by 0.560s | Hybrid: 10.189s | Basic: 9.629s
+[Eval] Starting map 233 at 09:38:50.203 on seed 23688
+[Eval] BasicAgent finished map 233 | Time: 9.395s | Timestamp: 09:38:59.595
+[Eval] Starting map 234 at 09:39:04.475 on seed 23689
+[Eval] HybridAgent finished map 234 | Time: 5.621s | Timestamp: 09:39:10.107
+[Eval] BasicAgent finished map 234 | Time: 7.181s | Timestamp: 09:39:11.666
+[Eval] Map 234 complete | Winner: HybridAgent by 1.560s | Hybrid: 5.621s | Basic: 7.181s
+[Eval] Starting map 235 at 09:39:11.892 on seed 23690
+[Eval] Starting map 236 at 09:39:21.120 on seed 23691
+[Eval] Starting map 237 at 09:39:23.699 on seed 23692
+[Eval] Starting map 238 at 09:39:25.360 on seed 23693
+[Eval] Starting map 239 at 09:39:26.802 on seed 23694
+[Eval] HybridAgent finished map 239 | Time: 10.675s | Timestamp: 09:39:37.478
+[Eval] Starting map 240 at 09:39:38.068 on seed 23695
+[Eval] HybridAgent finished map 240 | Time: 3.628s | Timestamp: 09:39:41.699
+[Eval] BasicAgent finished map 240 | Time: 5.888s | Timestamp: 09:39:43.984
+[Eval] Map 240 complete | Winner: HybridAgent by 2.260s | Hybrid: 3.628s | Basic: 5.888s
+[Eval] Starting map 241 at 09:39:44.316 on seed 23696
+[Eval] BasicAgent finished map 241 | Time: 11.881s | Timestamp: 09:39:56.203
+[Eval] Map 241 TIMEOUT (30s) | Hybrid: DNF | Basic: 11.881s
+[Eval] Starting map 242 at 09:40:14.785 on seed 23697
+[Eval] BasicAgent finished map 242 | Time: 5.545s | Timestamp: 09:40:20.330
+[Eval] Map 242 TIMEOUT (30s) | Hybrid: DNF | Basic: 5.545s
+[Eval] Starting map 243 at 09:40:45.073 on seed 23698
+[Eval] Starting map 244 at 09:41:12.146 on seed 23699
+[Eval] Starting map 245 at 09:41:20.921 on seed 23700
+[Eval] HybridAgent finished map 245 | Time: 0.792s | Timestamp: 09:41:21.722
+[Eval] BasicAgent finished map 245 | Time: 0.792s | Timestamp: 09:41:21.722
+[Eval] Map 245 complete | Winner: BasicAgent by 0.000s | Hybrid: 0.792s | Basic: 0.792s
+[Eval] Starting map 246 at 09:41:22.057 on seed 23701
+[Eval] BasicAgent finished map 246 | Time: 3.076s | Timestamp: 09:41:25.159
+[Eval] HybridAgent finished map 246 | Time: 8.896s | Timestamp: 09:41:30.955
+[Eval] Map 246 complete | Winner: BasicAgent by 5.820s | Hybrid: 8.896s | Basic: 3.076s
+[Eval] Starting map 247 at 09:41:31.314 on seed 23702
+[Eval] Starting map 248 at 09:41:38.780 on seed 23703
+[Eval] Starting map 249 at 09:41:43.028 on seed 23704
+[Eval] HybridAgent finished map 249 | Time: 1.783s | Timestamp: 09:41:44.821
+[Eval] BasicAgent finished map 249 | Time: 1.904s | Timestamp: 09:41:44.941
+[Eval] Map 249 complete | Winner: HybridAgent by 0.120s | Hybrid: 1.783s | Basic: 1.904s
+[Eval] Starting map 250 at 09:41:45.443 on seed 23705
+[Eval] BasicAgent finished map 250 | Time: 15.900s | Timestamp: 09:42:01.364
+[Eval] HybridAgent finished map 250 | Time: 17.680s | Timestamp: 09:42:03.127
+[Eval] Map 250 complete | Winner: BasicAgent by 1.780s | Hybrid: 17.680s | Basic: 15.900s
+[Eval] Starting map 251 at 09:42:03.372 on seed 23706
+[Eval] HybridAgent finished map 251 | Time: 5.412s | Timestamp: 09:42:08.791
+[Eval] Starting map 252 at 09:42:09.231 on seed 23707
+[Eval] HybridAgent finished map 252 | Time: 9.333s | Timestamp: 09:42:18.573
+[Eval] Starting map 1 at 09:47:07.631 on seed 23708
+[Eval] BasicAgent finished map 1 | Time: 4.117s | Timestamp: 09:47:11.746
+[Eval] HybridAgent finished map 1 | Time: 4.257s | Timestamp: 09:47:11.887
+[Eval] Map 1 complete | Winner: BasicAgent by 0.140s | Hybrid: 4.257s | Basic: 4.117s
+[Eval] All agents finished, generating next map...
+[Eval] Starting map 2 at 09:47:12.100 on seed 23709
+[Eval] HybridAgent finished map 2 | Time: 12.742s | Timestamp: 09:47:24.846
+[Eval] BasicAgent finished map 2 | Time: 13.982s | Timestamp: 09:47:26.080
+[Eval] Map 2 complete | Winner: HybridAgent by 1.240s | Hybrid: 12.742s | Basic: 13.982s
+[Eval] Starting map 3 at 09:47:26.346 on seed 23710
+[Eval] Map 3 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 4 at 09:47:46.655 on seed 23711
+[Eval] HybridAgent finished map 4 | Time: 10.947s | Timestamp: 09:47:57.601
+[Eval] Map 4 TIMEOUT (20s) | Hybrid: 10.947s | Basic: DNF
+[Eval] Starting map 5 at 09:48:06.900 on seed 23712
+[Eval] HybridAgent finished map 5 | Time: 2.482s | Timestamp: 09:48:09.385
+[Eval] BasicAgent finished map 5 | Time: 5.122s | Timestamp: 09:48:12.026
+[Eval] Map 5 complete | Winner: HybridAgent by 2.640s | Hybrid: 2.482s | Basic: 5.122s
+[Eval] Starting map 6 at 09:48:12.592 on seed 23713
+[Eval] HybridAgent finished map 6 | Time: 4.547s | Timestamp: 09:48:17.183
+[Eval] BasicAgent finished map 6 | Time: 5.367s | Timestamp: 09:48:17.983
+[Eval] Map 6 complete | Winner: HybridAgent by 0.820s | Hybrid: 4.547s | Basic: 5.367s
+[Eval] Starting map 7 at 09:48:18.282 on seed 23714
+[Eval] Map 7 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 8 at 09:48:39.378 on seed 23715
+[Eval] Starting map 9 at 09:48:46.560 on seed 23716
+[Eval] BasicAgent finished map 9 | Time: 3.474s | Timestamp: 09:48:50.048
+[Eval] Starting map 10 at 09:48:52.592 on seed 23717
+[Eval] Starting map 11 at 09:49:08.069 on seed 23718
+[Eval] HybridAgent finished map 11 | Time: 1.786s | Timestamp: 09:49:09.858
+[Eval] BasicAgent finished map 11 | Time: 1.786s | Timestamp: 09:49:09.858
+[Eval] Map 11 complete | Winner: BasicAgent by 0.000s | Hybrid: 1.786s | Basic: 1.786s
+[Eval] Starting map 12 at 09:49:10.116 on seed 23719
+[Eval] HybridAgent finished map 12 | Time: 9.898s | Timestamp: 09:49:20.047
+[Eval] BasicAgent finished map 12 | Time: 10.318s | Timestamp: 09:49:20.439
+[Eval] Map 12 complete | Winner: HybridAgent by 0.420s | Hybrid: 9.898s | Basic: 10.318s
+[Eval] Starting map 13 at 09:49:20.724 on seed 23720
+[Eval] HybridAgent finished map 13 | Time: 4.109s | Timestamp: 09:49:24.843
+[Eval] BasicAgent finished map 13 | Time: 4.789s | Timestamp: 09:49:25.521
+[Eval] Map 13 complete | Winner: HybridAgent by 0.680s | Hybrid: 4.109s | Basic: 4.789s
+[Eval] Starting map 14 at 09:49:25.849 on seed 23721
+[Eval] Map 14 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 15 at 09:49:46.171 on seed 23722
+[Eval] Map 15 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 16 at 09:50:06.462 on seed 23723
+[Eval] HybridAgent finished map 16 | Time: 4.584s | Timestamp: 09:50:11.070
+[Eval] BasicAgent finished map 16 | Time: 5.564s | Timestamp: 09:50:12.031
+[Eval] Map 16 complete | Winner: HybridAgent by 0.980s | Hybrid: 4.584s | Basic: 5.564s
+[Eval] Starting map 17 at 09:50:13.289 on seed 23724
+[Eval] Map 17 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 18 at 09:50:34.494 on seed 23725
+[Eval] HybridAgent finished map 18 | Time: 6.461s | Timestamp: 09:50:40.958
+[Eval] BasicAgent finished map 18 | Time: 8.181s | Timestamp: 09:50:42.676
+[Eval] Map 18 complete | Winner: HybridAgent by 1.720s | Hybrid: 6.461s | Basic: 8.181s
+[Eval] Starting map 19 at 09:50:42.914 on seed 23726
+[Eval] HybridAgent finished map 19 | Time: 5.560s | Timestamp: 09:50:48.475
+[Eval] BasicAgent finished map 19 | Time: 8.140s | Timestamp: 09:50:51.059
+[Eval] Map 19 complete | Winner: HybridAgent by 2.580s | Hybrid: 5.560s | Basic: 8.140s
+[Eval] Starting map 20 at 09:50:51.401 on seed 23727
+[Eval] Starting map 21 at 09:50:56.018 on seed 23728
+[Eval] Starting map 22 at 09:50:57.271 on seed 23729
+[Eval] HybridAgent finished map 22 | Time: 6.805s | Timestamp: 09:51:04.073
+[Eval] BasicAgent finished map 22 | Time: 7.665s | Timestamp: 09:51:04.946
+[Eval] Map 22 complete | Winner: HybridAgent by 0.860s | Hybrid: 6.805s | Basic: 7.665s
+[Eval] Starting map 23 at 09:51:05.214 on seed 23730
+[Eval] Map 23 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
+[Eval] Starting map 24 at 09:51:25.532 on seed 23731
+[Eval] BasicAgent finished map 24 | Time: 17.544s | Timestamp: 09:51:43.114
+[Eval] HybridAgent finished map 24 | Time: 17.724s | Timestamp: 09:51:43.271
+[Eval] Map 24 complete | Winner: BasicAgent by 0.180s | Hybrid: 17.724s | Basic: 17.544s
+[Eval] Starting map 25 at 09:51:43.506 on seed 23732
+[Eval] HybridAgent finished map 25 | Time: 3.329s | Timestamp: 09:51:46.864
+[Eval] BasicAgent finished map 25 | Time: 4.049s | Timestamp: 09:51:47.560
+[Eval] Map 25 complete | Winner: HybridAgent by 0.720s | Hybrid: 3.329s | Basic: 4.049s
+[Eval] Starting map 26 at 09:51:50.588 on seed 23733
+[Eval] BasicAgent finished map 26 | Time: 5.334s | Timestamp: 09:51:55.921
+[Eval] HybridAgent finished map 26 | Time: 6.274s | Timestamp: 09:51:56.861
+[Eval] Map 26 complete | Winner: BasicAgent by 0.940s | Hybrid: 6.274s | Basic: 5.334s
+[Eval] Starting map 27 at 09:51:57.200 on seed 23734
+[Eval] BasicAgent finished map 27 | Time: 10.620s | Timestamp: 09:52:07.821
+[Eval] Map 27 TIMEOUT (20s) | Hybrid: DNF | Basic: 10.620s
+[Eval] Starting map 28 at 09:52:17.456 on seed 23735
+[Eval] HybridAgent finished map 28 | Time: 3.405s | Timestamp: 09:52:20.865
+[Eval] BasicAgent finished map 28 | Time: 3.605s | Timestamp: 09:52:21.072
+[Eval] Map 28 complete | Winner: HybridAgent by 0.200s | Hybrid: 3.405s | Basic: 3.605s
+[Eval] Starting map 29 at 09:52:21.391 on seed 23736
+[Eval] BasicAgent finished map 29 | Time: 11.589s | Timestamp: 09:52:32.985
+[Eval] Starting map 30 at 09:52:33.909 on seed 23737
+[Eval] HybridAgent finished map 30 | Time: 7.532s | Timestamp: 09:52:41.452
+[Eval] BasicAgent finished map 30 | Time: 7.832s | Timestamp: 09:52:41.741
+[Eval] Map 30 complete | Winner: HybridAgent by 0.300s | Hybrid: 7.532s | Basic: 7.832s
+[Eval] Starting map 31 at 09:52:44.308 on seed 23738
+[Eval] BasicAgent finished map 31 | Time: 7.712s | Timestamp: 09:52:52.023
+[Eval] HybridAgent finished map 31 | Time: 8.172s | Timestamp: 09:52:52.483
+[Eval] Map 31 complete | Winner: BasicAgent by 0.460s | Hybrid: 8.172s | Basic: 7.712s
+[Eval] Starting map 32 at 09:52:53.793 on seed 23739
+[Eval] Starting map 33 at 09:53:10.167 on seed 23740
+[Eval] Starting map 34 at 09:53:17.892 on seed 23741
+[Eval] HybridAgent finished map 34 | Time: 10.986s | Timestamp: 09:53:28.879
+[Eval] Starting map 35 at 09:53:31.258 on seed 23742
+[Eval] BasicAgent finished map 35 | Time: 6.799s | Timestamp: 09:53:38.088
+[Eval] HybridAgent finished map 35 | Time: 7.119s | Timestamp: 09:53:38.401
+[Eval] Map 35 complete | Winner: BasicAgent by 0.320s | Hybrid: 7.119s | Basic: 6.799s
+[Eval] Starting map 36 at 09:53:38.848 on seed 23743
+[Eval] HybridAgent finished map 36 | Time: 3.651s | Timestamp: 09:53:42.498
+[Eval] BasicAgent finished map 36 | Time: 4.571s | Timestamp: 09:53:43.428
+[Eval] Map 36 complete | Winner: HybridAgent by 0.920s | Hybrid: 3.651s | Basic: 4.571s
+[Eval] Starting map 37 at 09:53:43.640 on seed 23744
+[Eval] Starting map 38 at 09:53:45.918 on seed 23745
+[Eval] BasicAgent finished map 38 | Time: 1.971s | Timestamp: 09:53:47.934
+[Eval] HybridAgent finished map 38 | Time: 2.131s | Timestamp: 09:53:48.086
+[Eval] Map 38 complete | Winner: BasicAgent by 0.160s | Hybrid: 2.131s | Basic: 1.971s
+[Eval] Starting map 39 at 09:53:48.442 on seed 23746
+[Eval] HybridAgent finished map 39 | Time: 5.427s | Timestamp: 09:53:53.909
+[Eval] BasicAgent finished map 39 | Time: 6.867s | Timestamp: 09:53:55.314
+[Eval] Map 39 complete | Winner: HybridAgent by 1.440s | Hybrid: 5.427s | Basic: 6.867s
+[Eval] Starting map 40 at 09:53:55.774 on seed 23747
+[Eval] Starting map 41 at 09:54:00.730 on seed 23748
+[Eval] Starting map 42 at 09:54:02.320 on seed 23749
+[Eval] HybridAgent finished map 42 | Time: 2.343s | Timestamp: 09:54:04.661
+[Eval] BasicAgent finished map 42 | Time: 2.603s | Timestamp: 09:54:04.958
+[Eval] Map 42 complete | Winner: HybridAgent by 0.260s | Hybrid: 2.343s | Basic: 2.603s
+[Eval] Starting map 43 at 09:54:05.218 on seed 23750
+[Eval] HybridAgent finished map 43 | Time: 2.984s | Timestamp: 09:54:08.209
+[Eval] Starting map 44 at 09:54:13.409 on seed 23751
+[Eval] Starting map 45 at 09:54:21.728 on seed 23752
+[Eval] HybridAgent finished map 45 | Time: 4.238s | Timestamp: 09:54:25.972
+[Eval] BasicAgent finished map 45 | Time: 5.678s | Timestamp: 09:54:27.413
+[Eval] Map 45 complete | Winner: HybridAgent by 1.440s | Hybrid: 4.238s | Basic: 5.678s
+[Eval] Starting map 46 at 09:54:27.589 on seed 23753
+[Eval] BasicAgent finished map 46 | Time: 2.297s | Timestamp: 09:54:29.889
+[Eval] HybridAgent finished map 46 | Time: 3.217s | Timestamp: 09:54:30.805
+[Eval] Map 46 complete | Winner: BasicAgent by 0.920s | Hybrid: 3.217s | Basic: 2.297s
+[Eval] Starting map 47 at 09:54:31.127 on seed 23754
+[Eval] BasicAgent finished map 47 | Time: 3.480s | Timestamp: 09:54:34.612
+[Eval] HybridAgent finished map 47 | Time: 4.100s | Timestamp: 09:54:35.234
+[Eval] Map 47 complete | Winner: BasicAgent by 0.620s | Hybrid: 4.100s | Basic: 3.480s
+[Eval] Starting map 48 at 09:54:35.477 on seed 23755
+[Eval] HybridAgent finished map 48 | Time: 4.568s | Timestamp: 09:54:40.048
+[Eval] BasicAgent finished map 48 | Time: 5.108s | Timestamp: 09:54:40.597
+[Eval] Map 48 complete | Winner: HybridAgent by 0.540s | Hybrid: 4.568s | Basic: 5.108s
