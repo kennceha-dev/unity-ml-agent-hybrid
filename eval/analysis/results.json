@@ -1,6 +1,6 @@
 [
   {
-    "scenario": "moving_noslime",
+    "scenario": "moving_no slime",
     "n_samples": 126,
     "shapiro_stat": 0.6922853190370353,
     "shapiro_p": 6.623662058831594e-15,
@@ -40,7 +40,7 @@
     "basic_win_rate": 38.46153846153847
   },
   {
-    "scenario": "static_noslime",
+    "scenario": "static_no slime",
     "n_samples": 150,
     "shapiro_stat": 0.9838217598440346,
     "shapiro_p": 0.07577890411713903,
