@@ -9,8 +9,8 @@ class MapResult:
     map_id: int
     map_seed: int
     timestamp: str
-    basic_agent_time: float
-    hybrid_agent_time: float
+    baseline_agent_time: float
+    proposed_agent_time: float
     time_diff: float
     winner: str
 
@@ -55,8 +55,8 @@ def parse_log_file(log_path: Path) -> list[MapResult]:
                 original_map_id = int(complete_match.group(1))
                 winner = complete_match.group(2)
                 time_diff = float(complete_match.group(3))
-                hybrid_time = float(complete_match.group(4))
-                basic_time = float(complete_match.group(5))
+                proposed_time = float(complete_match.group(4))
+                baseline_time = float(complete_match.group(5))
                 
                 if original_map_id in map_starts:
                     timestamp, seed, actual_id = map_starts[original_map_id]
@@ -65,8 +65,8 @@ def parse_log_file(log_path: Path) -> list[MapResult]:
                         map_id=actual_id,
                         map_seed=seed,
                         timestamp=timestamp,
-                        basic_agent_time=basic_time,
-                        hybrid_agent_time=hybrid_time,
+                        baseline_agent_time=baseline_time,
+                        proposed_agent_time=proposed_time,
                         time_diff=time_diff,
                         winner=winner,
                     ))
@@ -82,8 +82,8 @@ def write_results_to_csv(results: list[MapResult], output_path: Path) -> None:
             'map_id',
             'map_seed', 
             'timestamp',
-            'basic_agent_time',
-            'hybrid_agent_time',
+            'baseline_agent_time',
+            'proposed_agent_time',
             'time_diff',
             'winner'
         ])
@@ -93,8 +93,8 @@ def write_results_to_csv(results: list[MapResult], output_path: Path) -> None:
                 result.map_id,
                 result.map_seed,
                 result.timestamp,
-                result.basic_agent_time,
-                result.hybrid_agent_time,
+                result.baseline_agent_time,
+                result.proposed_agent_time,
                 result.time_diff,
                 result.winner,
             ])

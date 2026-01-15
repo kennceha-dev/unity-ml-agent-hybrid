@@ -425,9 +425,7 @@
 [Eval] BasicAgent finished map 147 | Time: 14.850s | Timestamp: 20:29:37.170
 [Eval] Map 147 complete | Winner: HybridAgent by 1.540s | Hybrid: 13.310s | Basic: 14.850s
 [Eval] Starting map 148 at 20:29:37.742 on seed 12492
-[Eval] HybridAgent finished map 148 | Time: 6.062s | Timestamp: 20:29:43.824
-[Eval] BasicAgent finished map 148 | Time: 16.382s | Timestamp: 20:29:54.125
-[Eval] Map 148 complete | Winner: HybridAgent by 10.320s | Hybrid: 6.062s | Basic: 16.382s
+[Eval] Map 148 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
 [Eval] Starting map 149 at 20:29:54.619 on seed 12493
 [Eval] Map 149 TIMEOUT (20s) | Hybrid: DNF | Basic: DNF
 [Eval] Starting map 150 at 20:30:14.855 on seed 12494

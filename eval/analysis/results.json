@@ -1,23 +1,23 @@
 [
   {
     "scenario": "moving_no slime",
-    "n_samples": 126,
-    "shapiro_stat": 0.6922853190370353,
-    "shapiro_p": 6.623662058831594e-15,
+    "n_samples": 125,
+    "shapiro_stat": 0.8843616103015584,
+    "shapiro_p": 2.0385305524659842e-08,
     "is_normal": false,
     "test_used": "Wilcoxon Signed-Rank",
-    "test_stat": 3848.0,
-    "test_p": 0.5872691958320151,
+    "test_stat": 3723.0,
+    "test_p": 0.6476731601332611,
     "is_significant": false,
-    "mean_delta": 0.08265079365079367,
-    "std_delta": 1.3596107814662861,
-    "median_delta": 0.03999999999999959,
-    "hybrid_wins": 66,
+    "mean_delta": 0.0007519999999999971,
+    "std_delta": 1.0057333198122875,
+    "median_delta": 0.03999999999999915,
+    "proposed_wins": 65,
     "ties": 1,
-    "basic_wins": 59,
-    "hybrid_win_rate": 52.38095238095239,
-    "tie_rate": 0.7936507936507936,
-    "basic_win_rate": 46.82539682539682
+    "baseline_wins": 59,
+    "proposed_win_rate": 52.0,
+    "tie_rate": 0.8,
+    "baseline_win_rate": 47.199999999999996
   },
   {
     "scenario": "moving_slime",
@@ -32,12 +32,12 @@
     "mean_delta": 0.15416923076923075,
     "std_delta": 1.4808457259830257,
     "median_delta": 0.17999999999999994,
-    "hybrid_wins": 78,
+    "proposed_wins": 78,
     "ties": 2,
-    "basic_wins": 50,
-    "hybrid_win_rate": 60.0,
+    "baseline_wins": 50,
+    "proposed_win_rate": 60.0,
     "tie_rate": 1.5384615384615385,
-    "basic_win_rate": 38.46153846153847
+    "baseline_win_rate": 38.46153846153847
   },
   {
     "scenario": "static_no slime",
@@ -52,12 +52,12 @@
     "mean_delta": -0.14520666666666665,
     "std_delta": 0.7072071006266366,
     "median_delta": -0.13949999999999974,
-    "hybrid_wins": 63,
+    "proposed_wins": 63,
     "ties": 0,
-    "basic_wins": 87,
-    "hybrid_win_rate": 42.0,
+    "baseline_wins": 87,
+    "proposed_win_rate": 42.0,
     "tie_rate": 0.0,
-    "basic_win_rate": 57.99999999999999
+    "baseline_win_rate": 57.99999999999999
   },
   {
     "scenario": "static_slime",
@@ -72,11 +72,11 @@
     "mean_delta": 0.7558538461538463,
     "std_delta": 1.0561956237022232,
     "median_delta": 0.6600000000000004,
-    "hybrid_wins": 102,
+    "proposed_wins": 102,
     "ties": 1,
-    "basic_wins": 27,
-    "hybrid_win_rate": 78.46153846153847,
+    "baseline_wins": 27,
+    "proposed_win_rate": 78.46153846153847,
     "tie_rate": 0.7692307692307693,
-    "basic_win_rate": 20.76923076923077
+    "baseline_win_rate": 20.76923076923077
   }
 ]

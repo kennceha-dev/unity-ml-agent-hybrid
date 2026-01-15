@@ -1,4 +1,4 @@
-map_id,map_seed,timestamp,basic_agent_time,hybrid_agent_time,time_diff,winner
+map_id,map_seed,timestamp,baseline_agent_time,proposed_agent_time,time_diff,winner
 1,23456,10:01:47.143,7.665,8.485,0.82,BasicAgent
 2,23457,10:01:56.708,2.669,2.049,0.62,HybridAgent
 3,23458,10:02:00.520,3.153,2.353,0.8,HybridAgent

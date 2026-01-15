@@ -153,7 +153,7 @@ MonoBehaviour:
   enableBaseAgent: 1
   enablePlayerNavMesh: 0
   evalTimeout: 25
-  trainingPhase: 3
+  trainingPhase: 0
   initialSeed: 23456
   timePenaltyPerStep: 0.005
   closeDistanceThreshold: 2
@@ -533,7 +533,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e9587a2fc34febd408b1bb26ed02444c, type: 2}
+  - {fileID: 2100000, guid: c94d187f3ba66534eb3f1a3ca0e3ccd2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -916,7 +916,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9b34ea8a8f8b61049b373d5b68642b23, type: 2}
+  - {fileID: 2100000, guid: a318282c1b86f6a4181acd1bb7cf6776, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1181,7 +1181,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 58daeaae19c63f54e9cab1ff28364e8d, type: 2}
+  - {fileID: 2100000, guid: 6fc6c79eca3e23742b1f4b662aa906bb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

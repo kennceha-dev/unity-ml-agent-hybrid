@@ -25,12 +25,12 @@ class ScenarioResult:
     mean_delta: float
     std_delta: float
     median_delta: float
-    hybrid_wins: int
+    proposed_wins: int
     ties: int
-    basic_wins: int
-    hybrid_win_rate: float
+    baseline_wins: int
+    proposed_win_rate: float
     tie_rate: float
-    basic_win_rate: float
+    baseline_win_rate: float
 
 
 def load_scenario_data(processed_dir: Path) -> dict[str, pd.DataFrame]:
@@ -38,16 +38,16 @@ def load_scenario_data(processed_dir: Path) -> dict[str, pd.DataFrame]:
     for csv_file in processed_dir.glob("*.csv"):
         scenario_name = csv_file.stem
         df = pd.read_csv(csv_file)
-        df['delta'] = df['basic_agent_time'] - df['hybrid_agent_time']
+        df['delta'] = df['baseline_agent_time'] - df['proposed_agent_time']
         scenarios[scenario_name] = df
     return scenarios
 
 
-def classify_winner(delta: float, epsilon: float = EPSILON) -> Literal['hybrid', 'tie', 'basic']:
+def classify_winner(delta: float, epsilon: float = EPSILON) -> Literal['proposed', 'tie', 'baseline']:
     if delta > epsilon:
-        return 'hybrid'
+        return 'proposed'
     elif delta < -epsilon:
-        return 'basic'
+        return 'baseline'
     else:
         return 'tie'
 
@@ -74,9 +74,9 @@ def analyze_scenario(name: str, df: pd.DataFrame, alpha: float = 0.05) -> Scenar
     median_delta = np.median(deltas)
     
     df['classification'] = df['delta'].apply(classify_winner)
-    hybrid_wins = (df['classification'] == 'hybrid').sum()
+    proposed_wins = (df['classification'] == 'proposed').sum()
     ties = (df['classification'] == 'tie').sum()
-    basic_wins = (df['classification'] == 'basic').sum()
+    baseline_wins = (df['classification'] == 'baseline').sum()
     
     return ScenarioResult(
         scenario=name,
@@ -91,12 +91,12 @@ def analyze_scenario(name: str, df: pd.DataFrame, alpha: float = 0.05) -> Scenar
         mean_delta=mean_delta,
         std_delta=std_delta,
         median_delta=median_delta,
-        hybrid_wins=hybrid_wins,
+        proposed_wins=proposed_wins,
         ties=ties,
-        basic_wins=basic_wins,
-        hybrid_win_rate=hybrid_wins / n * 100,
+        baseline_wins=baseline_wins,
+        proposed_win_rate=proposed_wins / n * 100,
         tie_rate=ties / n * 100,
-        basic_win_rate=basic_wins / n * 100,
+        baseline_win_rate=baseline_wins / n * 100,
     )
 
 
@@ -124,8 +124,8 @@ def create_box_plot(scenarios: dict[str, pd.DataFrame], output_path: Path):
     ax.axhline(y=0, color='black', linestyle='--', linewidth=1, alpha=0.7)
     
     ax.set_xlabel('Scenario', fontsize=12)
-    ax.set_ylabel('Time Difference (Basic - Hybrid) [s]', fontsize=12)
-    ax.set_title('Performance Gap Distribution\n(Positive Values Indicate Hybrid Agent is Faster)', fontsize=14)
+    ax.set_ylabel('Time Difference (Baseline - Proposed) [s]', fontsize=12)
+    ax.set_title('Performance Gap Distribution\n(Positive Values Indicate Proposed Agent is Faster)', fontsize=14)
     ax.grid(axis='y', alpha=0.3)
     
     plt.tight_layout()
@@ -138,17 +138,17 @@ def create_stacked_bar_chart(results: list[ScenarioResult], output_path: Path):
     fig, ax = plt.subplots(figsize=(10, 6))
     
     scenarios = [r.scenario.replace('_', '\n') for r in results]
-    hybrid_wins = [r.hybrid_win_rate for r in results]
+    proposed_wins = [r.proposed_win_rate for r in results]
     ties = [r.tie_rate for r in results]
-    basic_wins = [r.basic_win_rate for r in results]
+    baseline_wins = [r.baseline_win_rate for r in results]
     
     x = np.arange(len(scenarios))
     width = 0.6
     
-    ax.bar(x, hybrid_wins, width, label='Hybrid Win', color='#60A5FA')
-    ax.bar(x, ties, width, bottom=hybrid_wins, label='Tie', color='#FBBF24')
-    ax.bar(x, basic_wins, width, bottom=np.array(hybrid_wins) + np.array(ties), 
-           label='Basic Win', color='#67B8C4')
+    ax.bar(x, proposed_wins, width, label='Proposed', color='#60A5FA')
+    ax.bar(x, ties, width, bottom=proposed_wins, label='Tie', color='#FBBF24')
+    ax.bar(x, baseline_wins, width, bottom=np.array(proposed_wins) + np.array(ties), 
+           label='Baseline', color='#F87171')
     
     ax.set_xlabel('Scenario', fontsize=12)
     ax.set_ylabel('Percentage (%)', fontsize=12)
@@ -160,12 +160,15 @@ def create_stacked_bar_chart(results: list[ScenarioResult], output_path: Path):
     ax.grid(axis='y', alpha=0.3)
     
     for i, r in enumerate(results):
-        if r.hybrid_win_rate > 5:
-            ax.text(i, r.hybrid_win_rate / 2, f'{r.hybrid_win_rate:.1f}%', 
+        if r.proposed_win_rate > 5:
+            ax.text(i, r.proposed_win_rate / 2, f'{r.proposed_win_rate:.1f}%', 
                     ha='center', va='center', fontsize=10, fontweight='bold')
-        if r.basic_win_rate > 5:
-            ax.text(i, r.hybrid_win_rate + r.tie_rate + r.basic_win_rate / 2, 
-                    f'{r.basic_win_rate:.1f}%', 
+        if r.tie_rate > 0:
+            ax.text(i, r.proposed_win_rate + r.tie_rate / 2, f'{r.tie_rate:.1f}%', 
+                    ha='center', va='center', fontsize=9, fontweight='bold')
+        if r.baseline_win_rate > 5:
+            ax.text(i, r.proposed_win_rate + r.tie_rate + r.baseline_win_rate / 2, 
+                    f'{r.baseline_win_rate:.1f}%', 
                     ha='center', va='center', fontsize=10, fontweight='bold')
     
     plt.tight_layout()
@@ -218,7 +221,7 @@ def main():
         sig = "✓" if result.is_significant else "✗"
         print(f"    - Normality: p={result.shapiro_p:.4f} ({'Normal' if result.is_normal else 'Non-Normal'})")
         print(f"    - {result.test_used}: p={result.test_p:.4f} {sig}")
-        print(f"    - Win Rate: Hybrid {result.hybrid_win_rate:.1f}% | Tie {result.tie_rate:.1f}% | Basic {result.basic_win_rate:.1f}%")
+        print(f"    - Win Rate: Proposed {result.proposed_win_rate:.1f}% | Tie {result.tie_rate:.1f}% | Baseline {result.baseline_win_rate:.1f}%")
     print()
     
     print("Generating outputs...")
